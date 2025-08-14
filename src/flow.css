@@ -1,0 +1,51 @@
+.card-node {
+  --bg: #0f172a;
+  --fg: #e2e8f0;
+  --muted: #94a3b8;
+  background: var(--bg);
+  color: var(--fg);
+  border-radius: 12px;
+  padding: 14px 16px;
+  width: 340px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+}
+
+.card-node__title {
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.card-node__desc {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.react-flow__handle {
+  width: 10px;
+  height: 10px;
+}
+
+.react-flow__node.selected .card-node {
+  box-shadow: 0 0 0 2px #8b5cf6 inset, 0 6px 20px rgba(0, 0, 0, 0.35);
+}
+
+/* Make nodes clickable */
+.card-node {
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.card-node:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+}
+
+/* Node highlighting when message is hovered */
+.node-highlighted {
+  transform: scale(1.05);
+  box-shadow: 0 0 0 3px #8b5cf6, 0 8px 25px rgba(139, 92, 246, 0.3);
+  z-index: 10;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
