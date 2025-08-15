@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, Fragment } from "react";
 import "./ConversationPreview.css";
 
 type MessageType = "text" | "card" | "pills";
@@ -9,7 +9,11 @@ type Message = {
   content: string;
   timestamp: string;
   messageId?: string; // Links to node messageId
+  componentId?: string; // Links to component data
+  userResponseId?: string; // Links to user response placeholder
   type: MessageType;
+  uiToolType?: string;
+  showDropdown?: boolean;
   cardData?: {
     title: string;
     description: string;
@@ -22,161 +26,95 @@ type Message = {
   };
 };
 
-const mockConversation: Message[] = [
-  {
-    id: "1",
-    sender: "user",
-    content:
-      "Hi! I'm working on a new project and I'm feeling a bit overwhelmed. Can you help me break it down into manageable steps?",
-    timestamp: "2:34 PM",
-    type: "text",
-  },
-  {
-    id: "2",
-    sender: "ai",
-    content:
-      "Of course! I'd be happy to help you break down your project. Let's start by understanding what you're working on. Can you tell me a bit more about the project and what your main goals are?",
-    timestamp: "2:35 PM",
-    messageId: "msg-1",
-    type: "text",
-  },
-  {
-    id: "3",
-    sender: "user",
-    content:
-      "I'm building a web application for managing customer relationships. It needs to handle user authentication, customer data storage, and reporting features. I'm not sure where to start.",
-    timestamp: "2:36 PM",
-    type: "text",
-  },
-  {
-    id: "4",
-    sender: "ai",
-    content:
-      "Great! That's a solid project. Let me help you break this down into phases. We can start with a simple MVP and build up from there. Here's what I suggest for Phase 1:",
-    timestamp: "2:37 PM",
-    messageId: "msg-2",
-    type: "text",
-  },
-  {
-    id: "5",
-    sender: "ai",
-    content:
-      "1. Set up the basic project structure and development environment\n2. Create a simple user authentication system\n3. Build a basic customer data model and storage\n4. Create a simple UI for adding/viewing customers\n\nDoes this approach sound good to you?",
-    timestamp: "2:37 PM",
-    messageId: "msg-4",
-    type: "text",
-  },
-  {
-    id: "6",
-    sender: "user",
-    content:
-      "Yes, that makes a lot of sense! I think I can handle the project structure and environment setup. But I'm not sure about the authentication part - any tips?",
-    timestamp: "2:38 PM",
-    type: "text",
-  },
-  {
-    id: "7",
-    sender: "ai",
-    content:
-      "Absolutely! For authentication, I'd recommend starting with a simple email/password system using a library like Passport.js if you're using Node.js, or Firebase Auth if you want something managed. The key is to start simple and add security features incrementally.",
-    timestamp: "2:39 PM",
-    messageId: "msg-5",
-    type: "text",
-  },
-  {
-    id: "8",
-    sender: "ai",
-    content:
-      "For the database setup, I'd suggest starting with a simple relational database like PostgreSQL. We can design a basic schema with users, customers, and relationships tables. Would you like me to walk you through the database design?",
-    timestamp: "2:40 PM",
-    messageId: "msg-8",
-    type: "text",
-  },
-  {
-    id: "9",
-    sender: "ai",
-    content:
-      "For the frontend, I'd recommend React with TypeScript for type safety. You can use a UI library like Material-UI or Tailwind CSS for styling. This will give you a solid foundation to build upon.",
-    timestamp: "2:41 PM",
-    messageId: "msg-9",
-    type: "text",
-  },
-  {
-    id: "10",
-    sender: "ai",
-    content:
-      "Testing is crucial! I'd suggest starting with unit tests for your business logic, integration tests for your API endpoints, and basic end-to-end tests for critical user flows. We can set up Jest and React Testing Library.",
-    timestamp: "2:42 PM",
-    messageId: "msg-10",
-    type: "text",
-  },
-  {
-    id: "11",
-    sender: "ai",
-    content:
-      "For deployment, I'd recommend starting with Vercel for the frontend and Railway or Render for the backend. These platforms make it easy to get started and scale as needed.",
-    timestamp: "2:43 PM",
-    messageId: "msg-11",
-    type: "text",
-  },
-  {
-    id: "12",
-    sender: "ai",
-    content:
-      "Perfect! Here's your action plan: Start with the project setup this week, work on authentication next week, and aim to have a basic customer management system running within 3-4 weeks. Sound doable?",
-    timestamp: "2:44 PM",
-    messageId: "msg-12",
-    type: "text",
-  },
-  {
-    id: "13",
-    sender: "user",
-    content:
-      "That sounds perfect! I feel much more confident about tackling this project now. Thanks for breaking it down into manageable pieces.",
-    timestamp: "2:45 PM",
-    type: "text",
-  },
-  {
-    id: "14",
-    sender: "ai",
-    content:
-      "Awesome - now that we've got a feel for your project, let's dig into your strengths. You'll see a few sample answers to guide you. Feel free to click one that fits, but writing in detail in your own words is best.",
-    timestamp: "2:46 PM",
-    messageId: "msg-13",
-    type: "card",
-    cardData: {
-      title: "Strengths",
-      description:
-        "Awesome - now that we've got a feel for your personality, let's dig into your strengths. You'll see a few sample answers to guide you. Feel free to click one that fits, but writing in detail in your own words is best.",
-      illustration: "🎨", // Placeholder for the illustration
-      question: "What tasks are easy for you but hard for others?",
-    },
-  },
-  {
-    id: "15",
-    sender: "ai",
-    content:
-      "Based on what you've shared, here are some areas that might be your strengths. Click on any that resonate with you:",
-    timestamp: "2:47 PM",
-    messageId: "msg-14",
-    type: "pills",
-    pillsData: {
-      text: "Based on what you've shared, here are some areas that might be your strengths. Click on any that resonate with you:",
-      options: [
-        "System Mapping",
-        "Quiet Leadership",
-        "Empathic Mediation",
-        "Analytical Reasoning",
-        "Strategic Planning",
-      ],
-    },
-  },
-];
+const mockConversation: Message[] = [];
 
 export default function ConversationPreview() {
   const messagesRef = useRef<HTMLDivElement>(null);
   const messageRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const [highlightedMessageId, setHighlightedMessageId] = useState<string | null>(null);
+  const [messages, setMessages] = useState<Message[]>(mockConversation);
+  const [orphanMessageIds, setOrphanMessageIds] = useState<Set<string>>(new Set());
+  const [selectedMessageIds, setSelectedMessageIds] = useState<Set<string>>(new Set());
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{ messageId: string; componentName: string } | null>(null);
+  const [isTestMode, setIsTestMode] = useState(false);
+  const [testStartMessageId, setTestStartMessageId] = useState<string | null>(null);
+  const [testMessages, setTestMessages] = useState<Message[]>([]);
+  const [inputValue, setInputValue] = useState("");
+  const [showSelectComponentPopup, setShowSelectComponentPopup] = useState(false);
+  const [showExitTestWarning, setShowExitTestWarning] = useState(false);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const startTestMode = (messageId: string) => {
+    setIsTestMode(true);
+    setTestStartMessageId(messageId);
+    
+    // Find the selected message and all messages that come before it
+    const messageIndex = messages.findIndex(msg => msg.messageId === messageId);
+    if (messageIndex !== -1) {
+      const testMessagesToShow = messages.slice(0, messageIndex + 1);
+      setTestMessages(testMessagesToShow);
+      
+      // Smooth scroll to the selected message with variable velocity
+      setTimeout(() => {
+        const messageElement = messageRefs.current[messageId];
+        const messagesContainer = messagesRef.current;
+        if (messageElement && messagesContainer) {
+          const containerRect = messagesContainer.getBoundingClientRect();
+          const messageRect = messageElement.getBoundingClientRect();
+          const targetScrollTop = messagesContainer.scrollTop + (messageRect.top - containerRect.top) - (containerRect.height / 2) + (messageRect.height / 2);
+          
+          // Smooth scroll with easing
+          const startScrollTop = messagesContainer.scrollTop;
+          const distance = targetScrollTop - startScrollTop;
+          const duration = Math.min(Math.max(Math.abs(distance) * 0.5, 300), 800); // Variable duration based on distance
+          const startTime = performance.now();
+          
+          const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
+          
+          const animateScroll = (currentTime: number) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const easedProgress = easeOutCubic(progress);
+            
+            messagesContainer.scrollTop = startScrollTop + (distance * easedProgress);
+            
+            if (progress < 1) {
+              requestAnimationFrame(animateScroll);
+            }
+          };
+          
+          requestAnimationFrame(animateScroll);
+        }
+      }, 100);
+    }
+    
+    // Focus the input
+    setTimeout(() => {
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
+    }, 200);
+    
+    // Dispatch event to gray out canvas
+    const event = new CustomEvent("enterTestMode", {
+      detail: { messageId },
+    });
+    window.dispatchEvent(event);
+  };
+
+  const exitTestMode = () => {
+    setIsTestMode(false);
+    setTestStartMessageId(null);
+    setTestMessages([]);
+    setInputValue("");
+    setShowSelectComponentPopup(false);
+    setShowExitTestWarning(false);
+    
+    // Dispatch event to restore canvas
+    const event = new CustomEvent("exitTestMode");
+    window.dispatchEvent(event);
+  };
 
   useEffect(() => {
     const handleScrollToMessage = (event: CustomEvent) => {
@@ -206,16 +144,140 @@ export default function ConversationPreview() {
       setHighlightedMessageId(null);
     };
 
+    const handleAddMessage = (event: CustomEvent) => {
+      const { messageId, componentId, uiToolType, showDropdown } = event.detail;
+      
+      // Generate a unique ID that doesn't conflict with existing messages
+      const existingIds = messages.map(msg => parseInt(msg.id));
+      const maxId = Math.max(...existingIds, 0);
+      const newId = (maxId + 1).toString();
+      
+      const newMessage: Message = {
+        id: newId,
+        sender: "ai",
+        content: "New component added", // Will be updated by component data event
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        messageId,
+        componentId,
+        type: "text",
+        uiToolType,
+        showDropdown,
+      };
+      
+      setMessages(prev => [...prev, newMessage]);
+    };
+
+    const handleUpdateMessage = (event: CustomEvent) => {
+      const { messageId, uiToolType, showDropdown } = event.detail;
+      setMessages(prev => 
+        prev.map(msg => 
+          msg.messageId === messageId 
+            ? { ...msg, uiToolType, showDropdown }
+            : msg
+        )
+      );
+    };
+
+    const handleDeleteMessage = (event: CustomEvent) => {
+      const { messageId } = event.detail;
+      setMessages(prev => prev.filter(msg => msg.messageId !== messageId));
+    };
+
+    const handleSyncMessageOrder = (event: CustomEvent) => {
+      const { order, orphanIds } = event.detail;
+      
+      // Update orphan status
+      setOrphanMessageIds(new Set(orphanIds || []));
+      
+      // Reorder messages based on the calculated order
+      setMessages(prev => {
+        const messageMap = new Map(prev.map(msg => [msg.messageId, msg]));
+        const orderedMessages: Message[] = [];
+        
+        // Add messages in the calculated order
+        order.forEach((messageId: string) => {
+          const message = messageMap.get(messageId);
+          if (message) {
+            orderedMessages.push(message);
+            messageMap.delete(messageId);
+          }
+        });
+        
+        // Add any remaining messages (orphans) at the end
+        messageMap.forEach(message => {
+          orderedMessages.push(message);
+        });
+        
+        return orderedMessages;
+      });
+    };
+
+    const handleNodeSelection = (event: CustomEvent) => {
+      const { selectedMessageIds } = event.detail;
+      setSelectedMessageIds(new Set(selectedMessageIds));
+      
+      // If we're waiting for a component selection for test mode, start test mode
+      if (showSelectComponentPopup && selectedMessageIds.length > 0) {
+        setShowSelectComponentPopup(false);
+        startTestMode(selectedMessageIds[0]);
+      }
+    };
+
+    const handleUpdateMessageContent = (event: CustomEvent) => {
+      const { messageId, content } = event.detail;
+      setMessages(prev => 
+        prev.map(msg => 
+          msg.messageId === messageId 
+            ? { ...msg, content }
+            : msg
+        )
+      );
+    };
+
+    const handleUpdateComponentData = (event: CustomEvent) => {
+      const { messageId, componentData } = event.detail;
+      setMessages(prev => 
+        prev.map(msg => 
+          msg.messageId === messageId 
+            ? { 
+                ...msg, 
+                content: componentData.content.message?.text || "New component added",
+                uiToolType: componentData.uiToolType
+              }
+            : msg
+        )
+      );
+    };
+
+
+
+
+
     window.addEventListener("scrollToMessage", handleScrollToMessage as EventListener);
     window.addEventListener("highlightMessage", handleHighlightMessage as EventListener);
     window.addEventListener("unhighlightMessage", handleUnhighlightMessage as EventListener);
+    window.addEventListener("addMessage", handleAddMessage as EventListener);
+    window.addEventListener("updateMessage", handleUpdateMessage as EventListener);
+    window.addEventListener("deleteMessage", handleDeleteMessage as EventListener);
+    window.addEventListener("syncMessageOrder", handleSyncMessageOrder as EventListener);
+    window.addEventListener("nodeSelection", handleNodeSelection as EventListener);
+    window.addEventListener("updateMessageContent", handleUpdateMessageContent as EventListener);
+    window.addEventListener("updateComponentData", handleUpdateComponentData as EventListener);
+    window.addEventListener("showExitTestWarning", () => setShowExitTestWarning(true));
 
     return () => {
       window.removeEventListener("scrollToMessage", handleScrollToMessage as EventListener);
       window.removeEventListener("highlightMessage", handleHighlightMessage as EventListener);
       window.removeEventListener("unhighlightMessage", handleUnhighlightMessage as EventListener);
+      window.removeEventListener("addMessage", handleAddMessage as EventListener);
+      window.removeEventListener("updateMessage", handleUpdateMessage as EventListener);
+      window.removeEventListener("deleteMessage", handleDeleteMessage as EventListener);
+      window.removeEventListener("syncMessageOrder", handleSyncMessageOrder as EventListener);
+      window.removeEventListener("nodeSelection", handleNodeSelection as EventListener);
+      window.removeEventListener("updateMessageContent", handleUpdateMessageContent as EventListener);
+      window.removeEventListener("showExitTestWarning", () => setShowExitTestWarning(true));
     };
-  }, []);
+  }, [messages]);
 
   const renderMessageContent = (message: Message) => {
     switch (message.type) {
@@ -252,64 +314,376 @@ export default function ConversationPreview() {
         );
 
       default:
-        return <div className="message-text">{message.content}</div>;
+        return (
+          <div className="message-text">
+            {message.content}
+
+
+          </div>
+        );
     }
   };
 
   return (
-    <div className="conversation-preview">
+    <div 
+      className={`conversation-preview ${isTestMode ? 'test-mode' : ''}`}
+      onClick={(e) => {
+        if (isTestMode && !(e.target as Element).closest('.conversation-input')) {
+          setShowExitTestWarning(true);
+        }
+      }}
+    >
+      {isTestMode && (
+        <div className="status-bar">
+          <div className="time">9:41</div>
+          <div className="status-icons">
+            <span className="material-icons signal">signal_cellular_alt</span>
+            <span className="material-icons wifi">wifi</span>
+            <span className="material-icons battery">battery_charging_full</span>
+          </div>
+        </div>
+      )}
       <div className="conversation-header">
-        <h3>Conversation Preview</h3>
-        <div className="conversation-status">
-          <span className="status-dot active"></span>
-          <span className="status-text">Active</span>
+        <div className="hamburger-menu">☰</div>
+        <h3>Clarity</h3>
+        <div className="profile-photo">
+          <div className="profile-circle">R</div>
         </div>
       </div>
 
       <div className="conversation-messages" ref={messagesRef}>
-        {mockConversation.map((message) => (
-          <div
-            key={message.id}
-            className={`message ${message.sender} ${
-              message.messageId && highlightedMessageId === message.messageId ? "message-node-highlighted" : ""
-            }`}
-            ref={
-              message.messageId
-                ? (el) => {
-                    messageRefs.current[message.messageId!] = el;
-                  }
-                : undefined
-            }
-            onMouseEnter={() => {
-              if (message.messageId) {
-                const event = new CustomEvent("highlightNode", {
-                  detail: { messageId: message.messageId },
-                });
-                window.dispatchEvent(event);
+                {(isTestMode ? testMessages : messages).map((message, index, messageArray) => (
+          <Fragment key={message.id}>
+            <div
+              className={`message ${message.sender} ${
+                message.messageId && highlightedMessageId === message.messageId ? "message-node-highlighted" : ""
+              } ${message.messageId && orphanMessageIds.has(message.messageId) ? "message-orphan" : ""} ${
+                message.messageId && selectedMessageIds.has(message.messageId) ? "message-selected" : ""
+              }`}
+              ref={
+                message.messageId
+                  ? (el) => {
+                      messageRefs.current[message.messageId!] = el;
+                    }
+                  : undefined
               }
-            }}
-            onMouseLeave={() => {
-              if (message.messageId) {
-                const event = new CustomEvent("unhighlightNode", {
-                  detail: { messageId: message.messageId },
-                });
-                window.dispatchEvent(event);
-              }
-            }}
-          >
-            <div className="message-avatar">{message.sender === "ai" ? "🤖" : "👤"}</div>
-            <div className="message-content">
-              {renderMessageContent(message)}
-              <div className="message-timestamp">{message.timestamp}</div>
+              onMouseEnter={() => {
+                if (!isTestMode && message.messageId) {
+                  const event = new CustomEvent("highlightNode", {
+                    detail: { messageId: message.messageId },
+                  });
+                  window.dispatchEvent(event);
+                }
+              }}
+              onMouseLeave={() => {
+                if (!isTestMode && message.messageId) {
+                  const event = new CustomEvent("unhighlightNode", {
+                    detail: { messageId: message.messageId },
+                  });
+                  window.dispatchEvent(event);
+                }
+              }}
+              onClick={() => {
+                if (!isTestMode && message.messageId) {
+                  const event = new CustomEvent("selectNode", {
+                    detail: { messageId: message.messageId },
+                  });
+                  window.dispatchEvent(event);
+                }
+              }}
+            >
+              {message.messageId && !isTestMode && (
+                <>
+                  <button
+                    className="delete-message-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (message.messageId) {
+                        setDeleteConfirmation({ messageId: message.messageId, componentName: message.content || "Component" });
+                      }
+                    }}
+                    style={{
+                      position: "absolute",
+                      top: "8px",
+                      right: "8px",
+                      background: "#F16B68",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "50%",
+                      width: "20px",
+                      height: "20px",
+                      fontSize: "12px",
+                      cursor: "pointer",
+                      display: "none",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      zIndex: 10,
+                    }}
+                  >
+                    ×
+                  </button>
+                  <button
+                    className="edit-message-btn"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      // Dispatch event to open edit window in FlowCanvas
+                      const event = new CustomEvent("openEditWindow", {
+                        detail: { messageId: message.messageId },
+                      });
+                      window.dispatchEvent(event);
+                    }}
+                    style={{
+                      position: "absolute",
+                      top: "8px",
+                      right: "43px",
+                      background: "#8EAF86",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "50%",
+                      width: "20px",
+                      height: "20px",
+                      fontSize: "12px",
+                      cursor: "pointer",
+                      display: "none",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      zIndex: 10,
+                    }}
+                  >
+                    ✏️
+                  </button>
+                </>
+              )}
+              <div className="message-content">
+                {renderMessageContent(message)}
+              </div>
             </div>
-          </div>
+            
+            {/* Add user placeholder after AI messages */}
+            {message.sender === "ai" && (
+              // Show placeholder in normal mode, or in test mode for messages before the selected one
+              (!isTestMode || (isTestMode && message.messageId !== testStartMessageId)) && (
+                <div className="message user placeholder">
+                  <div className="message-content">
+                    <div className="message-text" style={{
+                      background: "#F2E8E0",
+                      color: "#003250",
+                      borderRadius: "18px 18px 0px 18px",
+                      maxWidth: "80%",
+                      width: "fit-content",
+                      marginLeft: "auto",
+                      textAlign: "right",
+                      padding: "8px 24px",
+                    }}>
+                      User response placeholder
+                    </div>
+                  </div>
+                </div>
+              )
+            )}
+          </Fragment>
         ))}
       </div>
 
       <div className="conversation-input">
-        <div className="input-placeholder">Type your message here...</div>
+        <input
+          ref={inputRef}
+          type="text"
+          value={inputValue}
+          onChange={(e) => setInputValue(e.target.value)}
+          onFocus={() => {
+            if (isTestMode) return; // Already in test mode
+            
+            if (selectedMessageIds.size === 0) {
+              setShowSelectComponentPopup(true);
+            } else {
+              const selectedMessageId = Array.from(selectedMessageIds)[0];
+              startTestMode(selectedMessageId);
+            }
+          }}
+          onBlur={() => {
+            // Don't exit test mode on blur, only on clicking outside
+          }}
+          placeholder="Type your answer here..."
+          style={{
+            width: "100%",
+            padding: "12px 16px",
+            border: "1px solid #E9DDD3",
+            borderRadius: "8px",
+            fontSize: "14px",
+            background: "white",
+            outline: "none",
+            color: "#003250",
+          }}
+        />
         <button className="send-button">Send</button>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmation && (
+        <div className="edit-window-overlay">
+          <div className="edit-window">
+            <div className="edit-window-header">
+              <h4>Delete Component</h4>
+            </div>
+            <div className="edit-window-content">
+              <p>Are you sure you want to delete "{deleteConfirmation.componentName}"?</p>
+              <p style={{ fontSize: "14px", color: "#666", marginTop: "8px" }}>
+                This action cannot be undone.
+              </p>
+            </div>
+            <div className="edit-window-footer">
+              <button
+                className="save-btn"
+                onClick={() => {
+                  // Delete from preview
+                  setMessages(prev => prev.filter(msg => msg.messageId !== deleteConfirmation.messageId));
+                  
+                  // Dispatch event to delete from canvas
+                  const event = new CustomEvent("deleteNode", {
+                    detail: { messageId: deleteConfirmation.messageId },
+                  });
+                  window.dispatchEvent(event);
+                  
+                  setDeleteConfirmation(null);
+                }}
+                style={{
+                  background: "#F16B68",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "8px",
+                  padding: "8px 16px",
+                  fontSize: "14px",
+                  cursor: "pointer",
+                }}
+              >
+                Delete
+              </button>
+              <button
+                className="cancel-btn"
+                onClick={() => setDeleteConfirmation(null)}
+                style={{
+                  background: "#E9DDD3",
+                  color: "#003250",
+                  border: "none",
+                  borderRadius: "8px",
+                  padding: "8px 16px",
+                  fontSize: "14px",
+                  cursor: "pointer",
+                  marginLeft: "8px",
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Select Component Popup */}
+      {showSelectComponentPopup && (
+        <div className="edit-window-overlay">
+          <div className="edit-window">
+            <div className="edit-window-header">
+              <h4>Select Component</h4>
+            </div>
+            <div className="edit-window-content">
+              <p>Please select a component in the canvas to test the conversation flow from that point.</p>
+            </div>
+            <div className="edit-window-footer">
+              <button
+                className="cancel-btn"
+                onClick={() => setShowSelectComponentPopup(false)}
+                style={{
+                  background: "#E9DDD3",
+                  color: "#003250",
+                  border: "none",
+                  borderRadius: "8px",
+                  padding: "8px 16px",
+                  fontSize: "14px",
+                  cursor: "pointer",
+                }}
+              >
+                OK
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Exit Test Mode Warning */}
+      {showExitTestWarning && (
+        <div className="edit-window-overlay">
+          <div className="edit-window">
+            <div className="edit-window-header">
+              <h4>Exit Test Mode</h4>
+            </div>
+            <div className="edit-window-content">
+              <p>Are you sure you want to exit test mode?</p>
+              <p style={{ fontSize: "14px", color: "#666", marginTop: "8px" }}>
+                Your test conversation history will be lost.
+              </p>
+            </div>
+            <div className="edit-window-footer">
+              <button
+                className="save-btn"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  exitTestMode();
+                }}
+                style={{
+                  background: "#F16B68",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "8px",
+                  padding: "8px 16px",
+                  fontSize: "14px",
+                  cursor: "pointer",
+                  outline: "none",
+                }}
+                onFocus={(e) => {
+                  e.target.style.boxShadow = "0 0 0 2px rgba(241, 107, 104, 0.3)";
+                }}
+                onBlur={(e) => {
+                  e.target.style.boxShadow = "none";
+                }}
+              >
+                Exit Test Mode
+              </button>
+              <button
+                className="cancel-btn"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setShowExitTestWarning(false);
+                }}
+                style={{
+                  background: "#E9DDD3",
+                  color: "#003250",
+                  border: "none",
+                  borderRadius: "8px",
+                  padding: "8px 16px",
+                  fontSize: "14px",
+                  cursor: "pointer",
+                  marginLeft: "8px",
+                  outline: "none",
+                }}
+                onFocus={(e) => {
+                  e.target.style.boxShadow = "0 0 0 2px rgba(241, 107, 104, 0.3)";
+                }}
+                onBlur={(e) => {
+                  e.target.style.boxShadow = "none";
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+
     </div>
   );
 }

@@ -13,156 +13,292 @@ import {
 import type { Connection, Edge as FlowEdge, Node as FlowNode, NodeProps, NodeTypes } from "@xyflow/react";
 import "../flow.css";
 
-type CardNodeData = {
-  title: string;
-  description?: string;
-  messageId: string;
+type UIToolType = "message" | "question" | "form" | "freeChat" | "accordion" | "banner" | "intro" | "multiSelect";
+
+// Comprehensive component data structure - single source of truth
+type ComponentData = {
+  id: string;                    // Unique component ID
+  name: string;                  // Display name (required)
+  slug: string;                  // Slug ID like "01.03.06" (required)
+  uiToolType: UIToolType;        // UI tool type
+  content: {
+    message?: { text: string; richText?: boolean; };
+    question?: { text: string; options: string[]; };
+    form?: { fields: any[]; };
+    freeChat?: { text: string; };
+    accordion?: { title: string; content: string; };
+    banner?: { text: string; type: string; };
+    intro?: { text: string; };
+    multiSelect?: { text: string; options: string[]; };
+  };
+  createdAt: Date;
+  updatedAt: Date;
 };
 
-const initialNodes: FlowNode<CardNodeData>[] = [
-  {
-    id: "n-1",
-    type: "card",
-    position: { x: 160, y: 160 },
-    data: {
-      title: "00.01 Intro",
-      description:
-        "This is the prompt for 00.01 Intro. Click to edit and customize this prompt for your specific use case.",
-      messageId: "msg-1",
-    },
-  },
-  {
-    id: "n-2",
-    type: "card",
-    position: { x: 640, y: 160 },
-    data: {
-      title: "00.02 Project Overview",
-      description: "Ask the user to describe their project and main goals to understand the scope.",
-      messageId: "msg-2",
-    },
-  },
-  {
-    id: "n-3",
-    type: "card",
-    position: { x: 1120, y: 160 },
-    data: {
-      title: "00.03 Break Down Approach",
-      description: "Explain the phased approach and suggest starting with an MVP.",
-      messageId: "msg-4",
-    },
-  },
-  {
-    id: "n-4",
-    type: "card",
-    position: { x: 160, y: 400 },
-    data: {
-      title: "00.04 Phase 1 Steps",
-      description: "List out the specific steps for Phase 1 implementation.",
-      messageId: "msg-5",
-    },
-  },
-  {
-    id: "n-5",
-    type: "card",
-    position: { x: 640, y: 400 },
-    data: {
-      title: "00.05 Authentication Tips",
-      description: "Provide specific recommendations for authentication implementation.",
-      messageId: "msg-7",
-    },
-  },
-  {
-    id: "n-6",
-    type: "card",
-    position: { x: 1120, y: 400 },
-    data: {
-      title: "00.06 Database Setup",
-      description: "Guide through database schema design and setup process.",
-      messageId: "msg-8",
-    },
-  },
-  {
-    id: "n-7",
-    type: "card",
-    position: { x: 160, y: 640 },
-    data: {
-      title: "00.07 UI Framework",
-      description: "Recommend frontend frameworks and UI component libraries.",
-      messageId: "msg-9",
-    },
-  },
-  {
-    id: "n-8",
-    type: "card",
-    position: { x: 640, y: 640 },
-    data: {
-      title: "00.08 Testing Strategy",
-      description: "Outline testing approach for different layers of the application.",
-      messageId: "msg-10",
-    },
-  },
-  {
-    id: "n-9",
-    type: "card",
-    position: { x: 1120, y: 640 },
-    data: {
-      title: "00.09 Deployment",
-      description: "Walk through deployment options and hosting recommendations.",
-      messageId: "msg-11",
-    },
-  },
-  {
-    id: "n-10",
-    type: "card",
-    position: { x: 160, y: 880 },
-    data: {
-      title: "00.10 Next Steps",
-      description: "Summarize the plan and suggest immediate next actions.",
-      messageId: "msg-12",
-    },
-  },
-  {
-    id: "n-11",
-    type: "card",
-    position: { x: 640, y: 880 },
-    data: {
-      title: "00.11 Strengths Assessment",
-      description: "Present the strengths card with illustration and question to guide user reflection.",
-      messageId: "msg-13",
-    },
-  },
-  {
-    id: "n-12",
-    type: "card",
-    position: { x: 1120, y: 880 },
-    data: {
-      title: "00.12 Strengths Selection",
-      description: "Present interactive pill options for users to select their strengths.",
-      messageId: "msg-14",
-    },
-  },
-];
+type CardNodeData = {
+  componentId: string;           // References ComponentData.id
+  messageId: string;             // Legacy field for backward compatibility
+};
 
-const initialEdges: FlowEdge[] = [
-  { id: "e-1-2", source: "n-1", target: "n-2" },
-  { id: "e-2-3", source: "n-2", target: "n-3" },
-  { id: "e-3-4", source: "n-3", target: "n-4" },
-  { id: "e-4-5", source: "n-4", target: "n-5" },
-  { id: "e-5-6", source: "n-5", target: "n-6" },
-  { id: "e-6-7", source: "n-6", target: "n-7" },
-  { id: "e-7-8", source: "n-7", target: "n-8" },
-  { id: "e-8-9", source: "n-8", target: "n-9" },
-  { id: "e-9-10", source: "n-9", target: "n-10" },
-  { id: "e-10-11", source: "n-10", target: "n-11" },
-  { id: "e-11-12", source: "n-11", target: "n-12" },
-];
+const initialNodes: FlowNode<CardNodeData>[] = [];
+
+const initialEdges: FlowEdge[] = [];
 
 export default function FlowCanvas() {
-  const [nodes, , onNodesChange] = useNodesState<FlowNode<CardNodeData>>(initialNodes);
+  // Central component data store - single source of truth
+  const [components, setComponents] = useState<Map<string, ComponentData>>(new Map());
+  
+  const [nodes, setNodes, onNodesChange] = useNodesState<FlowNode<CardNodeData>>(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<FlowEdge>(initialEdges);
   const [highlightedNodeId, setHighlightedNodeId] = useState<string | null>(null);
+  const [lastClickedNodeId, setLastClickedNodeId] = useState<string | null>(null);
+  const [selectedNodeIds, setSelectedNodeIds] = useState<Set<string>>(new Set());
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragOffset, setDragOffset] = useState<{ x: number; y: number } | null>(null);
+  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [deleteConfirmation, setDeleteConfirmation] = useState<{ messageId: string; componentName: string } | null>(null);
+  const [isTestMode, setIsTestMode] = useState(false);
 
   const onConnect = useCallback((connection: Connection) => setEdges((eds) => addEdge(connection, eds)), [setEdges]);
+
+  const onNodesChangeCustom = useCallback((changes: any) => {
+    console.log('Node changes:', changes);
+    console.log('Selected nodes:', selectedNodeIds);
+    
+    // Handle group dragging
+    const dragChanges = changes.filter((change: any) => change.type === 'position' && change.dragging);
+    
+    if (dragChanges.length > 0 && selectedNodeIds.size > 1) {
+      console.log('Group dragging detected');
+      
+      // Find the node being dragged
+      const draggedNode = dragChanges[0];
+      const draggedNodeId = draggedNode.id;
+      
+      if (selectedNodeIds.has(draggedNodeId)) {
+        console.log('Dragged node is in selection:', draggedNodeId);
+        
+        // Calculate the offset from the original position
+        const originalNode = nodes.find(n => n.id === draggedNodeId);
+        if (originalNode) {
+          const deltaX = draggedNode.position.x - originalNode.position.x;
+          const deltaY = draggedNode.position.y - originalNode.position.y;
+          
+          console.log('Delta:', { deltaX, deltaY });
+          
+          // Move all selected nodes by the same offset
+          const updatedNodes = nodes.map(node => {
+            if (selectedNodeIds.has(node.id)) {
+              console.log('Moving node:', node.id);
+              return {
+                ...node,
+                position: {
+                  x: node.position.x + deltaX,
+                  y: node.position.y + deltaY,
+                },
+              };
+            }
+            return node;
+          });
+          
+          setNodes(updatedNodes);
+          return; // Don't call the default handler
+        }
+      }
+    }
+    
+    // Handle regular node changes
+    onNodesChange(changes);
+  }, [selectedNodeIds, nodes, setNodes, onNodesChange]);
+
+  const addNewComponent = useCallback(() => {
+    const componentId = `comp-${Date.now()}`;
+    const newNodeId = `n-${nodes.length + 1}`;
+    const newMessageId = `msg-${nodes.length + 1}`;
+    
+    // Array of professional/coaching placeholder texts
+    const placeholderTexts = [
+      "What tasks are easy for you but hard for others? Think about the skills that come naturally to you and how they might be valuable in your career.",
+      "Awesome - now that we've got a feel for your personality, let's dig into your strengths. You'll see a few sample answers to guide you.",
+      "Tell me about a time when you felt most confident at work. What were you doing, and what made you feel so capable in that moment?",
+      "Let's explore your communication style. How do you prefer to give and receive feedback? Are you more direct or diplomatic?",
+      "Great progress! Now let's look at your work preferences. What kind of environment helps you perform at your best?",
+      "What would your colleagues say is your biggest strength? Sometimes others see qualities in us that we take for granted.",
+      "Let's talk about challenges. What's a problem you've solved recently that you're particularly proud of?",
+      "Excellent work so far! Now let's focus on your goals. Where do you see yourself professionally in the next 2-3 years?",
+      "What motivates you to do your best work? Is it recognition, helping others, solving complex problems, or something else?",
+      "Let's explore your learning style. How do you prefer to acquire new skills - through hands-on experience, formal training, or mentoring?",
+      "Perfect! Now let's wrap up with your values. What's most important to you in a work environment - collaboration, autonomy, innovation, or stability?"
+    ];
+    
+    // Cycle through placeholder texts
+    const textIndex = nodes.length % placeholderTexts.length;
+    const selectedText = placeholderTexts[textIndex];
+    
+    // Create new component data
+    const newComponent: ComponentData = {
+      id: componentId,
+      name: `New Component ${nodes.length + 1}`,
+      slug: "",
+      uiToolType: "message", // Default to message
+      content: {
+        message: { text: selectedText, richText: true }
+      },
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    
+    // Add to central component store
+    setComponents(prev => new Map(prev).set(componentId, newComponent));
+    
+    const newNode: FlowNode<CardNodeData> = {
+      id: newNodeId,
+      type: "card",
+      position: { x: 160 + (nodes.length % 3) * 480, y: 160 + Math.floor(nodes.length / 3) * 240 },
+      data: {
+        componentId: componentId,
+        messageId: newMessageId,
+      },
+    };
+
+    setNodes((nds) => [...nds, newNode]);
+
+    // Add edge from last node to new node
+    if (nodes.length > 0) {
+      const lastNode = nodes[nodes.length - 1];
+      const newEdge: FlowEdge = {
+        id: `e-${lastNode.id}-${newNodeId}`,
+        source: lastNode.id,
+        target: newNodeId,
+      };
+      setEdges((eds) => [...eds, newEdge]);
+    }
+
+    // Dispatch event to add message to conversation
+    const event = new CustomEvent("addMessage", {
+      detail: { 
+        messageId: newMessageId,
+        componentId: componentId,
+        uiToolType: "message",
+        showDropdown: false 
+      },
+    });
+    window.dispatchEvent(event);
+    
+    // Dispatch component data immediately
+    const componentDataEvent = new CustomEvent("updateComponentData", {
+      detail: { 
+        messageId: newMessageId, 
+        componentData: newComponent 
+      },
+    });
+    window.dispatchEvent(componentDataEvent);
+  }, [nodes, setNodes, setEdges]);
+
+  const deleteComponent = useCallback((messageId: string) => {
+    // Find the node to delete
+    const nodeToDelete = nodes.find(node => node.data.messageId === messageId);
+    if (!nodeToDelete) return;
+
+    // Remove the node
+    setNodes((nds) => nds.filter(node => node.data.messageId !== messageId));
+
+    // Remove edges connected to this node
+    setEdges((eds) => eds.filter(edge => 
+      edge.source !== nodeToDelete.id && edge.target !== nodeToDelete.id
+    ));
+
+    // Reconnect edges if needed (connect previous node to next node)
+    const nodeIndex = nodes.findIndex(node => node.data.messageId === messageId);
+    if (nodeIndex > 0 && nodeIndex < nodes.length - 1) {
+      const prevNode = nodes[nodeIndex - 1];
+      const nextNode = nodes[nodeIndex + 1];
+      
+      const newEdge: FlowEdge = {
+        id: `e-${prevNode.id}-${nextNode.id}`,
+        source: prevNode.id,
+        target: nextNode.id,
+      };
+      setEdges((eds) => [...eds, newEdge]);
+    }
+
+    // Dispatch event to delete message from conversation
+    const event = new CustomEvent("deleteMessage", {
+      detail: { messageId },
+    });
+    window.dispatchEvent(event);
+  }, [nodes, setNodes, setEdges]);
+
+  // Calculate order based on edge connections
+  const calculateNodeOrder = useCallback(() => {
+    if (nodes.length === 0) return [];
+    
+    const order: string[] = [];
+    const visited = new Set<string>();
+    
+    // Find nodes without incoming edges (start nodes)
+    const hasIncomingEdge = new Set<string>();
+    edges.forEach(edge => {
+      hasIncomingEdge.add(edge.target);
+    });
+    
+    const startNodes = nodes.filter(node => !hasIncomingEdge.has(node.id));
+    
+    // If no clear start nodes, use first node
+    if (startNodes.length === 0 && nodes.length > 0) {
+      startNodes.push(nodes[0]);
+    }
+    
+    // Traverse from start nodes
+    const traverse = (nodeId: string) => {
+      if (visited.has(nodeId)) return;
+      visited.add(nodeId);
+      
+      const node = nodes.find(n => n.id === nodeId);
+      if (node) {
+        order.push(node.data.messageId);
+      }
+      
+      // Find outgoing edges
+      edges.forEach(edge => {
+        if (edge.source === nodeId) {
+          traverse(edge.target);
+        }
+      });
+    };
+    
+    // Start traversal from each start node
+    startNodes.forEach(node => traverse(node.id));
+    
+    // Add orphan nodes (nodes not in the order)
+    nodes.forEach(node => {
+      if (!visited.has(node.id)) {
+        order.push(node.data.messageId);
+      }
+    });
+    
+    return order;
+  }, [nodes, edges]);
+
+  // Sync order to preview window
+  const syncOrderToPreview = useCallback(() => {
+    const order = calculateNodeOrder();
+    
+    // Calculate orphan message IDs
+    const orphanIds: string[] = [];
+    nodes.forEach(node => {
+      const isOrphan = !edges.some(edge => edge.target === node.id);
+      const hasOutgoingEdges = edges.some(edge => edge.source === node.id);
+      if (isOrphan && !hasOutgoingEdges) {
+        orphanIds.push(node.data.messageId);
+      }
+    });
+    
+    const event = new CustomEvent("syncMessageOrder", {
+      detail: { order, orphanIds },
+    });
+    window.dispatchEvent(event);
+  }, [calculateNodeOrder, nodes, edges]);
 
   useEffect(() => {
     const handleHighlightNode = (event: CustomEvent) => {
@@ -177,21 +313,173 @@ export default function FlowCanvas() {
       setHighlightedNodeId(null);
     };
 
+    const handleUpdateNode = (event: CustomEvent) => {
+      const { messageId, uiToolType, showDropdown } = event.detail;
+      setNodes((nds) =>
+        nds.map((node) =>
+          node.data.messageId === messageId
+            ? { ...node, data: { ...node.data, uiToolType, showDropdown } }
+            : node
+        )
+      );
+    };
+
+    const handleDeleteNode = (event: CustomEvent) => {
+      const { messageId } = event.detail;
+      deleteComponent(messageId);
+    };
+
     window.addEventListener("highlightNode", handleHighlightNode as EventListener);
     window.addEventListener("unhighlightNode", handleUnhighlightNode as EventListener);
+    window.addEventListener("updateNode", handleUpdateNode as EventListener);
+    window.addEventListener("deleteNode", handleDeleteNode as EventListener);
 
     return () => {
       window.removeEventListener("highlightNode", handleHighlightNode as EventListener);
       window.removeEventListener("unhighlightNode", handleUnhighlightNode as EventListener);
+      window.removeEventListener("updateNode", handleUpdateNode as EventListener);
+      window.removeEventListener("deleteNode", handleDeleteNode as EventListener);
     };
   }, [nodes]);
+
+  // Sync order whenever nodes or edges change
+  useEffect(() => {
+    syncOrderToPreview();
+  }, [nodes, edges, syncOrderToPreview]);
+
+  useEffect(() => {
+    const handleUpdateNodeContent = (event: CustomEvent) => {
+      const { messageId, content } = event.detail;
+      setNodes(prev => 
+        prev.map(node => 
+          node.data.messageId === messageId 
+            ? { ...node, data: { ...node.data, title: content } }
+            : node
+        )
+      );
+    };
+
+    const handleSelectNode = (event: CustomEvent) => {
+      const { messageId } = event.detail;
+      const node = nodes.find(n => n.data.messageId === messageId);
+      if (node) {
+        setSelectedNodeIds(new Set([node.id]));
+        setLastClickedNodeId(node.id);
+        
+        // Dispatch event to update preview window selection
+        const event = new CustomEvent("nodeSelection", {
+          detail: { selectedMessageIds: [messageId] },
+        });
+        window.dispatchEvent(event);
+      }
+    };
+
+    const handleEnterTestMode = (event: CustomEvent) => {
+      setIsTestMode(true);
+    };
+
+    const handleExitTestMode = () => {
+      setIsTestMode(false);
+    };
+
+    const handleOpenEditWindow = (event: CustomEvent) => {
+      const { messageId } = event.detail;
+      setEditingMessageId(messageId);
+    };
+
+    window.addEventListener("updateNodeContent", handleUpdateNodeContent as EventListener);
+    window.addEventListener("selectNode", handleSelectNode as EventListener);
+    window.addEventListener("enterTestMode", handleEnterTestMode as EventListener);
+    window.addEventListener("exitTestMode", handleExitTestMode as EventListener);
+    window.addEventListener("openEditWindow", handleOpenEditWindow as EventListener);
+
+    return () => {
+      window.removeEventListener("updateNodeContent", handleUpdateNodeContent as EventListener);
+      window.removeEventListener("selectNode", handleSelectNode as EventListener);
+      window.removeEventListener("enterTestMode", handleEnterTestMode as EventListener);
+      window.removeEventListener("exitTestMode", handleExitTestMode as EventListener);
+      window.removeEventListener("openEditWindow", handleOpenEditWindow as EventListener);
+    };
+  }, [setNodes, nodes]);
 
   // CardNode component defined inside FlowCanvas to access state
   function CardNode({ data, id }: NodeProps) {
     const d = data as CardNodeData;
     const isHighlighted = highlightedNodeId === id;
+    
+    // Get component data from central store
+    const component = components.get(d.componentId);
+    if (!component) {
+      return <div>Component not found</div>;
+    }
 
-    const handleNodeClick = () => {
+    const handleNodeClick = (e: React.MouseEvent) => {
+      // Disable node interactions in test mode
+      if (isTestMode) return;
+      
+      // Handle shift-click range selection
+      if (e.shiftKey && lastClickedNodeId && lastClickedNodeId !== id) {
+        // Get the range of nodes to select
+        const nodeIds = nodes.map(node => node.id);
+        const startIndex = nodeIds.indexOf(lastClickedNodeId);
+        const endIndex = nodeIds.indexOf(id);
+        
+        if (startIndex !== -1 && endIndex !== -1) {
+          const start = Math.min(startIndex, endIndex);
+          const end = Math.max(startIndex, endIndex);
+          const rangeIds = nodeIds.slice(start, end + 1);
+          
+          // Select the range of nodes
+          setSelectedNodeIds(new Set(rangeIds));
+          console.log('Shift-click selected range:', rangeIds);
+          console.log('Selection size:', rangeIds.length);
+          
+          // Dispatch event to update preview window selection
+          const selectedMessageIds = rangeIds.map(nodeId => {
+            const node = nodes.find(n => n.id === nodeId);
+            return node?.data.messageId;
+          }).filter(Boolean);
+          
+          const event = new CustomEvent("nodeSelection", {
+            detail: { selectedMessageIds },
+          });
+          window.dispatchEvent(event);
+        }
+      } else if (e.metaKey || e.ctrlKey) {
+        // Cmd/Ctrl + click for multi-select
+        const newSelection = new Set(selectedNodeIds);
+        if (newSelection.has(id)) {
+          newSelection.delete(id);
+        } else {
+          newSelection.add(id);
+        }
+        setSelectedNodeIds(newSelection);
+        setLastClickedNodeId(id);
+        console.log('Cmd/Ctrl-click selection:', Array.from(newSelection));
+        console.log('Selection size:', newSelection.size);
+        
+        // Dispatch event to update preview window selection
+        const selectedMessageIds = Array.from(newSelection).map(nodeId => {
+          const node = nodes.find(n => n.id === nodeId);
+          return node?.data.messageId;
+        }).filter(Boolean);
+        
+        const event = new CustomEvent("nodeSelection", {
+          detail: { selectedMessageIds },
+        });
+        window.dispatchEvent(event);
+              } else {
+          // Regular click - update last clicked node and clear selection
+          setLastClickedNodeId(id);
+          setSelectedNodeIds(new Set([id]));
+          
+          // Dispatch event to update preview window selection
+          const event = new CustomEvent("nodeSelection", {
+            detail: { selectedMessageIds: [d.messageId] },
+          });
+          window.dispatchEvent(event);
+      }
+
       // Dispatch custom event to scroll to corresponding message
       const event = new CustomEvent("scrollToMessage", {
         detail: { messageId: d.messageId },
@@ -199,7 +487,26 @@ export default function FlowCanvas() {
       window.dispatchEvent(event);
     };
 
+    const handleDragStart = () => {
+      if (selectedNodeIds.has(id)) {
+        setIsDragging(true);
+        // Store the initial position of the dragged node
+        const node = nodes.find(n => n.id === id);
+        if (node) {
+          setDragOffset({ x: 0, y: 0 });
+        }
+      }
+    };
+
+    const handleDragEnd = () => {
+      setIsDragging(false);
+      setDragOffset(null);
+    };
+
     const handleNodeMouseEnter = () => {
+      // Disable hover effects in test mode
+      if (isTestMode) return;
+      
       // Dispatch custom event to highlight corresponding message
       const event = new CustomEvent("highlightMessage", {
         detail: { messageId: d.messageId },
@@ -208,6 +515,9 @@ export default function FlowCanvas() {
     };
 
     const handleNodeMouseLeave = () => {
+      // Disable hover effects in test mode
+      if (isTestMode) return;
+      
       // Dispatch custom event to unhighlight corresponding message
       const event = new CustomEvent("unhighlightMessage", {
         detail: { messageId: d.messageId },
@@ -215,20 +525,137 @@ export default function FlowCanvas() {
       window.dispatchEvent(event);
     };
 
+    const handleUIToolSelect = (uiToolType: UIToolType) => {
+      // Update component data
+      const component = components.get(d.componentId);
+      if (component) {
+        const updatedComponent = {
+          ...component,
+          uiToolType,
+          updatedAt: new Date()
+        };
+        setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+      }
+      
+      // Dispatch event to update message in conversation
+      const event = new CustomEvent("updateMessage", {
+        detail: { messageId: d.messageId, uiToolType, showDropdown: false },
+      });
+      window.dispatchEvent(event);
+    };
+
+    // Check if this node is an orphan (no incoming edges)
+    const isOrphan = !edges.some(edge => edge.target === id);
+    const hasOutgoingEdges = edges.some(edge => edge.source === id);
+    const isSelected = selectedNodeIds.has(id);
+    
     return (
       <div
-        className={`card-node ${isHighlighted ? "node-highlighted" : ""}`}
+        className={`card-node ${isHighlighted ? "node-highlighted" : ""} ${isOrphan && !hasOutgoingEdges ? "node-orphan" : ""} ${isSelected ? "node-selected" : ""}`}
         onClick={handleNodeClick}
         onMouseEnter={handleNodeMouseEnter}
         onMouseLeave={handleNodeMouseLeave}
+        onMouseDown={handleDragStart}
+        onMouseUp={handleDragEnd}
       >
-        <div className="card-node__title">{d.title}</div>
-        {d.description && <div className="card-node__desc">{d.description}</div>}
+        <div className="card-node__title">{component.name}</div>
+        <div className="card-node__slug" style={{ 
+          position: "absolute",
+          top: "8px",
+          right: "8px",
+          fontSize: "12px",
+          color: "#FFF",
+          fontWeight: "500"
+        }}>
+          {component.slug}
+        </div>
+        {component.content.message?.text && (
+          <div className="card-node__desc" style={{
+            fontSize: "12px",
+            color: "#FFF",
+            marginTop: "4px",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            maxWidth: "200px"
+          }}>
+            {component.content.message.text.substring(0, 50)}
+            {component.content.message.text.length > 50 ? "..." : ""}
+          </div>
+        )}
+        {component.uiToolType && (
+          <div className="card-node__tool-type" style={{ 
+            marginTop: "8px", 
+            fontSize: "11px", 
+            color: "#F16B68", 
+            fontWeight: "600",
+            textTransform: "uppercase"
+          }}>
+            {component.uiToolType}
+          </div>
+        )}
+        
+
+
+        <button
+          className="delete-node-btn"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (!isTestMode) {
+              setDeleteConfirmation({ messageId: d.messageId, componentName: component.name });
+            }
+          }}
+          style={{
+            position: "absolute",
+            top: "32px",
+            right: "8px",
+            background: "#F16B68",
+            color: "white",
+            border: "none",
+            borderRadius: "50%",
+            width: "20px",
+            height: "20px",
+            fontSize: "12px",
+            cursor: "pointer",
+            display: "none",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 10,
+          }}
+        >
+          ×
+        </button>
+        <button
+          className="edit-node-btn"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (!isTestMode) {
+              setEditingMessageId(d.messageId);
+            }
+          }}
+          style={{
+            position: "absolute",
+            top: "32px",
+            right: "43px",
+            background: "#8EAF86",
+            color: "white",
+            border: "none",
+            borderRadius: "50%",
+            width: "20px",
+            height: "20px",
+            fontSize: "12px",
+            cursor: "pointer",
+            display: "none",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 10,
+          }}
+        >
+          ✏️
+        </button>
 
         <Handle type="target" position={Position.Left} />
         <Handle type="source" position={Position.Right} />
-        <Handle type="target" position={Position.Top} />
-        <Handle type="source" position={Position.Bottom} />
       </div>
     );
   }
@@ -236,20 +663,407 @@ export default function FlowCanvas() {
   const nodeTypes: NodeTypes = { card: CardNode };
 
   return (
-    <div style={{ width: "calc(100% - 400px)", height: "100vh" }}>
+    <div 
+      style={{ width: isTestMode ? "100%" : "calc(100% - 400px)", height: "100vh", position: "relative" }}
+      onClick={(e) => {
+        if (isTestMode) {
+          const event = new CustomEvent("showExitTestWarning");
+          window.dispatchEvent(event);
+        }
+      }}
+    >
+      {isTestMode && (
+        <div 
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: "rgba(176, 152, 128, 0.55)",
+            zIndex: 1000,
+            pointerEvents: "none",
+          }}
+        />
+      )}
       <ReactFlow
         nodes={nodes}
         edges={edges}
-        onNodesChange={onNodesChange}
+        onNodesChange={onNodesChangeCustom}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onEdgeClick={(event, edge) => {
+          event.preventDefault();
+          setEdges(prev => prev.filter(e => e.id !== edge.id));
+        }}
         nodeTypes={nodeTypes}
+        nodesFocusable={false}
+        nodesConnectable={true}
+        elementsSelectable={false}
         fitView
+        snapToGrid={true}
+        snapGrid={[40, 40]}
+        onPaneClick={() => {
+          // Clear selection when clicking on empty space
+          setSelectedNodeIds(new Set());
+          setLastClickedNodeId(null);
+          
+          // Dispatch event to clear preview window selection
+          const event = new CustomEvent("nodeSelection", {
+            detail: { selectedMessageIds: [] },
+          });
+          window.dispatchEvent(event);
+        }}
       >
         <MiniMap zoomable pannable />
         <Controls />
         <Background />
       </ReactFlow>
+      
+      <button 
+        className="add-component-btn"
+        onClick={addNewComponent}
+        style={{
+          position: "absolute",
+          top: "20px",
+          right: "20px",
+          zIndex: 10,
+          background: "#F16B68",
+          color: "white",
+          border: "none",
+          borderRadius: "8px",
+          padding: "12px 20px",
+          fontSize: "14px",
+          fontWeight: "500",
+          cursor: "pointer",
+          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+          outline: "none",
+        }}
+        onFocus={(e) => {
+          e.target.style.boxShadow = "0 0 0 2px rgba(241, 107, 104, 0.3)";
+        }}
+        onBlur={(e) => {
+          e.target.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.1)";
+        }}
+      >
+        Add Component
+      </button>
+
+      {/* Delete Confirmation Modal */}
+      {deleteConfirmation && (
+        <div className="edit-window-overlay">
+          <div className="edit-window">
+            <div className="edit-window-header">
+              <h4>Delete Component</h4>
+            </div>
+            <div className="edit-window-content">
+              <p>Are you sure you want to delete "{deleteConfirmation.componentName}"?</p>
+              <p style={{ fontSize: "14px", color: "#666", marginTop: "8px" }}>
+                This action cannot be undone.
+              </p>
+            </div>
+            <div className="edit-window-footer">
+              <button
+                className="save-btn"
+                onClick={() => {
+                  deleteComponent(deleteConfirmation.messageId);
+                  setDeleteConfirmation(null);
+                }}
+                style={{
+                  background: "#F16B68",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "8px",
+                  padding: "8px 16px",
+                  fontSize: "14px",
+                  cursor: "pointer",
+                }}
+              >
+                Delete
+              </button>
+              <button
+                className="cancel-btn"
+                onClick={() => setDeleteConfirmation(null)}
+                style={{
+                  background: "#E9DDD3",
+                  color: "#003250",
+                  border: "none",
+                  borderRadius: "8px",
+                  padding: "8px 16px",
+                  fontSize: "14px",
+                  cursor: "pointer",
+                  marginLeft: "8px",
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Window */}
+      {editingMessageId && (
+        <div className="edit-window-overlay">
+          <div className="edit-window">
+            <div className="edit-window-header">
+              <h4>Edit Message</h4>
+              <button
+                className="close-edit-btn"
+                onClick={() => setEditingMessageId(null)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  fontSize: "18px",
+                  cursor: "pointer",
+                  color: "#003250",
+                }}
+              >
+                ×
+              </button>
+            </div>
+            <div className="edit-window-content">
+              <label>Component Name:</label>
+              <input
+                type="text"
+                value={(() => {
+                  const node = nodes.find(n => n.data.messageId === editingMessageId);
+                  if (!node) return "";
+                  const component = components.get(node.data.componentId);
+                  return component?.name || "";
+                })()}
+                onChange={(e) => {
+                  const node = nodes.find(n => n.data.messageId === editingMessageId);
+                  if (node) {
+                    const component = components.get(node.data.componentId);
+                    if (component) {
+                      const updatedComponent = {
+                        ...component,
+                        name: e.target.value,
+                        updatedAt: new Date()
+                      };
+                      setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                      
+                      // Dispatch event to update preview
+                      const event = new CustomEvent("updateComponentData", {
+                        detail: { 
+                          messageId: editingMessageId, 
+                          componentData: updatedComponent 
+                        },
+                      });
+                      window.dispatchEvent(event);
+                    }
+                  }
+                }}
+                placeholder="Enter component name..."
+                style={{
+                  width: "100%",
+                  padding: "12px",
+                  border: "1px solid #E9DDD3",
+                  borderRadius: "8px",
+                  fontSize: "14px",
+                  fontFamily: "inherit",
+                  marginBottom: "16px",
+                }}
+              />
+              
+              <label>Slug:</label>
+              <input
+                type="text"
+                value={(() => {
+                  const node = nodes.find(n => n.data.messageId === editingMessageId);
+                  if (!node) return "";
+                  const component = components.get(node.data.componentId);
+                  return component?.slug || "";
+                })()}
+                onChange={(e) => {
+                  const node = nodes.find(n => n.data.messageId === editingMessageId);
+                  if (node) {
+                    const component = components.get(node.data.componentId);
+                    if (component) {
+                      const updatedComponent = {
+                        ...component,
+                        slug: e.target.value,
+                        updatedAt: new Date()
+                      };
+                      setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                      
+                      // Dispatch event to update preview
+                      const event = new CustomEvent("updateComponentData", {
+                        detail: { 
+                          messageId: editingMessageId, 
+                          componentData: updatedComponent 
+                        },
+                      });
+                      window.dispatchEvent(event);
+                    }
+                  }
+                }}
+                placeholder="e.g., 01.03.06"
+                style={{
+                  width: "100%",
+                  padding: "12px",
+                  border: "1px solid #E9DDD3",
+                  borderRadius: "8px",
+                  fontSize: "14px",
+                  fontFamily: "inherit",
+                  marginBottom: "16px",
+                }}
+              />
+              
+              <label>UI Tool Type:</label>
+              <select
+                value={(() => {
+                  const node = nodes.find(n => n.data.messageId === editingMessageId);
+                  if (!node) return "message";
+                  const component = components.get(node.data.componentId);
+                  return component?.uiToolType || "message";
+                })()}
+                onChange={(e) => {
+                  const node = nodes.find(n => n.data.messageId === editingMessageId);
+                  if (node) {
+                    const component = components.get(node.data.componentId);
+                    if (component) {
+                      const updatedComponent = {
+                        ...component,
+                        uiToolType: e.target.value as UIToolType,
+                        updatedAt: new Date()
+                      };
+                      setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                      
+                      // Dispatch event to update preview
+                      const event = new CustomEvent("updateComponentData", {
+                        detail: { 
+                          messageId: editingMessageId, 
+                          componentData: updatedComponent 
+                        },
+                      });
+                      window.dispatchEvent(event);
+                    }
+                  }
+                }}
+                style={{
+                  width: "100%",
+                  padding: "12px",
+                  border: "1px solid #E9DDD3",
+                  borderRadius: "8px",
+                  fontSize: "14px",
+                  fontFamily: "inherit",
+                  marginBottom: "16px",
+                }}
+              >
+                <option value="message">Message</option>
+                <option value="question">Question</option>
+                <option value="form">Form</option>
+                <option value="freeChat">Free Chat</option>
+                <option value="accordion">Accordion</option>
+                <option value="banner">Banner</option>
+                <option value="intro">Intro</option>
+                <option value="multiSelect">Multi Select</option>
+              </select>
+              
+              <label>Message Content:</label>
+              <textarea
+                value={(() => {
+                  const node = nodes.find(n => n.data.messageId === editingMessageId);
+                  if (!node) return "";
+                  const component = components.get(node.data.componentId);
+                  return component?.content.message?.text || "";
+                })()}
+                onChange={(e) => {
+                  const node = nodes.find(n => n.data.messageId === editingMessageId);
+                  if (node) {
+                    const component = components.get(node.data.componentId);
+                    if (component) {
+                      const updatedComponent = {
+                        ...component,
+                        content: {
+                          ...component.content,
+                          message: {
+                            ...component.content.message,
+                            text: e.target.value
+                          }
+                        },
+                        updatedAt: new Date()
+                      };
+                      setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                      
+                      // Dispatch event to update preview
+                      const event = new CustomEvent("updateComponentData", {
+                        detail: { 
+                          messageId: editingMessageId, 
+                          componentData: updatedComponent 
+                        },
+                      });
+                      window.dispatchEvent(event);
+                    }
+                  }
+                }}
+                placeholder="Enter your message content..."
+                style={{
+                  width: "100%",
+                  minHeight: "100px",
+                  padding: "12px",
+                  border: "1px solid #E9DDD3",
+                  borderRadius: "8px",
+                  fontSize: "14px",
+                  fontFamily: "inherit",
+                  resize: "vertical",
+                }}
+              />
+            </div>
+            <div className="edit-window-footer">
+              <button
+                className="save-btn"
+                onClick={() => {
+                  // Dispatch event to update preview message
+                  const node = nodes.find(n => n.data.messageId === editingMessageId);
+                  if (node) {
+                    const component = components.get(node.data.componentId);
+                    if (component) {
+                      const event = new CustomEvent("updateMessageContent", {
+                        detail: { 
+                          messageId: editingMessageId, 
+                          content: component.content.message?.text || ""
+                        },
+                      });
+                      window.dispatchEvent(event);
+                    }
+                  }
+                  setEditingMessageId(null);
+                }}
+                style={{
+                  background: "#F16B68",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "8px",
+                  padding: "8px 16px",
+                  fontSize: "14px",
+                  cursor: "pointer",
+                }}
+              >
+                Save
+              </button>
+              <button
+                className="cancel-btn"
+                onClick={() => setEditingMessageId(null)}
+                style={{
+                  background: "#E9DDD3",
+                  color: "#003250",
+                  border: "none",
+                  borderRadius: "8px",
+                  padding: "8px 16px",
+                  fontSize: "14px",
+                  cursor: "pointer",
+                  marginLeft: "8px",
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
