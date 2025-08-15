@@ -42,10 +42,129 @@
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
 }
 
+/* UI Tool Dropdown */
+.ui-tool-dropdown {
+  margin-top: 12px;
+}
+
+.ui-tool-dropdown select {
+  width: 100%;
+  padding: 8px 12px;
+  border: 1px solid #E9DDD3;
+  border-radius: 6px;
+  background: white;
+  color: #003250;
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.ui-tool-dropdown select:focus {
+  outline: none;
+  border-color: #F16B68;
+  box-shadow: 0 0 0 2px rgba(241, 107, 104, 0.1);
+}
+
+.ui-tool-dropdown select:hover {
+  border-color: #F2E8E0;
+}
+
+/* Delete button hover effect */
+.card-node:hover .delete-node-btn {
+  display: flex !important;
+}
+
+/* Edit button hover effect */
+.card-node:hover .edit-node-btn {
+  display: flex !important;
+}
+
+/* Orphan node styling */
+.node-orphan {
+  border: 2px dashed #F16B68 !important;
+  opacity: 0.8;
+}
+
+/* Selected node styling */
+.node-selected {
+  border: 3px solid #F16B68 !important;
+  box-shadow: 0 0 0 2px rgba(241, 107, 104, 0.3) !important;
+  transform: scale(1.02);
+}
+
 /* Node highlighting when message is hovered */
 .node-highlighted {
   transform: scale(1.05);
-  box-shadow: 0 0 0 3px #8b5cf6, 0 8px 25px rgba(139, 92, 246, 0.3);
+  box-shadow: 0 0 0 3px #F16B68, 0 8px 25px rgba(241, 107, 104, 0.3);
+  background: #F2E8E0 !important;
+  color: #003250 !important;
   z-index: 10;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+}
+
+.node-highlighted .card-node__title {
+  color: #555 !important;
+}
+
+.node-highlighted .card-node__desc {
+  color: #555 !important;
+}
+
+/* Edit Window Styling */
+.edit-window-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.edit-window {
+  background: #FFF7F1;
+  border-radius: 12px;
+  padding: 24px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+}
+
+.edit-window-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #E9DDD3;
+}
+
+.edit-window-header h4 {
+  margin: 0;
+  color: #003250;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.edit-window-content {
+  margin-bottom: 20px;
+}
+
+.edit-window-content label {
+  display: block;
+  margin-bottom: 8px;
+  color: #003250;
+  font-weight: 500;
+  font-size: 14px;
+}
+
+.edit-window-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
 }
