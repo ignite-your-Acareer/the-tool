@@ -116,6 +116,25 @@ export default function FlowCanvas() {
     const newNodeId = `n-${nodes.length + 1}`;
     const newMessageId = `msg-${nodes.length + 1}`;
     
+    // Array of professional/coaching placeholder texts
+    const placeholderTexts = [
+      "What tasks are easy for you but hard for others? Think about the skills that come naturally to you and how they might be valuable in your career.",
+      "Awesome - now that we've got a feel for your personality, let's dig into your strengths. You'll see a few sample answers to guide you.",
+      "Tell me about a time when you felt most confident at work. What were you doing, and what made you feel so capable in that moment?",
+      "Let's explore your communication style. How do you prefer to give and receive feedback? Are you more direct or diplomatic?",
+      "Great progress! Now let's look at your work preferences. What kind of environment helps you perform at your best?",
+      "What would your colleagues say is your biggest strength? Sometimes others see qualities in us that we take for granted.",
+      "Let's talk about challenges. What's a problem you've solved recently that you're particularly proud of?",
+      "Excellent work so far! Now let's focus on your goals. Where do you see yourself professionally in the next 2-3 years?",
+      "What motivates you to do your best work? Is it recognition, helping others, solving complex problems, or something else?",
+      "Let's explore your learning style. How do you prefer to acquire new skills - through hands-on experience, formal training, or mentoring?",
+      "Perfect! Now let's wrap up with your values. What's most important to you in a work environment - collaboration, autonomy, innovation, or stability?"
+    ];
+    
+    // Cycle through placeholder texts
+    const textIndex = nodes.length % placeholderTexts.length;
+    const selectedText = placeholderTexts[textIndex];
+    
     // Create new component data
     const newComponent: ComponentData = {
       id: componentId,
@@ -123,7 +142,7 @@ export default function FlowCanvas() {
       slug: "",
       uiToolType: "message", // Default to message
       content: {
-        message: { text: "New component added", richText: true }
+        message: { text: selectedText, richText: true }
       },
       createdAt: new Date(),
       updatedAt: new Date(),
