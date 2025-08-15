@@ -9,6 +9,7 @@ type Message = {
   content: string;
   timestamp: string;
   messageId?: string; // Links to node messageId
+  componentId?: string; // Links to component data
   userResponseId?: string; // Links to user response placeholder
   type: MessageType;
   uiToolType?: string;
@@ -144,7 +145,7 @@ export default function ConversationPreview() {
     };
 
     const handleAddMessage = (event: CustomEvent) => {
-      const { messageId, uiToolType, showDropdown } = event.detail;
+      const { messageId, componentId, uiToolType, showDropdown } = event.detail;
       
       // Generate a unique ID that doesn't conflict with existing messages
       const existingIds = messages.map(msg => parseInt(msg.id));
@@ -154,9 +155,10 @@ export default function ConversationPreview() {
       const newMessage: Message = {
         id: newId,
         sender: "ai",
-        content: "New component added. Please select a UI tool type.",
+        content: "New component added", // Will be updated by component data event
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         messageId,
+        componentId,
         type: "text",
         uiToolType,
         showDropdown,
@@ -232,6 +234,21 @@ export default function ConversationPreview() {
       );
     };
 
+    const handleUpdateComponentData = (event: CustomEvent) => {
+      const { messageId, componentData } = event.detail;
+      setMessages(prev => 
+        prev.map(msg => 
+          msg.messageId === messageId 
+            ? { 
+                ...msg, 
+                content: componentData.content.message?.text || "New component added",
+                uiToolType: componentData.uiToolType
+              }
+            : msg
+        )
+      );
+    };
+
 
 
 
@@ -245,6 +262,7 @@ export default function ConversationPreview() {
     window.addEventListener("syncMessageOrder", handleSyncMessageOrder as EventListener);
     window.addEventListener("nodeSelection", handleNodeSelection as EventListener);
     window.addEventListener("updateMessageContent", handleUpdateMessageContent as EventListener);
+    window.addEventListener("updateComponentData", handleUpdateComponentData as EventListener);
     window.addEventListener("showExitTestWarning", () => setShowExitTestWarning(true));
 
     return () => {
@@ -299,55 +317,8 @@ export default function ConversationPreview() {
         return (
           <div className="message-text">
             {message.content}
-            {message.uiToolType && (
-              <div style={{ 
-                marginTop: "8px", 
-                fontSize: "11px", 
-                color: "#F16B68", 
-                fontWeight: "600",
-                textTransform: "uppercase"
-              }}>
-                {message.uiToolType}
-              </div>
-            )}
-            {message.showDropdown && !isTestMode && (
-              <div className="ui-tool-dropdown" style={{ marginTop: "12px" }}>
-                <select 
-                  onChange={(e) => {
-                    const uiToolType = e.target.value;
-                    // Update the message in the preview window
-                    setMessages(prev => 
-                      prev.map(msg => 
-                        msg.messageId === message.messageId 
-                          ? { ...msg, uiToolType, showDropdown: false }
-                          : msg
-                      )
-                    );
-                    
-                    // Dispatch event to update the corresponding node in the canvas
-                    const event = new CustomEvent("updateNode", {
-                      detail: { 
-                        messageId: message.messageId, 
-                        uiToolType, 
-                        showDropdown: false 
-                      },
-                    });
-                    window.dispatchEvent(event);
-                  }}
-                  value={message.uiToolType || ""}
-                >
-                  <option value="">Select UI Tool</option>
-                  <option value="message">Message</option>
-                  <option value="question">Question</option>
-                  <option value="form">Form</option>
-                  <option value="freeChat">Free Chat</option>
-                  <option value="accordion">Accordion</option>
-                  <option value="banner">Banner</option>
-                  <option value="intro">Intro</option>
-                  <option value="multiSelect">Multi Select</option>
-                </select>
-              </div>
-            )}
+
+
           </div>
         );
     }
@@ -455,7 +426,11 @@ export default function ConversationPreview() {
                     className="edit-message-btn"
                     onClick={(e) => {
                       e.stopPropagation();
-                      setEditingMessageId(message.messageId || null);
+                      // Dispatch event to open edit window in FlowCanvas
+                      const event = new CustomEvent("openEditWindow", {
+                        detail: { messageId: message.messageId },
+                      });
+                      window.dispatchEvent(event);
                     }}
                     style={{
                       position: "absolute",
@@ -708,101 +683,7 @@ export default function ConversationPreview() {
         </div>
       )}
 
-      {/* Edit Window */}
-      {editingMessageId && (
-        <div className="edit-window-overlay">
-          <div className="edit-window">
-            <div className="edit-window-header">
-              <h4>Edit Message</h4>
-              <button
-                className="close-edit-btn"
-                onClick={() => setEditingMessageId(null)}
-                style={{
-                  background: "none",
-                  border: "none",
-                  fontSize: "18px",
-                  cursor: "pointer",
-                  color: "#003250",
-                }}
-              >
-                ×
-              </button>
-            </div>
-            <div className="edit-window-content">
-              <label>Message Content:</label>
-              <textarea
-                value={messages.find(m => m.messageId === editingMessageId)?.content || ""}
-                onChange={(e) => {
-                  setMessages(prev => 
-                    prev.map(msg => 
-                      msg.messageId === editingMessageId 
-                        ? { ...msg, content: e.target.value }
-                        : msg
-                    )
-                  );
-                }}
-                placeholder="Enter your message content..."
-                style={{
-                  width: "100%",
-                  minHeight: "100px",
-                  padding: "12px",
-                  border: "1px solid #E9DDD3",
-                  borderRadius: "8px",
-                  fontSize: "14px",
-                  fontFamily: "inherit",
-                  resize: "vertical",
-                }}
-              />
-            </div>
-            <div className="edit-window-footer">
-              <button
-                className="save-btn"
-                onClick={() => {
-                  // Dispatch event to update canvas node
-                  const message = messages.find(m => m.messageId === editingMessageId);
-                  if (message) {
-                    const event = new CustomEvent("updateNodeContent", {
-                      detail: { 
-                        messageId: editingMessageId, 
-                        content: message.content 
-                      },
-                    });
-                    window.dispatchEvent(event);
-                  }
-                  setEditingMessageId(null);
-                }}
-                style={{
-                  background: "#F16B68",
-                  color: "white",
-                  border: "none",
-                  borderRadius: "8px",
-                  padding: "8px 16px",
-                  fontSize: "14px",
-                  cursor: "pointer",
-                }}
-              >
-                Save
-              </button>
-              <button
-                className="cancel-btn"
-                onClick={() => setEditingMessageId(null)}
-                style={{
-                  background: "#E9DDD3",
-                  color: "#003250",
-                  border: "none",
-                  borderRadius: "8px",
-                  padding: "8px 16px",
-                  fontSize: "14px",
-                  cursor: "pointer",
-                  marginLeft: "8px",
-                }}
-              >
-                Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+
     </div>
   );
 }

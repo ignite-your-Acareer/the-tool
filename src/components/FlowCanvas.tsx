@@ -15,12 +15,29 @@ import "../flow.css";
 
 type UIToolType = "message" | "question" | "form" | "freeChat" | "accordion" | "banner" | "intro" | "multiSelect";
 
+// Comprehensive component data structure - single source of truth
+type ComponentData = {
+  id: string;                    // Unique component ID
+  name: string;                  // Display name (required)
+  slug: string;                  // Slug ID like "01.03.06" (required)
+  uiToolType: UIToolType;        // UI tool type
+  content: {
+    message?: { text: string; richText?: boolean; };
+    question?: { text: string; options: string[]; };
+    form?: { fields: any[]; };
+    freeChat?: { text: string; };
+    accordion?: { title: string; content: string; };
+    banner?: { text: string; type: string; };
+    intro?: { text: string; };
+    multiSelect?: { text: string; options: string[]; };
+  };
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 type CardNodeData = {
-  title: string;
-  description?: string;
-  messageId: string;
-  uiToolType?: UIToolType;
-  showDropdown?: boolean;
+  componentId: string;           // References ComponentData.id
+  messageId: string;             // Legacy field for backward compatibility
 };
 
 const initialNodes: FlowNode<CardNodeData>[] = [];
@@ -28,6 +45,9 @@ const initialNodes: FlowNode<CardNodeData>[] = [];
 const initialEdges: FlowEdge[] = [];
 
 export default function FlowCanvas() {
+  // Central component data store - single source of truth
+  const [components, setComponents] = useState<Map<string, ComponentData>>(new Map());
+  
   const [nodes, setNodes, onNodesChange] = useNodesState<FlowNode<CardNodeData>>(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState<FlowEdge>(initialEdges);
   const [highlightedNodeId, setHighlightedNodeId] = useState<string | null>(null);
@@ -92,18 +112,33 @@ export default function FlowCanvas() {
   }, [selectedNodeIds, nodes, setNodes, onNodesChange]);
 
   const addNewComponent = useCallback(() => {
+    const componentId = `comp-${Date.now()}`;
     const newNodeId = `n-${nodes.length + 1}`;
     const newMessageId = `msg-${nodes.length + 1}`;
+    
+    // Create new component data
+    const newComponent: ComponentData = {
+      id: componentId,
+      name: `New Component ${nodes.length + 1}`,
+      slug: "",
+      uiToolType: "message", // Default to message
+      content: {
+        message: { text: "New component added", richText: true }
+      },
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    };
+    
+    // Add to central component store
+    setComponents(prev => new Map(prev).set(componentId, newComponent));
     
     const newNode: FlowNode<CardNodeData> = {
       id: newNodeId,
       type: "card",
       position: { x: 160 + (nodes.length % 3) * 480, y: 160 + Math.floor(nodes.length / 3) * 240 },
       data: {
-        title: `New Component ${nodes.length + 1}`,
-        description: "Select a UI tool type for this component.",
+        componentId: componentId,
         messageId: newMessageId,
-        showDropdown: true,
       },
     };
 
@@ -124,11 +159,21 @@ export default function FlowCanvas() {
     const event = new CustomEvent("addMessage", {
       detail: { 
         messageId: newMessageId,
-        uiToolType: undefined,
-        showDropdown: true 
+        componentId: componentId,
+        uiToolType: "message",
+        showDropdown: false 
       },
     });
     window.dispatchEvent(event);
+    
+    // Dispatch component data immediately
+    const componentDataEvent = new CustomEvent("updateComponentData", {
+      detail: { 
+        messageId: newMessageId, 
+        componentData: newComponent 
+      },
+    });
+    window.dispatchEvent(componentDataEvent);
   }, [nodes, setNodes, setEdges]);
 
   const deleteComponent = useCallback((messageId: string) => {
@@ -318,16 +363,23 @@ export default function FlowCanvas() {
       setIsTestMode(false);
     };
 
+    const handleOpenEditWindow = (event: CustomEvent) => {
+      const { messageId } = event.detail;
+      setEditingMessageId(messageId);
+    };
+
     window.addEventListener("updateNodeContent", handleUpdateNodeContent as EventListener);
     window.addEventListener("selectNode", handleSelectNode as EventListener);
     window.addEventListener("enterTestMode", handleEnterTestMode as EventListener);
     window.addEventListener("exitTestMode", handleExitTestMode as EventListener);
+    window.addEventListener("openEditWindow", handleOpenEditWindow as EventListener);
 
     return () => {
       window.removeEventListener("updateNodeContent", handleUpdateNodeContent as EventListener);
       window.removeEventListener("selectNode", handleSelectNode as EventListener);
       window.removeEventListener("enterTestMode", handleEnterTestMode as EventListener);
       window.removeEventListener("exitTestMode", handleExitTestMode as EventListener);
+      window.removeEventListener("openEditWindow", handleOpenEditWindow as EventListener);
     };
   }, [setNodes, nodes]);
 
@@ -335,6 +387,12 @@ export default function FlowCanvas() {
   function CardNode({ data, id }: NodeProps) {
     const d = data as CardNodeData;
     const isHighlighted = highlightedNodeId === id;
+    
+    // Get component data from central store
+    const component = components.get(d.componentId);
+    if (!component) {
+      return <div>Component not found</div>;
+    }
 
     const handleNodeClick = (e: React.MouseEvent) => {
       // Disable node interactions in test mode
@@ -449,15 +507,17 @@ export default function FlowCanvas() {
     };
 
     const handleUIToolSelect = (uiToolType: UIToolType) => {
-      // Update node data
-      setNodes((nds) =>
-        nds.map((node) =>
-          node.id === id
-            ? { ...node, data: { ...node.data, uiToolType, showDropdown: false } }
-            : node
-        )
-      );
-
+      // Update component data
+      const component = components.get(d.componentId);
+      if (component) {
+        const updatedComponent = {
+          ...component,
+          uiToolType,
+          updatedAt: new Date()
+        };
+        setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+      }
+      
       // Dispatch event to update message in conversation
       const event = new CustomEvent("updateMessage", {
         detail: { messageId: d.messageId, uiToolType, showDropdown: false },
@@ -479,9 +539,32 @@ export default function FlowCanvas() {
         onMouseDown={handleDragStart}
         onMouseUp={handleDragEnd}
       >
-        <div className="card-node__title">{d.title}</div>
-        {d.description && <div className="card-node__desc">{d.description}</div>}
-        {d.uiToolType && (
+        <div className="card-node__title">{component.name}</div>
+        <div className="card-node__slug" style={{ 
+          position: "absolute",
+          top: "8px",
+          right: "8px",
+          fontSize: "12px",
+          color: "#FFF",
+          fontWeight: "500"
+        }}>
+          {component.slug}
+        </div>
+        {component.content.message?.text && (
+          <div className="card-node__desc" style={{
+            fontSize: "12px",
+            color: "#FFF",
+            marginTop: "4px",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            maxWidth: "200px"
+          }}>
+            {component.content.message.text.substring(0, 50)}
+            {component.content.message.text.length > 50 ? "..." : ""}
+          </div>
+        )}
+        {component.uiToolType && (
           <div className="card-node__tool-type" style={{ 
             marginTop: "8px", 
             fontSize: "11px", 
@@ -489,41 +572,23 @@ export default function FlowCanvas() {
             fontWeight: "600",
             textTransform: "uppercase"
           }}>
-            {d.uiToolType}
+            {component.uiToolType}
           </div>
         )}
         
-        {d.showDropdown && !isTestMode && (
-          <div className="ui-tool-dropdown" onClick={(e) => e.stopPropagation()}>
-            <select 
-              onChange={(e) => handleUIToolSelect(e.target.value as UIToolType)}
-              value={d.uiToolType || ""}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <option value="">Select UI Tool</option>
-              <option value="message">Message</option>
-              <option value="question">Question</option>
-              <option value="form">Form</option>
-              <option value="freeChat">Free Chat</option>
-              <option value="accordion">Accordion</option>
-              <option value="banner">Banner</option>
-              <option value="intro">Intro</option>
-              <option value="multiSelect">Multi Select</option>
-            </select>
-          </div>
-        )}
+
 
         <button
           className="delete-node-btn"
           onClick={(e) => {
             e.stopPropagation();
             if (!isTestMode) {
-              setDeleteConfirmation({ messageId: d.messageId, componentName: d.title });
+              setDeleteConfirmation({ messageId: d.messageId, componentName: component.name });
             }
           }}
           style={{
             position: "absolute",
-            top: "8px",
+            top: "32px",
             right: "8px",
             background: "#F16B68",
             color: "white",
@@ -551,7 +616,7 @@ export default function FlowCanvas() {
           }}
           style={{
             position: "absolute",
-            top: "8px",
+            top: "32px",
             right: "43px",
             background: "#8EAF86",
             color: "white",
@@ -739,17 +804,181 @@ export default function FlowCanvas() {
               </button>
             </div>
             <div className="edit-window-content">
+              <label>Component Name:</label>
+              <input
+                type="text"
+                value={(() => {
+                  const node = nodes.find(n => n.data.messageId === editingMessageId);
+                  if (!node) return "";
+                  const component = components.get(node.data.componentId);
+                  return component?.name || "";
+                })()}
+                onChange={(e) => {
+                  const node = nodes.find(n => n.data.messageId === editingMessageId);
+                  if (node) {
+                    const component = components.get(node.data.componentId);
+                    if (component) {
+                      const updatedComponent = {
+                        ...component,
+                        name: e.target.value,
+                        updatedAt: new Date()
+                      };
+                      setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                      
+                      // Dispatch event to update preview
+                      const event = new CustomEvent("updateComponentData", {
+                        detail: { 
+                          messageId: editingMessageId, 
+                          componentData: updatedComponent 
+                        },
+                      });
+                      window.dispatchEvent(event);
+                    }
+                  }
+                }}
+                placeholder="Enter component name..."
+                style={{
+                  width: "100%",
+                  padding: "12px",
+                  border: "1px solid #E9DDD3",
+                  borderRadius: "8px",
+                  fontSize: "14px",
+                  fontFamily: "inherit",
+                  marginBottom: "16px",
+                }}
+              />
+              
+              <label>Slug:</label>
+              <input
+                type="text"
+                value={(() => {
+                  const node = nodes.find(n => n.data.messageId === editingMessageId);
+                  if (!node) return "";
+                  const component = components.get(node.data.componentId);
+                  return component?.slug || "";
+                })()}
+                onChange={(e) => {
+                  const node = nodes.find(n => n.data.messageId === editingMessageId);
+                  if (node) {
+                    const component = components.get(node.data.componentId);
+                    if (component) {
+                      const updatedComponent = {
+                        ...component,
+                        slug: e.target.value,
+                        updatedAt: new Date()
+                      };
+                      setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                      
+                      // Dispatch event to update preview
+                      const event = new CustomEvent("updateComponentData", {
+                        detail: { 
+                          messageId: editingMessageId, 
+                          componentData: updatedComponent 
+                        },
+                      });
+                      window.dispatchEvent(event);
+                    }
+                  }
+                }}
+                placeholder="e.g., 01.03.06"
+                style={{
+                  width: "100%",
+                  padding: "12px",
+                  border: "1px solid #E9DDD3",
+                  borderRadius: "8px",
+                  fontSize: "14px",
+                  fontFamily: "inherit",
+                  marginBottom: "16px",
+                }}
+              />
+              
+              <label>UI Tool Type:</label>
+              <select
+                value={(() => {
+                  const node = nodes.find(n => n.data.messageId === editingMessageId);
+                  if (!node) return "message";
+                  const component = components.get(node.data.componentId);
+                  return component?.uiToolType || "message";
+                })()}
+                onChange={(e) => {
+                  const node = nodes.find(n => n.data.messageId === editingMessageId);
+                  if (node) {
+                    const component = components.get(node.data.componentId);
+                    if (component) {
+                      const updatedComponent = {
+                        ...component,
+                        uiToolType: e.target.value as UIToolType,
+                        updatedAt: new Date()
+                      };
+                      setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                      
+                      // Dispatch event to update preview
+                      const event = new CustomEvent("updateComponentData", {
+                        detail: { 
+                          messageId: editingMessageId, 
+                          componentData: updatedComponent 
+                        },
+                      });
+                      window.dispatchEvent(event);
+                    }
+                  }
+                }}
+                style={{
+                  width: "100%",
+                  padding: "12px",
+                  border: "1px solid #E9DDD3",
+                  borderRadius: "8px",
+                  fontSize: "14px",
+                  fontFamily: "inherit",
+                  marginBottom: "16px",
+                }}
+              >
+                <option value="message">Message</option>
+                <option value="question">Question</option>
+                <option value="form">Form</option>
+                <option value="freeChat">Free Chat</option>
+                <option value="accordion">Accordion</option>
+                <option value="banner">Banner</option>
+                <option value="intro">Intro</option>
+                <option value="multiSelect">Multi Select</option>
+              </select>
+              
               <label>Message Content:</label>
               <textarea
-                value={nodes.find(n => n.data.messageId === editingMessageId)?.data.title || ""}
+                value={(() => {
+                  const node = nodes.find(n => n.data.messageId === editingMessageId);
+                  if (!node) return "";
+                  const component = components.get(node.data.componentId);
+                  return component?.content.message?.text || "";
+                })()}
                 onChange={(e) => {
-                  setNodes(prev => 
-                    prev.map(node => 
-                      node.data.messageId === editingMessageId 
-                        ? { ...node, data: { ...node.data, title: e.target.value } }
-                        : node
-                    )
-                  );
+                  const node = nodes.find(n => n.data.messageId === editingMessageId);
+                  if (node) {
+                    const component = components.get(node.data.componentId);
+                    if (component) {
+                      const updatedComponent = {
+                        ...component,
+                        content: {
+                          ...component.content,
+                          message: {
+                            ...component.content.message,
+                            text: e.target.value
+                          }
+                        },
+                        updatedAt: new Date()
+                      };
+                      setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                      
+                      // Dispatch event to update preview
+                      const event = new CustomEvent("updateComponentData", {
+                        detail: { 
+                          messageId: editingMessageId, 
+                          componentData: updatedComponent 
+                        },
+                      });
+                      window.dispatchEvent(event);
+                    }
+                  }
                 }}
                 placeholder="Enter your message content..."
                 style={{
@@ -771,13 +1000,16 @@ export default function FlowCanvas() {
                   // Dispatch event to update preview message
                   const node = nodes.find(n => n.data.messageId === editingMessageId);
                   if (node) {
-                    const event = new CustomEvent("updateMessageContent", {
-                      detail: { 
-                        messageId: editingMessageId, 
-                        content: node.data.title 
-                      },
-                    });
-                    window.dispatchEvent(event);
+                    const component = components.get(node.data.componentId);
+                    if (component) {
+                      const event = new CustomEvent("updateMessageContent", {
+                        detail: { 
+                          messageId: editingMessageId, 
+                          content: component.content.message?.text || ""
+                        },
+                      });
+                      window.dispatchEvent(event);
+                    }
                   }
                   setEditingMessageId(null);
                 }}
