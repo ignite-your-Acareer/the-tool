@@ -1,5 +1,5 @@
 .card-node {
-  --bg: #0f172a;
+  --bg: #00243B;
   --fg: #e2e8f0;
   --muted: #94a3b8;
   background: var(--bg);
@@ -69,13 +69,32 @@
   border-color: #F2E8E0;
 }
 
-/* Delete button hover effect */
-.card-node:hover .delete-node-btn {
-  display: flex !important;
+/* Three dots menu button */
+.three-dots-menu {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+  font-size: 14px;
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  transition: background-color 0.2s ease;
 }
 
-/* Edit button hover effect */
-.card-node:hover .edit-node-btn {
+.three-dots-menu:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Show three dots menu on hover */
+.card-node:hover .three-dots-menu {
   display: flex !important;
 }
 

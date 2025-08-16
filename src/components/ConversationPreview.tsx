@@ -36,6 +36,7 @@ export default function ConversationPreview() {
   const [orphanMessageIds, setOrphanMessageIds] = useState<Set<string>>(new Set());
   const [selectedMessageIds, setSelectedMessageIds] = useState<Set<string>>(new Set());
   const [deleteConfirmation, setDeleteConfirmation] = useState<{ messageId: string; componentName: string } | null>(null);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; rightClickedMessageId?: string; } | null>(null);
   const [isTestMode, setIsTestMode] = useState(false);
   const [testStartMessageId, setTestStartMessageId] = useState<string | null>(null);
   const [testMessages, setTestMessages] = useState<Message[]>([]);
@@ -116,6 +117,30 @@ export default function ConversationPreview() {
   };
 
   useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Delete' && selectedMessageIds.size > 0 && !isTestMode) {
+        event.preventDefault();
+        
+        // Get all selected message IDs
+        const selectedMessageIdsArray = Array.from(selectedMessageIds);
+        
+        // Get component names for confirmation
+        const componentNames = selectedMessageIdsArray.map(messageId => {
+          const message = messages.find(m => m.messageId === messageId);
+          return message?.content || "Component";
+        });
+        
+        const componentNameText = selectedMessageIdsArray.length === 1 
+          ? componentNames[0] 
+          : `${selectedMessageIdsArray.length} components`;
+        
+        setDeleteConfirmation({ 
+          messageId: selectedMessageIdsArray.join(','), 
+          componentName: componentNameText 
+        });
+      }
+    };
+
     const handleScrollToMessage = (event: CustomEvent) => {
       const { messageId } = event.detail;
       const messageElement = messageRefs.current[messageId];
@@ -248,6 +273,7 @@ export default function ConversationPreview() {
       );
     };
 
+    window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("scrollToMessage", handleScrollToMessage as EventListener);
     window.addEventListener("highlightMessage", handleHighlightMessage as EventListener);
     window.addEventListener("unhighlightMessage", handleUnhighlightMessage as EventListener);
@@ -261,6 +287,7 @@ export default function ConversationPreview() {
     window.addEventListener("showExitTestWarning", () => setShowExitTestWarning(true));
 
     return () => {
+      window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("scrollToMessage", handleScrollToMessage as EventListener);
       window.removeEventListener("highlightMessage", handleHighlightMessage as EventListener);
       window.removeEventListener("unhighlightMessage", handleUnhighlightMessage as EventListener);
@@ -326,6 +353,10 @@ export default function ConversationPreview() {
         if (isTestMode && !(e.target as Element).closest('.conversation-input')) {
           setShowExitTestWarning(true);
         }
+        // Close context menu when clicking outside
+        if (contextMenu) {
+          setContextMenu(null);
+        }
       }}
     >
       {isTestMode && (
@@ -386,66 +417,60 @@ export default function ConversationPreview() {
                   window.dispatchEvent(event);
                 }
               }}
+              onContextMenu={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Only show context menu if message is selected and not in test mode
+                if (!isTestMode && message.messageId && selectedMessageIds.has(message.messageId)) {
+                  setContextMenu({
+                    x: e.clientX,
+                    y: e.clientY,
+                    rightClickedMessageId: message.messageId
+                  });
+                }
+              }}
             >
               {message.messageId && !isTestMode && (
                 <>
                   <button
-                    className="delete-message-btn"
+                    className="three-dots-menu"
                     onClick={(e) => {
                       e.stopPropagation();
-                      if (message.messageId) {
-                        setDeleteConfirmation({ messageId: message.messageId, componentName: message.content || "Component" });
+                      if (!isTestMode) {
+                        setContextMenu({
+                          x: e.clientX,
+                          y: e.clientY,
+                          rightClickedMessageId: message.messageId
+                        });
                       }
                     }}
                     style={{
                       position: "absolute",
                       top: "8px",
                       right: "8px",
-                      background: "#F16B68",
-                      color: "white",
+                      background: "rgba(0, 0, 0, 0.1)",
+                      color: "#003250",
                       border: "none",
                       borderRadius: "50%",
-                      width: "20px",
-                      height: "20px",
-                      fontSize: "12px",
+                      width: "24px",
+                      height: "24px",
+                      fontSize: "14px",
                       cursor: "pointer",
                       display: "none",
                       alignItems: "center",
                       justifyContent: "center",
                       zIndex: 10,
+                      transition: "background-color 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = "rgba(0, 0, 0, 0.2)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = "rgba(0, 0, 0, 0.1)";
                     }}
                   >
-                    ×
-                  </button>
-                  <button
-                    className="edit-message-btn"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      // Dispatch event to open edit window in FlowCanvas
-                      const event = new CustomEvent("openEditWindow", {
-                        detail: { messageId: message.messageId },
-                      });
-                      window.dispatchEvent(event);
-                    }}
-                    style={{
-                      position: "absolute",
-                      top: "8px",
-                      right: "43px",
-                      background: "#8EAF86",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "50%",
-                      width: "20px",
-                      height: "20px",
-                      fontSize: "12px",
-                      cursor: "pointer",
-                      display: "none",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      zIndex: 10,
-                    }}
-                  >
-                    ✏️
+                    ⋯
                   </button>
                 </>
               )}
@@ -514,6 +539,112 @@ export default function ConversationPreview() {
         <button className="send-button">Send</button>
       </div>
 
+      {/* Context Menu */}
+      {contextMenu && (
+        <div 
+          className="context-menu-overlay"
+          onClick={() => setContextMenu(null)}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 1000,
+          }}
+        >
+          <div 
+            className="context-menu"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              position: "fixed",
+              left: contextMenu.x - 150, // Offset to the left by menu width
+              top: contextMenu.y,
+              background: "white",
+              border: "1px solid #E9DDD3",
+              borderRadius: "8px",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+              zIndex: 1001,
+              minWidth: "150px",
+            }}
+          >
+            <button
+              onClick={() => {
+                // Edit only the right-clicked component
+                if (contextMenu.rightClickedMessageId) {
+                  const event = new CustomEvent("openEditWindow", {
+                    detail: { messageId: contextMenu.rightClickedMessageId },
+                  });
+                  window.dispatchEvent(event);
+                }
+                setContextMenu(null);
+              }}
+              style={{
+                width: "100%",
+                padding: "8px 12px",
+                border: "none",
+                background: "none",
+                textAlign: "left",
+                cursor: "pointer",
+                fontSize: "14px",
+                color: "#FA8072",
+                fontWeight: "500",
+                borderBottom: "1px solid #E9DDD3",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#F5F5F5";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "none";
+              }}
+            >
+              Edit
+            </button>
+            <button
+              onClick={() => {
+                // Get all selected message IDs
+                const selectedMessageIdsArray = Array.from(selectedMessageIds);
+                
+                // Get component names for confirmation
+                const componentNames = selectedMessageIdsArray.map(messageId => {
+                  const message = messages.find(m => m.messageId === messageId);
+                  return message?.content || "Component";
+                });
+                
+                const componentNameText = selectedMessageIdsArray.length === 1 
+                  ? componentNames[0] 
+                  : `${selectedMessageIdsArray.length} components`;
+                
+                setDeleteConfirmation({ 
+                  messageId: selectedMessageIdsArray.join(','), 
+                  componentName: componentNameText 
+                });
+                setContextMenu(null);
+              }}
+              style={{
+                width: "100%",
+                padding: "8px 12px",
+                border: "none",
+                background: "none",
+                textAlign: "left",
+                cursor: "pointer",
+                fontSize: "14px",
+                color: "#F16B68",
+                fontWeight: "500",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#F5F5F5";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "none";
+              }}
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Delete Confirmation Modal */}
       {deleteConfirmation && (
         <div className="edit-window-overlay">
@@ -531,14 +662,18 @@ export default function ConversationPreview() {
               <button
                 className="save-btn"
                 onClick={() => {
-                  // Delete from preview
-                  setMessages(prev => prev.filter(msg => msg.messageId !== deleteConfirmation.messageId));
+                  const messageIds = deleteConfirmation.messageId.split(',');
                   
-                  // Dispatch event to delete from canvas
-                  const event = new CustomEvent("deleteNode", {
-                    detail: { messageId: deleteConfirmation.messageId },
+                  // Delete from preview
+                  setMessages(prev => prev.filter(msg => !messageIds.includes(msg.messageId || '')));
+                  
+                  // Dispatch events to delete from canvas
+                  messageIds.forEach(messageId => {
+                    const event = new CustomEvent("deleteNode", {
+                      detail: { messageId },
+                    });
+                    window.dispatchEvent(event);
                   });
-                  window.dispatchEvent(event);
                   
                   setDeleteConfirmation(null);
                 }}

@@ -55,6 +55,7 @@ export default function FlowCanvas() {
   const [selectedNodeIds, setSelectedNodeIds] = useState<Set<string>>(new Set());
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [deleteConfirmation, setDeleteConfirmation] = useState<{ messageId: string; componentName: string } | null>(null);
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number; rightClickedMessageId?: string; } | null>(null);
   const [isTestMode, setIsTestMode] = useState(false);
 
   const onConnect = useCallback((connection: Connection) => setEdges((eds) => addEdge(connection, eds)), [setEdges]);
@@ -152,7 +153,7 @@ export default function FlowCanvas() {
     const newNode: FlowNode<CardNodeData> = {
       id: newNodeId,
       type: "card",
-      position: { x: 160 + (nodes.length % 3) * 480, y: 160 + Math.floor(nodes.length / 3) * 240 },
+      position: { x: 480 + (nodes.length % 3) * 480, y: 120 + Math.floor(nodes.length / 3) * 120 },
       data: {
         componentId: componentId,
         messageId: newMessageId,
@@ -193,38 +194,33 @@ export default function FlowCanvas() {
     window.dispatchEvent(componentDataEvent);
   }, [nodes, setNodes, setEdges]);
 
-  const deleteComponent = useCallback((messageId: string) => {
-    // Find the node to delete
-    const nodeToDelete = nodes.find(node => node.data.messageId === messageId);
-    if (!nodeToDelete) return;
+  const deleteComponent = useCallback((messageIds: string | string[]) => {
+    const messageIdArray = Array.isArray(messageIds) ? messageIds : [messageIds];
+    
+    // Find all nodes to delete
+    const nodesToDelete = nodes.filter(node => messageIdArray.includes(node.data.messageId));
+    if (nodesToDelete.length === 0) return;
 
-    // Remove the node
-    setNodes((nds) => nds.filter(node => node.data.messageId !== messageId));
+    // Remove the nodes
+    setNodes((nds) => nds.filter(node => !messageIdArray.includes(node.data.messageId)));
 
-    // Remove edges connected to this node
+    // Remove edges connected to these nodes
+    const nodeIdsToDelete = nodesToDelete.map(node => node.id);
     setEdges((eds) => eds.filter(edge => 
-      edge.source !== nodeToDelete.id && edge.target !== nodeToDelete.id
+      !nodeIdsToDelete.includes(edge.source) && !nodeIdsToDelete.includes(edge.target)
     ));
 
     // Reconnect edges if needed (connect previous node to next node)
-    const nodeIndex = nodes.findIndex(node => node.data.messageId === messageId);
-    if (nodeIndex > 0 && nodeIndex < nodes.length - 1) {
-      const prevNode = nodes[nodeIndex - 1];
-      const nextNode = nodes[nodeIndex + 1];
-      
-      const newEdge: FlowEdge = {
-        id: `e-${prevNode.id}-${nextNode.id}`,
-        source: prevNode.id,
-        target: nextNode.id,
-      };
-      setEdges((eds) => [...eds, newEdge]);
-    }
+    // This is a simplified approach - for multiple deletions, we'll just remove the edges
+    // and let the user reconnect manually if needed
 
-    // Dispatch event to delete message from conversation
-    const event = new CustomEvent("deleteMessage", {
-      detail: { messageId },
+    // Dispatch events to delete messages from conversation
+    messageIdArray.forEach(messageId => {
+      const event = new CustomEvent("deleteMessage", {
+        detail: { messageId },
+      });
+      window.dispatchEvent(event);
     });
-    window.dispatchEvent(event);
   }, [nodes, setNodes, setEdges]);
 
   // Calculate order based on edge connections
@@ -233,6 +229,7 @@ export default function FlowCanvas() {
     
     const order: string[] = [];
     const visited = new Set<string>();
+    const excludedNodes = new Set<string>(); // Track nodes that should be excluded
     
     // Find nodes without incoming edges (start nodes)
     const hasIncomingEdge = new Set<string>();
@@ -247,9 +244,36 @@ export default function FlowCanvas() {
       startNodes.push(nodes[0]);
     }
     
-    // Traverse from start nodes
+    // Find all convergence points (nodes with multiple incoming edges)
+    const convergencePoints = new Map<string, string[]>();
+    edges.forEach(edge => {
+      if (!convergencePoints.has(edge.target)) {
+        convergencePoints.set(edge.target, []);
+      }
+      convergencePoints.get(edge.target)!.push(edge.source);
+    });
+    
+    // For each convergence point, mark the non-top branches as excluded
+    convergencePoints.forEach((sourceNodes) => {
+      if (sourceNodes.length > 1) {
+        // Multiple sources converging to this target
+        const sourceNodeObjects = sourceNodes.map(sourceId => nodes.find(n => n.id === sourceId)).filter(Boolean);
+        const topSourceNode = sourceNodeObjects.reduce((top, current) => 
+          current && top && current.position.y < top.position.y ? current : top
+        );
+        
+        // Mark all other source nodes as excluded
+        sourceNodeObjects.forEach(sourceNode => {
+          if (sourceNode && sourceNode !== topSourceNode) {
+            excludedNodes.add(sourceNode.id);
+          }
+        });
+      }
+    });
+    
+    // Traverse from start nodes, excluding marked nodes
     const traverse = (nodeId: string) => {
-      if (visited.has(nodeId)) return;
+      if (visited.has(nodeId) || excludedNodes.has(nodeId)) return;
       visited.add(nodeId);
       
       const node = nodes.find(n => n.id === nodeId);
@@ -258,8 +282,9 @@ export default function FlowCanvas() {
       }
       
       // Find outgoing edges
-      edges.forEach(edge => {
-        if (edge.source === nodeId) {
+      const outgoingEdges = edges.filter(edge => edge.source === nodeId);
+      outgoingEdges.forEach(edge => {
+        if (!excludedNodes.has(edge.target)) {
           traverse(edge.target);
         }
       });
@@ -268,9 +293,9 @@ export default function FlowCanvas() {
     // Start traversal from each start node
     startNodes.forEach(node => traverse(node.id));
     
-    // Add orphan nodes (nodes not in the order)
+    // Add orphan nodes (nodes not in the order and not excluded)
     nodes.forEach(node => {
-      if (!visited.has(node.id)) {
+      if (!visited.has(node.id) && !excludedNodes.has(node.id)) {
         order.push(node.data.messageId);
       }
     });
@@ -299,6 +324,37 @@ export default function FlowCanvas() {
   }, [calculateNodeOrder, nodes, edges]);
 
   useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Delete' && selectedNodeIds.size > 0 && !isTestMode) {
+        event.preventDefault();
+        
+        // Get all selected message IDs
+        const selectedMessageIds = Array.from(selectedNodeIds).map(nodeId => {
+          const node = nodes.find(n => n.id === nodeId);
+          return node?.data.messageId;
+        }).filter(Boolean);
+        
+        // Get component names for confirmation
+        const componentNames = selectedMessageIds.map(messageId => {
+          const node = nodes.find(n => n.data.messageId === messageId);
+          if (node) {
+            const component = components.get(node.data.componentId);
+            return component?.name || "Component";
+          }
+          return "Component";
+        });
+        
+        const componentNameText = selectedMessageIds.length === 1 
+          ? componentNames[0] 
+          : `${selectedMessageIds.length} components`;
+        
+        setDeleteConfirmation({ 
+          messageId: selectedMessageIds.join(','), 
+          componentName: componentNameText 
+        });
+      }
+    };
+
     const handleHighlightNode = (event: CustomEvent) => {
       const { messageId } = event.detail;
       const node = nodes.find((n) => n.data.messageId === messageId);
@@ -327,12 +383,14 @@ export default function FlowCanvas() {
       deleteComponent(messageId);
     };
 
+    window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("highlightNode", handleHighlightNode as EventListener);
     window.addEventListener("unhighlightNode", handleUnhighlightNode as EventListener);
     window.addEventListener("updateNode", handleUpdateNode as EventListener);
     window.addEventListener("deleteNode", handleDeleteNode as EventListener);
 
     return () => {
+      window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("highlightNode", handleHighlightNode as EventListener);
       window.removeEventListener("unhighlightNode", handleUnhighlightNode as EventListener);
       window.removeEventListener("updateNode", handleUpdateNode as EventListener);
@@ -485,6 +543,20 @@ export default function FlowCanvas() {
       window.dispatchEvent(event);
     };
 
+    const handleNodeRightClick = (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      
+      // Only show context menu if node is selected
+      if (selectedNodeIds.has(id)) {
+        setContextMenu({
+          x: e.clientX,
+          y: e.clientY,
+          rightClickedMessageId: d.messageId
+        });
+      }
+    };
+
     const handleNodeMouseEnter = () => {
       // Disable hover effects in test mode
       if (isTestMode) return;
@@ -516,13 +588,14 @@ export default function FlowCanvas() {
       <div
         className={`card-node ${isHighlighted ? "node-highlighted" : ""} ${isOrphan && !hasOutgoingEdges ? "node-orphan" : ""} ${isSelected ? "node-selected" : ""}`}
         onClick={handleNodeClick}
+        onContextMenu={handleNodeRightClick}
         onMouseEnter={handleNodeMouseEnter}
         onMouseLeave={handleNodeMouseLeave}
       >
         <div className="card-node__title">{component.name}</div>
         <div className="card-node__slug" style={{ 
           position: "absolute",
-          top: "8px",
+          bottom: "8px",
           right: "8px",
           fontSize: "12px",
           color: "#FFF",
@@ -559,60 +632,19 @@ export default function FlowCanvas() {
 
 
         <button
-          className="delete-node-btn"
+          className="three-dots-menu"
           onClick={(e) => {
             e.stopPropagation();
             if (!isTestMode) {
-              setDeleteConfirmation({ messageId: d.messageId, componentName: component.name });
+              setContextMenu({
+                x: e.clientX,
+                y: e.clientY,
+                rightClickedMessageId: d.messageId
+              });
             }
           }}
-          style={{
-            position: "absolute",
-            top: "32px",
-            right: "8px",
-            background: "#F16B68",
-            color: "white",
-            border: "none",
-            borderRadius: "50%",
-            width: "20px",
-            height: "20px",
-            fontSize: "12px",
-            cursor: "pointer",
-            display: "none",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 10,
-          }}
         >
-          ×
-        </button>
-        <button
-          className="edit-node-btn"
-          onClick={(e) => {
-            e.stopPropagation();
-            if (!isTestMode) {
-              setEditingMessageId(d.messageId);
-            }
-          }}
-          style={{
-            position: "absolute",
-            top: "32px",
-            right: "43px",
-            background: "#8EAF86",
-            color: "white",
-            border: "none",
-            borderRadius: "50%",
-            width: "20px",
-            height: "20px",
-            fontSize: "12px",
-            cursor: "pointer",
-            display: "none",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 10,
-          }}
-        >
-          ✏️
+          ⋯
         </button>
 
         <Handle type="target" position={Position.Left} />
@@ -641,7 +673,7 @@ export default function FlowCanvas() {
             left: 0,
             right: 0,
             bottom: 0,
-            background: "rgba(176, 152, 128, 0.55)",
+            background: "rgba(60, 40, 30, 0.75)",
             zIndex: 1000,
             pointerEvents: "none",
           }}
@@ -663,11 +695,16 @@ export default function FlowCanvas() {
         elementsSelectable={false}
         fitView
         snapToGrid={true}
-        snapGrid={[40, 40]}
+        snapGrid={[480, 120]}
         onPaneClick={() => {
           // Clear selection when clicking on empty space
           setSelectedNodeIds(new Set());
           setLastClickedNodeId(null);
+          
+          // Close context menu when clicking outside
+          if (contextMenu) {
+            setContextMenu(null);
+          }
           
           // Dispatch event to clear preview window selection
           const event = new CustomEvent("nodeSelection", {
@@ -727,7 +764,8 @@ export default function FlowCanvas() {
               <button
                 className="save-btn"
                 onClick={() => {
-                  deleteComponent(deleteConfirmation.messageId);
+                  const messageIds = deleteConfirmation.messageId.split(',');
+                  deleteComponent(messageIds);
                   setDeleteConfirmation(null);
                 }}
                 style={{
@@ -759,6 +797,116 @@ export default function FlowCanvas() {
                 Cancel
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Context Menu */}
+      {contextMenu && (
+        <div 
+          className="context-menu-overlay"
+          onClick={() => setContextMenu(null)}
+          style={{
+            position: "fixed",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            zIndex: 1000,
+          }}
+        >
+          <div 
+            className="context-menu"
+            onClick={(e) => e.stopPropagation()}
+            style={{
+              position: "fixed",
+              left: contextMenu.x - 150, // Offset to the left by menu width
+              top: contextMenu.y,
+              background: "white",
+              border: "1px solid #E9DDD3",
+              borderRadius: "8px",
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+              zIndex: 1001,
+              minWidth: "150px",
+            }}
+          >
+            <button
+              onClick={() => {
+                // Edit only the right-clicked component
+                if (contextMenu.rightClickedMessageId) {
+                  setEditingMessageId(contextMenu.rightClickedMessageId);
+                }
+                setContextMenu(null);
+              }}
+              style={{
+                width: "100%",
+                padding: "8px 12px",
+                border: "none",
+                background: "none",
+                textAlign: "left",
+                cursor: "pointer",
+                fontSize: "14px",
+                color: "#FA8072",
+                fontWeight: "500",
+                borderBottom: "1px solid #E9DDD3",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#F5F5F5";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "none";
+              }}
+            >
+              Edit
+            </button>
+            <button
+              onClick={() => {
+                // Get all selected message IDs
+                const selectedMessageIds = Array.from(selectedNodeIds).map(nodeId => {
+                  const node = nodes.find(n => n.id === nodeId);
+                  return node?.data.messageId;
+                }).filter(Boolean);
+                
+                // Get component names for confirmation
+                const componentNames = selectedMessageIds.map(messageId => {
+                  const node = nodes.find(n => n.data.messageId === messageId);
+                  if (node) {
+                    const component = components.get(node.data.componentId);
+                    return component?.name || "Component";
+                  }
+                  return "Component";
+                });
+                
+                const componentNameText = selectedMessageIds.length === 1 
+                  ? componentNames[0] 
+                  : `${selectedMessageIds.length} components`;
+                
+                setDeleteConfirmation({ 
+                  messageId: selectedMessageIds.join(','), 
+                  componentName: componentNameText 
+                });
+                setContextMenu(null);
+              }}
+              style={{
+                width: "100%",
+                padding: "8px 12px",
+                border: "none",
+                background: "none",
+                textAlign: "left",
+                cursor: "pointer",
+                fontSize: "14px",
+                color: "#F16B68",
+                fontWeight: "500",
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = "#F5F5F5";
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = "none";
+              }}
+            >
+              Delete
+            </button>
           </div>
         </div>
       )}

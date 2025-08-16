@@ -396,13 +396,8 @@
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
 }
 
-/* Delete button hover effect for messages */
-.message:hover .delete-message-btn {
-  display: flex !important;
-}
-
-/* Edit button hover effect for messages */
-.message:hover .edit-message-btn {
+/* Three dots menu hover effect for messages */
+.message:hover .three-dots-menu {
   display: flex !important;
 }
 
@@ -435,7 +430,7 @@
   height: 844px;
   z-index: 1500;
   border-radius: 47px;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3), 0 0 60px rgba(242, 232, 224, 0.8);
   transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   animation: testModeEnter 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   border: 12px solid #1d1d1f;
@@ -508,6 +503,7 @@
 .conversation-preview.test-mode .status-bar .battery {
   font-size: 16px;
   color: #000;
+  transform: rotate(90deg);
 }
 
 /* Adjust header position in test mode */
@@ -560,7 +556,7 @@
   border-radius: 12px;
   padding: 24px;
   width: 90%;
-  max-width: 500px;
+  max-width: 522px;
   max-height: 80vh;
   overflow-y: auto;
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
