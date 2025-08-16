@@ -10,7 +10,7 @@ import {
   Handle,
   Position,
 } from "@xyflow/react";
-import type { Connection, Edge as FlowEdge, Node as FlowNode, NodeProps, NodeTypes } from "@xyflow/react";
+import type { Connection, Edge as FlowEdge, Node as FlowNode, NodeProps, NodeTypes, NodeChange } from "@xyflow/react";
 import "../flow.css";
 
 type UIToolType = "message" | "question" | "form" | "freeChat" | "accordion" | "banner" | "intro" | "multiSelect";
@@ -24,7 +24,7 @@ type ComponentData = {
   content: {
     message?: { text: string; richText?: boolean; };
     question?: { text: string; options: string[]; };
-    form?: { fields: any[]; };
+    form?: { fields: Record<string, unknown>[]; };
     freeChat?: { text: string; };
     accordion?: { title: string; content: string; };
     banner?: { text: string; type: string; };
@@ -53,34 +53,32 @@ export default function FlowCanvas() {
   const [highlightedNodeId, setHighlightedNodeId] = useState<string | null>(null);
   const [lastClickedNodeId, setLastClickedNodeId] = useState<string | null>(null);
   const [selectedNodeIds, setSelectedNodeIds] = useState<Set<string>>(new Set());
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragOffset, setDragOffset] = useState<{ x: number; y: number } | null>(null);
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [deleteConfirmation, setDeleteConfirmation] = useState<{ messageId: string; componentName: string } | null>(null);
   const [isTestMode, setIsTestMode] = useState(false);
 
   const onConnect = useCallback((connection: Connection) => setEdges((eds) => addEdge(connection, eds)), [setEdges]);
 
-  const onNodesChangeCustom = useCallback((changes: any) => {
+  const onNodesChangeCustom = useCallback((changes: NodeChange<FlowNode<CardNodeData>>[]) => {
     console.log('Node changes:', changes);
     console.log('Selected nodes:', selectedNodeIds);
     
     // Handle group dragging
-    const dragChanges = changes.filter((change: any) => change.type === 'position' && change.dragging);
+    const dragChanges = changes.filter((change: NodeChange<FlowNode<CardNodeData>>) => change.type === 'position' && 'dragging' in change && change.dragging);
     
     if (dragChanges.length > 0 && selectedNodeIds.size > 1) {
       console.log('Group dragging detected');
       
       // Find the node being dragged
       const draggedNode = dragChanges[0];
-      const draggedNodeId = draggedNode.id;
+      const draggedNodeId = 'id' in draggedNode ? draggedNode.id : undefined;
       
-      if (selectedNodeIds.has(draggedNodeId)) {
+      if (draggedNodeId && selectedNodeIds.has(draggedNodeId)) {
         console.log('Dragged node is in selection:', draggedNodeId);
         
         // Calculate the offset from the original position
         const originalNode = nodes.find(n => n.id === draggedNodeId);
-        if (originalNode) {
+        if (originalNode && 'position' in draggedNode && draggedNode.position) {
           const deltaX = draggedNode.position.x - originalNode.position.x;
           const deltaY = draggedNode.position.y - originalNode.position.y;
           
@@ -340,7 +338,7 @@ export default function FlowCanvas() {
       window.removeEventListener("updateNode", handleUpdateNode as EventListener);
       window.removeEventListener("deleteNode", handleDeleteNode as EventListener);
     };
-  }, [nodes]);
+  }, [nodes, deleteComponent]);
 
   // Sync order whenever nodes or edges change
   useEffect(() => {
@@ -367,14 +365,14 @@ export default function FlowCanvas() {
         setLastClickedNodeId(node.id);
         
         // Dispatch event to update preview window selection
-        const event = new CustomEvent("nodeSelection", {
+        const selectionEvent = new CustomEvent("nodeSelection", {
           detail: { selectedMessageIds: [messageId] },
         });
-        window.dispatchEvent(event);
+        window.dispatchEvent(selectionEvent);
       }
     };
 
-    const handleEnterTestMode = (event: CustomEvent) => {
+    const handleEnterTestMode = () => {
       setIsTestMode(true);
     };
 
@@ -487,22 +485,6 @@ export default function FlowCanvas() {
       window.dispatchEvent(event);
     };
 
-    const handleDragStart = () => {
-      if (selectedNodeIds.has(id)) {
-        setIsDragging(true);
-        // Store the initial position of the dragged node
-        const node = nodes.find(n => n.id === id);
-        if (node) {
-          setDragOffset({ x: 0, y: 0 });
-        }
-      }
-    };
-
-    const handleDragEnd = () => {
-      setIsDragging(false);
-      setDragOffset(null);
-    };
-
     const handleNodeMouseEnter = () => {
       // Disable hover effects in test mode
       if (isTestMode) return;
@@ -525,25 +507,6 @@ export default function FlowCanvas() {
       window.dispatchEvent(event);
     };
 
-    const handleUIToolSelect = (uiToolType: UIToolType) => {
-      // Update component data
-      const component = components.get(d.componentId);
-      if (component) {
-        const updatedComponent = {
-          ...component,
-          uiToolType,
-          updatedAt: new Date()
-        };
-        setComponents(prev => new Map(prev).set(component.id, updatedComponent));
-      }
-      
-      // Dispatch event to update message in conversation
-      const event = new CustomEvent("updateMessage", {
-        detail: { messageId: d.messageId, uiToolType, showDropdown: false },
-      });
-      window.dispatchEvent(event);
-    };
-
     // Check if this node is an orphan (no incoming edges)
     const isOrphan = !edges.some(edge => edge.target === id);
     const hasOutgoingEdges = edges.some(edge => edge.source === id);
@@ -555,8 +518,6 @@ export default function FlowCanvas() {
         onClick={handleNodeClick}
         onMouseEnter={handleNodeMouseEnter}
         onMouseLeave={handleNodeMouseLeave}
-        onMouseDown={handleDragStart}
-        onMouseUp={handleDragEnd}
       >
         <div className="card-node__title">{component.name}</div>
         <div className="card-node__slug" style={{ 
@@ -665,7 +626,7 @@ export default function FlowCanvas() {
   return (
     <div 
       style={{ width: isTestMode ? "100%" : "calc(100% - 400px)", height: "100vh", position: "relative" }}
-      onClick={(e) => {
+      onClick={() => {
         if (isTestMode) {
           const event = new CustomEvent("showExitTestWarning");
           window.dispatchEvent(event);

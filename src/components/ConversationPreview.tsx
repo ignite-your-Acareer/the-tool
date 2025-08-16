@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, Fragment } from "react";
+import { useEffect, useRef, useState, Fragment, useCallback } from "react";
 import "./ConversationPreview.css";
 
 type MessageType = "text" | "card" | "pills";
@@ -35,7 +35,6 @@ export default function ConversationPreview() {
   const [messages, setMessages] = useState<Message[]>(mockConversation);
   const [orphanMessageIds, setOrphanMessageIds] = useState<Set<string>>(new Set());
   const [selectedMessageIds, setSelectedMessageIds] = useState<Set<string>>(new Set());
-  const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
   const [deleteConfirmation, setDeleteConfirmation] = useState<{ messageId: string; componentName: string } | null>(null);
   const [isTestMode, setIsTestMode] = useState(false);
   const [testStartMessageId, setTestStartMessageId] = useState<string | null>(null);
@@ -45,7 +44,7 @@ export default function ConversationPreview() {
   const [showExitTestWarning, setShowExitTestWarning] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const startTestMode = (messageId: string) => {
+  const startTestMode = useCallback((messageId: string) => {
     setIsTestMode(true);
     setTestStartMessageId(messageId);
     
@@ -101,7 +100,7 @@ export default function ConversationPreview() {
       detail: { messageId },
     });
     window.dispatchEvent(event);
-  };
+  }, [messages]);
 
   const exitTestMode = () => {
     setIsTestMode(false);
@@ -249,10 +248,6 @@ export default function ConversationPreview() {
       );
     };
 
-
-
-
-
     window.addEventListener("scrollToMessage", handleScrollToMessage as EventListener);
     window.addEventListener("highlightMessage", handleHighlightMessage as EventListener);
     window.addEventListener("unhighlightMessage", handleUnhighlightMessage as EventListener);
@@ -277,7 +272,7 @@ export default function ConversationPreview() {
       window.removeEventListener("updateMessageContent", handleUpdateMessageContent as EventListener);
       window.removeEventListener("showExitTestWarning", () => setShowExitTestWarning(true));
     };
-  }, [messages]);
+  }, [messages, showSelectComponentPopup, startTestMode]);
 
   const renderMessageContent = (message: Message) => {
     switch (message.type) {
@@ -352,7 +347,7 @@ export default function ConversationPreview() {
       </div>
 
       <div className="conversation-messages" ref={messagesRef}>
-                {(isTestMode ? testMessages : messages).map((message, index, messageArray) => (
+                {(isTestMode ? testMessages : messages).map((message) => (
           <Fragment key={message.id}>
             <div
               className={`message ${message.sender} ${
