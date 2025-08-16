@@ -179,7 +179,7 @@ export default function ConversationPreview() {
       const newMessage: Message = {
         id: newId,
         sender: "ai",
-        content: "New component added", // Will be updated by component data event
+        content: uiToolType === "banner" ? "New banner" : "New component added", // Will be updated by component data event
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         messageId,
         componentId,
@@ -196,7 +196,13 @@ export default function ConversationPreview() {
       setMessages(prev => 
         prev.map(msg => 
           msg.messageId === messageId 
-            ? { ...msg, uiToolType, showDropdown }
+            ? { 
+                ...msg, 
+                uiToolType, 
+                showDropdown,
+                // Update content based on new uiToolType
+                content: uiToolType === "banner" ? "New banner" : msg.content
+              }
             : msg
         )
       );
@@ -265,7 +271,9 @@ export default function ConversationPreview() {
           msg.messageId === messageId 
             ? { 
                 ...msg, 
-                content: componentData.content.message?.text || "New component added",
+                content: componentData.uiToolType === "banner" 
+                  ? componentData.content.banner?.text || "New banner"
+                  : componentData.content.message?.text || "New component added",
                 uiToolType: componentData.uiToolType
               }
             : msg
@@ -302,6 +310,25 @@ export default function ConversationPreview() {
   }, [messages, showSelectComponentPopup, startTestMode]);
 
   const renderMessageContent = (message: Message) => {
+    // Check if this is a banner type message
+    if (message.uiToolType === "banner") {
+      return (
+        <div className="message-banner">
+          <h2 className="banner-title">{message.content}</h2>
+        </div>
+      );
+    }
+    
+    // For regular message type, show the content in a text bubble
+    if (message.uiToolType === "message" || !message.uiToolType) {
+      return (
+        <div className="message-text">
+          {message.content}
+        </div>
+      );
+    }
+    
+    // For other UI tool types, we can add them later
     switch (message.type) {
       case "card":
         return (
@@ -339,8 +366,6 @@ export default function ConversationPreview() {
         return (
           <div className="message-text">
             {message.content}
-
-
           </div>
         );
     }

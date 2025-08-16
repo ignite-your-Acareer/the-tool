@@ -596,6 +596,21 @@
   gap: 8px;
 }
 
+/* Banner message styling */
+.message-banner {
+  margin: 8px 0;
+  padding: 0;
+}
+
+.banner-title {
+  margin: 0;
+  color: #003250;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: left;
+}
+
 /* Input placeholder styling */
 .conversation-input input::placeholder {
   color: rgba(0, 50, 80, 0.5);

@@ -57,8 +57,74 @@ export default function FlowCanvas() {
   const [deleteConfirmation, setDeleteConfirmation] = useState<{ messageId: string; componentName: string } | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; rightClickedMessageId?: string; } | null>(null);
   const [isTestMode, setIsTestMode] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<Set<string>>(new Set());
 
   const onConnect = useCallback((connection: Connection) => setEdges((eds) => addEdge(connection, eds)), [setEdges]);
+
+  const searchNodes = useCallback((query: string) => {
+    if (!query.trim()) {
+      setSearchResults(new Set());
+      return;
+    }
+
+    const results = new Set<string>();
+    const lowerQuery = query.toLowerCase();
+
+    nodes.forEach(node => {
+      const component = components.get(node.data.componentId);
+      if (component) {
+        // Search in component name
+        if (component.name.toLowerCase().includes(lowerQuery)) {
+          results.add(node.id);
+        }
+        // Search in slug
+        if (component.slug.toLowerCase().includes(lowerQuery)) {
+          results.add(node.id);
+        }
+        // Search in message content
+        if (component.content.message?.text?.toLowerCase().includes(lowerQuery)) {
+          results.add(node.id);
+        }
+        // Search in banner content
+        if (component.content.banner?.text?.toLowerCase().includes(lowerQuery)) {
+          results.add(node.id);
+        }
+        // Search in question content
+        if (component.content.question?.text?.toLowerCase().includes(lowerQuery)) {
+          results.add(node.id);
+        }
+        // Search in form content
+        if (component.content.form?.fields?.some(field => 
+          JSON.stringify(field).toLowerCase().includes(lowerQuery)
+        )) {
+          results.add(node.id);
+        }
+        // Search in freeChat content
+        if (component.content.freeChat?.text?.toLowerCase().includes(lowerQuery)) {
+          results.add(node.id);
+        }
+        // Search in accordion content
+        if (component.content.accordion?.title?.toLowerCase().includes(lowerQuery) ||
+            component.content.accordion?.content?.toLowerCase().includes(lowerQuery)) {
+          results.add(node.id);
+        }
+        // Search in intro content
+        if (component.content.intro?.text?.toLowerCase().includes(lowerQuery)) {
+          results.add(node.id);
+        }
+        // Search in multiSelect content
+        if (component.content.multiSelect?.text?.toLowerCase().includes(lowerQuery) ||
+            component.content.multiSelect?.options?.some(option => 
+              option.toLowerCase().includes(lowerQuery)
+            )) {
+          results.add(node.id);
+        }
+      }
+    });
+
+    setSearchResults(results);
+  }, [nodes, components]);
 
   const onNodesChangeCustom = useCallback((changes: NodeChange<FlowNode<CardNodeData>>[]) => {
     console.log('Node changes:', changes);
@@ -141,7 +207,8 @@ export default function FlowCanvas() {
       slug: "",
       uiToolType: "message", // Default to message
       content: {
-        message: { text: selectedText, richText: true }
+        message: { text: selectedText, richText: true },
+        banner: { text: "New Banner", type: "default" }
       },
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -403,6 +470,11 @@ export default function FlowCanvas() {
     syncOrderToPreview();
   }, [nodes, edges, syncOrderToPreview]);
 
+  // Search nodes when query changes
+  useEffect(() => {
+    searchNodes(searchQuery);
+  }, [searchQuery, searchNodes]);
+
   useEffect(() => {
     const handleUpdateNodeContent = (event: CustomEvent) => {
       const { messageId, content } = event.detail;
@@ -583,10 +655,11 @@ export default function FlowCanvas() {
     const isOrphan = !edges.some(edge => edge.target === id);
     const hasOutgoingEdges = edges.some(edge => edge.source === id);
     const isSelected = selectedNodeIds.has(id);
+    const isSearchResult = searchResults.has(id);
     
     return (
       <div
-        className={`card-node ${isHighlighted ? "node-highlighted" : ""} ${isOrphan && !hasOutgoingEdges ? "node-orphan" : ""} ${isSelected ? "node-selected" : ""}`}
+        className={`card-node ${isHighlighted ? "node-highlighted" : ""} ${isOrphan && !hasOutgoingEdges ? "node-orphan" : ""} ${isSelected ? "node-selected" : ""} ${isSearchResult ? "node-search-result" : ""}`}
         onClick={handleNodeClick}
         onContextMenu={handleNodeRightClick}
         onMouseEnter={handleNodeMouseEnter}
@@ -603,7 +676,19 @@ export default function FlowCanvas() {
         }}>
           {component.slug}
         </div>
-        {component.content.message?.text && (
+        {component.uiToolType === "banner" ? (
+          <div className="card-node__desc" style={{
+            fontSize: "12px",
+            color: "#FFF",
+            marginTop: "4px",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            maxWidth: "200px"
+          }}>
+            {component.content.banner?.text || "New Banner"}
+          </div>
+        ) : component.content.message?.text && (
           <div className="card-node__desc" style={{
             fontSize: "12px",
             color: "#FFF",
@@ -696,6 +781,7 @@ export default function FlowCanvas() {
         fitView
         snapToGrid={true}
         snapGrid={[480, 120]}
+        className={searchQuery ? "searching" : ""}
         onPaneClick={() => {
           // Clear selection when clicking on empty space
           setSelectedNodeIds(new Set());
@@ -724,7 +810,7 @@ export default function FlowCanvas() {
         style={{
           position: "absolute",
           top: "20px",
-          right: "20px",
+          left: "20px",
           zIndex: 10,
           background: "#F16B68",
           color: "white",
@@ -746,6 +832,67 @@ export default function FlowCanvas() {
       >
         Add Component
       </button>
+
+      {/* Search Bar */}
+      <div style={{
+        position: "absolute",
+        top: "20px",
+        right: "20px",
+        zIndex: 10,
+        display: "flex",
+        alignItems: "center",
+        gap: "8px",
+        width: "300px",
+      }}>
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          placeholder="Search components..."
+          style={{
+            flex: 1,
+            padding: "12px 16px",
+            paddingRight: searchQuery ? "40px" : "16px",
+            border: "1px solid #E9DDD3",
+            borderRadius: "8px",
+            fontSize: "14px",
+            background: "white",
+            outline: "none",
+            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+            position: "relative",
+          }}
+          onFocus={(e) => {
+            e.target.style.boxShadow = "0 0 0 2px rgba(241, 107, 104, 0.3)";
+          }}
+          onBlur={(e) => {
+            e.target.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.1)";
+          }}
+        />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery("")}
+            style={{
+              position: "absolute",
+              left: "265px",
+              top: "50%",
+              transform: "translateY(-50%)",
+              background: "none",
+              border: "none",
+              fontSize: "18px",
+              cursor: "pointer",
+              color: "#666",
+              width: "20px",
+              height: "20px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              zIndex: 11,
+            }}
+          >
+            ×
+          </button>
+        )}
+      </div>
 
       {/* Delete Confirmation Modal */}
       {deleteConfirmation && (
@@ -1033,18 +1180,29 @@ export default function FlowCanvas() {
                   if (node) {
                     const component = components.get(node.data.componentId);
                     if (component) {
+                      const newUiToolType = e.target.value as UIToolType;
                       const updatedComponent = {
                         ...component,
-                        uiToolType: e.target.value as UIToolType,
+                        uiToolType: newUiToolType,
                         updatedAt: new Date()
                       };
                       setComponents(prev => new Map(prev).set(component.id, updatedComponent));
                       
-                      // Dispatch event to update preview
-                      const event = new CustomEvent("updateComponentData", {
+                      // Dispatch component data update first
+                      const componentDataEvent = new CustomEvent("updateComponentData", {
                         detail: { 
                           messageId: editingMessageId, 
                           componentData: updatedComponent 
+                        },
+                      });
+                      window.dispatchEvent(componentDataEvent);
+                      
+                      // Then dispatch event to update preview with new UI tool type
+                      const event = new CustomEvent("updateMessage", {
+                        detail: { 
+                          messageId: editingMessageId, 
+                          uiToolType: newUiToolType, 
+                          showDropdown: false 
                         },
                       });
                       window.dispatchEvent(event);
@@ -1071,69 +1229,128 @@ export default function FlowCanvas() {
                 <option value="multiSelect">Multi Select</option>
               </select>
               
-              <label>Message Content:</label>
-              <textarea
-                value={(() => {
-                  const node = nodes.find(n => n.data.messageId === editingMessageId);
-                  if (!node) return "";
-                  const component = components.get(node.data.componentId);
-                  return component?.content.message?.text || "";
-                })()}
-                onChange={(e) => {
-                  const node = nodes.find(n => n.data.messageId === editingMessageId);
-                  if (node) {
-                    const component = components.get(node.data.componentId);
-                    if (component) {
-                      const updatedComponent = {
-                        ...component,
-                        content: {
-                          ...component.content,
-                          message: {
-                            ...component.content.message,
-                            text: e.target.value
+              {(() => {
+                const node = nodes.find(n => n.data.messageId === editingMessageId);
+                if (!node) return null;
+                const component = components.get(node.data.componentId);
+                const uiToolType = component?.uiToolType || "message";
+                
+                if (uiToolType === "banner") {
+                  return (
+                    <>
+                      <label>Banner Title:</label>
+                      <input
+                        type="text"
+                        value={component?.content.banner?.text || ""}
+                        onChange={(e) => {
+                          if (node) {
+                            const component = components.get(node.data.componentId);
+                            if (component) {
+                              const updatedComponent = {
+                                ...component,
+                                content: {
+                                  ...component.content,
+                                  banner: {
+                                    text: e.target.value,
+                                    type: "default"
+                                  }
+                                },
+                                updatedAt: new Date()
+                              };
+                              setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                              
+                              // Dispatch event to update preview
+                              const event = new CustomEvent("updateComponentData", {
+                                detail: { 
+                                  messageId: editingMessageId, 
+                                  componentData: updatedComponent 
+                                },
+                              });
+                              window.dispatchEvent(event);
+                            }
                           }
-                        },
-                        updatedAt: new Date()
-                      };
-                      setComponents(prev => new Map(prev).set(component.id, updatedComponent));
-                      
-                      // Dispatch event to update preview
-                      const event = new CustomEvent("updateComponentData", {
-                        detail: { 
-                          messageId: editingMessageId, 
-                          componentData: updatedComponent 
-                        },
-                      });
-                      window.dispatchEvent(event);
-                    }
-                  }
-                }}
-                placeholder="Enter your message content..."
-                style={{
-                  width: "100%",
-                  minHeight: "100px",
-                  padding: "12px",
-                  border: "1px solid #E9DDD3",
-                  borderRadius: "8px",
-                  fontSize: "14px",
-                  fontFamily: "inherit",
-                  resize: "vertical",
-                }}
-              />
+                        }}
+                        placeholder="Enter banner title (e.g., 'Strengths')..."
+                        style={{
+                          width: "100%",
+                          padding: "12px",
+                          border: "1px solid #E9DDD3",
+                          borderRadius: "8px",
+                          fontSize: "14px",
+                          fontFamily: "inherit",
+                          marginBottom: "16px",
+                        }}
+                      />
+                    </>
+                  );
+                } else {
+                  return (
+                    <>
+                      <label>Message Content:</label>
+                      <textarea
+                        value={component?.content.message?.text || ""}
+                        onChange={(e) => {
+                          if (node) {
+                            const component = components.get(node.data.componentId);
+                            if (component) {
+                              const updatedComponent = {
+                                ...component,
+                                content: {
+                                  ...component.content,
+                                  message: {
+                                    ...component.content.message,
+                                    text: e.target.value
+                                  }
+                                },
+                                updatedAt: new Date()
+                              };
+                              setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                              
+                              // Dispatch event to update preview
+                              const event = new CustomEvent("updateComponentData", {
+                                detail: { 
+                                  messageId: editingMessageId, 
+                                  componentData: updatedComponent 
+                                },
+                              });
+                              window.dispatchEvent(event);
+                            }
+                          }
+                        }}
+                        placeholder="Enter your message content..."
+                        style={{
+                          width: "100%",
+                          minHeight: "100px",
+                          padding: "12px",
+                          border: "1px solid #E9DDD3",
+                          borderRadius: "8px",
+                          fontSize: "14px",
+                          fontFamily: "inherit",
+                          resize: "vertical",
+                        }}
+                      />
+                    </>
+                  );
+                }
+              })()}
             </div>
             <div className="edit-window-footer">
               <button
                 className="save-btn"
                 onClick={() => {
-                  // Dispatch event to update preview message
+                  // Dispatch event to update preview message based on UI tool type
                   const node = nodes.find(n => n.data.messageId === editingMessageId);
                   if (node) {
                     const component = components.get(node.data.componentId);
                     if (component) {
+                      const content = component.uiToolType === "banner" 
+                        ? component.content.banner?.text || ""
+                        : component.content.message?.text || "";
+                        
                       const event = new CustomEvent("updateMessageContent", {
                         detail: { 
                           messageId: editingMessageId, 
-                          content: component.content.message?.text || ""
+                          content: content
                         },
                       });
                       window.dispatchEvent(event);

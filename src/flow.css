@@ -98,6 +98,20 @@
   display: flex !important;
 }
 
+/* Search result highlighting */
+.node-search-result {
+  box-shadow: 0 0 0 3px rgba(242, 232, 224, 0.8), 0 0 60px rgba(242, 232, 224, 0.8) !important;
+  transform: scale(1.02);
+  z-index: 5;
+}
+
+/* Gray out non-matching nodes when searching */
+.searching .card-node:not(.node-search-result) {
+  opacity: 0.3;
+  filter: grayscale(50%);
+  transition: opacity 0.3s ease, filter 0.3s ease;
+}
+
 /* Orphan node styling */
 .node-orphan {
   border: 2px dashed #F16B68 !important;
