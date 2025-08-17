@@ -615,7 +615,7 @@ export default function FlowCanvas() {
     // Load components
     const componentMap = new Map<string, ComponentData>();
     Object.entries(defaultState.components).forEach(([key, component]) => {
-      componentMap.set(key, component as ComponentData);
+      componentMap.set(key, component as any);
     });
     setComponents(componentMap);
     
@@ -1095,6 +1095,117 @@ export default function FlowCanvas() {
           }}
         >
           Save as Default
+        </button>
+        
+        <button 
+          className="copy-default-btn"
+          onClick={() => {
+            // Convert current screen state to the same format as localStorage
+            const componentsObject: Record<string, any> = {};
+            components.forEach((component, key) => {
+              componentsObject[key] = component as any;
+            });
+
+            // Get current messages from conversation preview
+            const getCurrentMessages = () => {
+              return new Promise<any[]>((resolve) => {
+                const event = new CustomEvent("getCurrentMessages", {
+                  detail: { callback: resolve },
+                });
+                window.dispatchEvent(event);
+              });
+            };
+
+            // Get messages and then copy state
+            getCurrentMessages().then(messages => {
+              // Clean up nodes - remove measured property
+              const cleanNodes = nodes.map(node => ({
+                id: node.id,
+                type: node.type,
+                position: node.position,
+                data: node.data
+              }));
+
+              // Clean up components - only include active tool type content
+              const cleanComponents: Record<string, any> = {};
+              components.forEach((component, key) => {
+                const cleanComponent = {
+                  id: component.id,
+                  name: component.name,
+                  slug: component.slug,
+                  uiToolType: component.uiToolType,
+                  content: {
+                    [component.uiToolType]: component.content[component.uiToolType]
+                  },
+                  createdAt: component.createdAt,
+                  updatedAt: component.updatedAt
+                };
+                cleanComponents[key] = cleanComponent;
+              });
+
+              // Clean up messages - remove extra fields
+              const cleanMessages = (messages || []).map(message => {
+                const cleanMessage: any = {
+                  id: message.id,
+                  sender: message.sender,
+                  content: message.content,
+                  messageId: message.messageId,
+                  componentId: message.componentId,
+                  uiToolType: message.uiToolType,
+                };
+                
+                // Only add fields that have actual content
+                if (message.suggestions && message.suggestions.length > 0) {
+                  cleanMessage.suggestions = message.suggestions;
+                }
+                if (message.image) {
+                  cleanMessage.image = message.image;
+                }
+                if (message.multiSelectOptions && message.multiSelectOptions.length > 0) {
+                  cleanMessage.multiSelectOptions = message.multiSelectOptions;
+                }
+                if (message.maxSelection) {
+                  cleanMessage.maxSelection = message.maxSelection;
+                }
+                
+                return cleanMessage;
+              });
+
+              const currentState = {
+                nodes: cleanNodes,
+                edges,
+                components: cleanComponents,
+                messages: cleanMessages,
+                orphanMessageIds: [],
+                lastSaved: new Date().toISOString(),
+              };
+
+              const jsonString = JSON.stringify(currentState, null, 2);
+              navigator.clipboard.writeText(jsonString).then(() => {
+                alert('Current screen state copied to clipboard!');
+              });
+            });
+          }}
+          style={{
+            background: "#F16B68",
+            color: "white",
+            border: "none",
+            borderRadius: "8px",
+            padding: "12px 20px",
+            fontSize: "14px",
+            fontWeight: "500",
+            cursor: "pointer",
+            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+            outline: "none",
+          }}
+          onFocus={(e) => {
+            e.target.style.boxShadow = "0 0 0 2px rgba(241, 107, 104, 0.3)";
+          }}
+          onBlur={(e) => {
+            e.target.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.1)";
+          }}
+        >
+          Copy Default State
         </button>
       </div>
 

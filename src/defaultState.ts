@@ -21,7 +21,6 @@ export const defaultState = {
         messageId: "msg-2",
       },
     },
-    // Add more nodes here as needed
   ],
   
   edges: [
@@ -30,7 +29,6 @@ export const defaultState = {
       source: "n-1",
       target: "n-2",
     },
-    // Add more edges here as needed
   ],
   
   components: {
@@ -38,69 +36,65 @@ export const defaultState = {
       id: "comp-1",
       name: "Welcome Message",
       slug: "01.01.01",
-      uiToolType: "message",
+      uiToolType: "question",
       content: {
-        message: { 
-          text: "Welcome! Let's start by understanding your career goals.", 
-          richText: true 
+        question: {
+          text: "afsf",
+          image: "/img/intro/intro-profile.png"
         }
       },
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: "2025-08-17T17:44:02.626Z",
+      updatedAt: "2025-08-17T17:45:01.808Z",
     },
     "comp-2": {
       id: "comp-2",
       name: "Career Goals Question",
-      slug: "01.01.02", 
-      uiToolType: "question",
+      slug: "01.01.02",
+      uiToolType: "multiSelect",
       content: {
-        question: {
-          text: "What's most important to you in your next career move?",
-          options: [],
-          suggestions: [
-            "Higher salary",
-            "Better work-life balance", 
-            "More challenging work",
-            "Career advancement",
-            "Learning new skills"
-          ]
+        multiSelect: {
+          options: [
+            { text: "sdf" },
+            { text: "sdf" },
+            { text: "sdfsd" }
+          ],
+          maxSelection: 2,
+          text: "adf"
         }
       },
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: "2025-08-17T17:44:02.626Z",
+      updatedAt: "2025-08-17T17:45:19.509Z",
     },
-    // Add more components here as needed
   },
   
   messages: [
     {
       id: "1",
       sender: "ai" as const,
-      content: "Welcome! Let's start by understanding your career goals.",
-      timestamp: "9:00 AM",
+      content: "afsf",
+      timestamp: "01:14 PM",
       messageId: "msg-1",
       componentId: "comp-1",
       type: "text" as const,
-      uiToolType: "message",
+      uiToolType: "question",
+      image: "/img/intro/intro-profile.png",
     },
     {
       id: "2",
-      sender: "ai" as const, 
-      content: "What's most important to you in your next career move?",
-      timestamp: "9:01 AM",
+      sender: "ai" as const,
+      content: "adf",
+      timestamp: "01:14 PM",
       messageId: "msg-2",
       componentId: "comp-2",
       type: "text" as const,
-      uiToolType: "question",
-      suggestions: [
-        "Higher salary",
-        "Better work-life balance",
-        "More challenging work", 
-        "Career advancement",
-        "Learning new skills"
-      ]
+      uiToolType: "multiSelect",
+      multiSelectOptions: [
+        { text: "sdf" },
+        { text: "sdf" },
+        { text: "sdfsd" }
+      ],
+      maxSelection: 2,
     },
-    // Add more messages here as needed
   ],
   
   orphanMessageIds: [],
