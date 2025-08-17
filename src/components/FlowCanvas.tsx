@@ -81,8 +81,14 @@ export default function FlowCanvas() {
   const uiToolTypeOptions = [
     { value: "message", label: "Message" },
     { value: "question", label: "Question" },
-
     { value: "multiSelect", label: "Multi Select" },
+    { value: "freeChat", label: "Free Chat", disabled: true },
+    { value: "form", label: "Form", disabled: true },
+    { value: "accordion", label: "Accordion", disabled: true },
+    { value: "intro", label: "Intro Dialog", disabled: true },
+    { value: "showTracksDrawer", label: "Show Tracks Drawer", disabled: true },
+    { value: "assessment", label: "Assessment", disabled: true },
+    { value: "swissArmyKnife", label: "Swiss Army Knife", disabled: true },
   ];
   
   // Available images for dropdown - all actual files from public/img folder
@@ -1606,6 +1612,8 @@ export default function FlowCanvas() {
                       <div
                         key={option.value}
                         onClick={() => {
+                          if (option.disabled) return; // Prevent selection of disabled options
+                          
                           const node = nodes.find(n => n.data.messageId === editingMessageId);
                           if (node) {
                             const component = components.get(node.data.componentId);
@@ -1642,15 +1650,21 @@ export default function FlowCanvas() {
                         }}
                         style={{
                           padding: "8px 12px",
-                          cursor: "pointer",
+                          cursor: option.disabled ? "not-allowed" : "pointer",
                           borderBottom: "1px solid #f0f0f0",
                           fontSize: "14px",
+                          color: option.disabled ? "#999999" : "#003250",
+                          backgroundColor: option.disabled ? "#f5f5f5" : "white",
                         }}
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.background = "#f5f5f5";
+                          if (!option.disabled) {
+                            e.currentTarget.style.background = "#f5f5f5";
+                          }
                         }}
                         onMouseLeave={(e) => {
-                          e.currentTarget.style.background = "white";
+                          if (!option.disabled) {
+                            e.currentTarget.style.background = "white";
+                          }
                         }}
                       >
                         {option.label}
@@ -1736,13 +1750,14 @@ export default function FlowCanvas() {
                       alignItems: "center",
                       gap: "4px",
                       fontSize: "14px",
-                      color: "#003250",
-                      cursor: "pointer"
+                      color: "#999999",
+                      cursor: "not-allowed"
                     }}>
                       <input
                         type="checkbox"
+                        disabled
                         style={{
-                          accentColor: "#003250",
+                          accentColor: "#999999",
                           transform: "scale(1.1)"
                         }}
                       />
@@ -1755,13 +1770,14 @@ export default function FlowCanvas() {
                       alignItems: "center",
                       gap: "4px",
                       fontSize: "14px",
-                      color: "#003250",
-                      cursor: "pointer"
+                      color: "#999999",
+                      cursor: "not-allowed"
                     }}>
                       <input
                         type="checkbox"
+                        disabled
                         style={{
-                          accentColor: "#003250",
+                          accentColor: "#999999",
                           transform: "scale(1.1)"
                         }}
                       />

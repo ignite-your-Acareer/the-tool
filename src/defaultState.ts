@@ -47,6 +47,18 @@ const defaultState = {
         "componentId": "comp-1755459253440",
         "messageId": "msg-4"
       }
+    },
+    {
+      "id": "n-5",
+      "type": "card",
+      "position": {
+        "x": 960,
+        "y": 240
+      },
+      "data": {
+        "componentId": "comp-1755460172767",
+        "messageId": "msg-5"
+      }
     }
   ],
   "edges": [
@@ -64,6 +76,11 @@ const defaultState = {
       "id": "e-n-3-n-4",
       "source": "n-3",
       "target": "n-4"
+    },
+    {
+      "id": "e-n-4-n-5",
+      "source": "n-4",
+      "target": "n-5"
     }
   ],
   "components": {
@@ -109,8 +126,8 @@ const defaultState = {
     },
     "comp-1755459042228": {
       "id": "comp-1755459042228",
-      "name": "New Component 3",
-      "slug": "",
+      "name": "Strengths Q3",
+      "slug": "01.01.03",
       "uiToolType": "question",
       "content": {
         "question": {
@@ -124,12 +141,12 @@ const defaultState = {
         }
       },
       "createdAt": "2025-08-17T19:30:42.229Z",
-      "updatedAt": "2025-08-17T19:34:07.687Z"
+      "updatedAt": "2025-08-17T19:51:14.438Z"
     },
     "comp-1755459253440": {
       "id": "comp-1755459253440",
-      "name": "New Component 4",
-      "slug": "",
+      "name": "Strengths Q4",
+      "slug": "01.01.04",
       "uiToolType": "question",
       "content": {
         "question": {
@@ -143,7 +160,26 @@ const defaultState = {
         }
       },
       "createdAt": "2025-08-17T19:34:13.440Z",
-      "updatedAt": "2025-08-17T19:35:01.300Z"
+      "updatedAt": "2025-08-17T19:50:55.874Z"
+    },
+    "comp-1755460172767": {
+      "id": "comp-1755460172767",
+      "name": "Strengths Q5",
+      "slug": "01.01.05",
+      "uiToolType": "question",
+      "content": {
+        "question": {
+          "text": "What do you get so involved with that you lose track of time?",
+          "options": [],
+          "suggestions": [
+            "Reading",
+            "etc"
+          ],
+          "image": "/img/steps/strengths/question/5.png"
+        }
+      },
+      "createdAt": "2025-08-17T19:49:32.767Z",
+      "updatedAt": "2025-08-17T19:50:39.395Z"
     }
   },
   "messages": [
@@ -206,10 +242,25 @@ const defaultState = {
         "etc"
       ],
       "image": "/img/steps/strengths/question/4.png"
+    },
+    {
+      "id": "5",
+      "sender": "ai" as const,
+      "content": "What do you get so involved with that you lose track of time?",
+      "timestamp": "01:14 PM",
+      "type": "text" as const,
+      "messageId": "msg-5",
+      "componentId": "comp-1755460172767",
+      "uiToolType": "question",
+      "suggestions": [
+        "Reading",
+        "etc"
+      ],
+      "image": "/img/steps/strengths/question/5.png"
     }
   ],
   "orphanMessageIds": [],
-  "lastSaved": "2025-08-17T19:35:07.428Z"
+  "lastSaved": "2025-08-17T19:51:25.152Z"
 };
 
 export default defaultState; 
