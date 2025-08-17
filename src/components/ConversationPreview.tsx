@@ -724,8 +724,9 @@ export default function ConversationPreview() {
                 textAlign: "left",
                 cursor: "pointer",
                 fontSize: "14px",
-                color: "#FA8072",
-                fontWeight: "500",
+                color: "#F16B68",
+                fontWeight: "600",
+                textShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
                 borderBottom: "1px solid #E9DDD3",
                 outline: "none",
               }}
@@ -768,7 +769,8 @@ export default function ConversationPreview() {
                 cursor: "pointer",
                 fontSize: "14px",
                 color: "#F16B68",
-                fontWeight: "500",
+                fontWeight: "600",
+                textShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
                 outline: "none",
               }}
               onMouseEnter={(e) => {

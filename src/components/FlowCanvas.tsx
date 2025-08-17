@@ -939,6 +939,9 @@ export default function FlowCanvas() {
         snapGrid={[480, 60]}
         className={searchQuery ? "searching" : ""}
         onPaneClick={() => {
+          // Don't clear selection when in test mode or when exiting test mode
+          if (isTestMode) return;
+          
           // Clear selection when clicking on empty space
           setSelectedNodeIds(new Set());
           setLastClickedNodeId(null);
@@ -1161,8 +1164,9 @@ export default function FlowCanvas() {
                 textAlign: "left",
                 cursor: "pointer",
                 fontSize: "14px",
-                color: "#FA8072",
-                fontWeight: "500",
+                color: "#F16B68",
+                fontWeight: "600",
+                textShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
                 borderBottom: "1px solid #E9DDD3",
                 outline: "none",
               }}
@@ -1212,7 +1216,8 @@ export default function FlowCanvas() {
                 cursor: "pointer",
                 fontSize: "14px",
                 color: "#F16B68",
-                fontWeight: "500",
+                fontWeight: "600",
+                textShadow: "0 1px 2px rgba(0, 0, 0, 0.1)",
                 outline: "none",
               }}
               onMouseEnter={(e) => {
