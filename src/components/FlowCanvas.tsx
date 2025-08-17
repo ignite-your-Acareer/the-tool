@@ -12,6 +12,7 @@ import {
 } from "@xyflow/react";
 import type { Connection, Edge as FlowEdge, Node as FlowNode, NodeProps, NodeTypes, NodeChange } from "@xyflow/react";
 import "../flow.css";
+import { saveDefaultState, loadDefaultState } from "../utils/defaultState";
 
 type UIToolType = "message" | "question" | "form" | "freeChat" | "accordion" | "banner" | "intro" | "multiSelect";
 
@@ -72,6 +73,7 @@ export default function FlowCanvas() {
   const [searchResults, setSearchResults] = useState<Set<string>>(new Set());
   const [imageDropdownOpen, setImageDropdownOpen] = useState<string | false>(false);
   const [uiToolTypeDropdownOpen, setUiToolTypeDropdownOpen] = useState(false);
+  const [showSaveDefaultConfirmation, setShowSaveDefaultConfirmation] = useState(false);
   
   // UI Tool Type options - single source of truth
   const uiToolTypeOptions = [
@@ -275,6 +277,43 @@ export default function FlowCanvas() {
     // Handle regular node changes
     onNodesChange(changes);
   }, [selectedNodeIds, nodes, setNodes, onNodesChange]);
+
+  const handleSaveAsDefault = useCallback(() => {
+    // Convert components Map to plain object for storage
+    const componentsObject: Record<string, any> = {};
+    components.forEach((component, key) => {
+      componentsObject[key] = component;
+    });
+
+    // Get current messages from conversation preview
+    const getCurrentMessages = () => {
+      return new Promise<any[]>((resolve) => {
+        const event = new CustomEvent("getCurrentMessages", {
+          detail: { callback: resolve },
+        });
+        window.dispatchEvent(event);
+      });
+    };
+
+    // Save with current messages
+    getCurrentMessages().then(messages => {
+      const success = saveDefaultState({
+        nodes,
+        edges,
+        components: componentsObject,
+        messages: messages || [],
+        orphanMessageIds: [],
+      });
+
+      if (success) {
+        setShowSaveDefaultConfirmation(false);
+        // Show success message
+        alert('Default state saved successfully!');
+      } else {
+        alert('Failed to save default state. Please try again.');
+      }
+    });
+  }, [nodes, edges, components]);
 
   const addNewComponent = useCallback(() => {
     const componentId = `comp-${Date.now()}`;
@@ -565,6 +604,48 @@ export default function FlowCanvas() {
       window.removeEventListener("deleteNode", handleDeleteNode as EventListener);
     };
   }, [nodes, deleteComponent]);
+
+  // Load default state on mount
+  useEffect(() => {
+    const defaultState = loadDefaultState();
+    if (defaultState) {
+      // Load nodes and edges
+      setNodes(defaultState.nodes);
+      setEdges(defaultState.edges);
+      
+      // Load components
+      const componentMap = new Map<string, ComponentData>();
+      Object.entries(defaultState.components).forEach(([key, component]) => {
+        componentMap.set(key, component as ComponentData);
+      });
+      setComponents(componentMap);
+      
+      // Dispatch events to update conversation preview
+      defaultState.messages.forEach(message => {
+        const event = new CustomEvent("addMessage", {
+          detail: { 
+            messageId: message.messageId,
+            componentId: message.componentId,
+            uiToolType: message.uiToolType,
+            showDropdown: false 
+          },
+        });
+        window.dispatchEvent(event);
+        
+        // Dispatch component data
+        const component = componentMap.get(message.componentId);
+        if (component) {
+          const componentDataEvent = new CustomEvent("updateComponentData", {
+            detail: { 
+              messageId: message.messageId, 
+              componentData: component 
+            },
+          });
+          window.dispatchEvent(componentDataEvent);
+        }
+      });
+    }
+  }, []);
 
   // Sync order whenever nodes or edges change
   useEffect(() => {
@@ -959,34 +1040,65 @@ export default function FlowCanvas() {
         <Background />
       </ReactFlow>
       
-      <button 
-        className="add-component-btn"
-        onClick={addNewComponent}
-        style={{
-          position: "absolute",
-          top: "20px",
-          left: "20px",
-          zIndex: 10,
-          background: "#F16B68",
-          color: "white",
-          border: "none",
-          borderRadius: "8px",
-          padding: "12px 20px",
-          fontSize: "14px",
-          fontWeight: "500",
-          cursor: "pointer",
-          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-          outline: "none",
-        }}
-        onFocus={(e) => {
-          e.target.style.boxShadow = "0 0 0 2px rgba(241, 107, 104, 0.3)";
-        }}
-        onBlur={(e) => {
-          e.target.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.1)";
-        }}
-      >
-        Add Component
-      </button>
+      <div style={{
+        position: "absolute",
+        top: "20px",
+        left: "20px",
+        zIndex: 10,
+        display: "flex",
+        flexDirection: "column",
+        gap: "8px",
+      }}>
+        <button 
+          className="add-component-btn"
+          onClick={addNewComponent}
+          style={{
+            background: "#F16B68",
+            color: "white",
+            border: "none",
+            borderRadius: "8px",
+            padding: "12px 20px",
+            fontSize: "14px",
+            fontWeight: "500",
+            cursor: "pointer",
+            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+            outline: "none",
+          }}
+          onFocus={(e) => {
+            e.target.style.boxShadow = "0 0 0 2px rgba(241, 107, 104, 0.3)";
+          }}
+          onBlur={(e) => {
+            e.target.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.1)";
+          }}
+        >
+          Add Component
+        </button>
+        
+        <button 
+          className="save-default-btn"
+          onClick={() => setShowSaveDefaultConfirmation(true)}
+          style={{
+            background: "#8EAF86",
+            color: "white",
+            border: "none",
+            borderRadius: "8px",
+            padding: "12px 20px",
+            fontSize: "14px",
+            fontWeight: "500",
+            cursor: "pointer",
+            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+            outline: "none",
+          }}
+          onFocus={(e) => {
+            e.target.style.boxShadow = "0 0 0 2px rgba(142, 175, 134, 0.3)";
+          }}
+          onBlur={(e) => {
+            e.target.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.1)";
+          }}
+        >
+          Save as Default
+        </button>
+      </div>
 
       {/* Search Bar */}
       <div style={{
@@ -1049,6 +1161,58 @@ export default function FlowCanvas() {
           </button>
         )}
       </div>
+
+      {/* Save as Default Confirmation Modal */}
+      {showSaveDefaultConfirmation && (
+        <div className="edit-window-overlay">
+          <div className="edit-window">
+            <div className="edit-window-header">
+              <h4>Save as Default</h4>
+            </div>
+            <div className="edit-window-content">
+              <p>Are you sure you want to save the current workflow as the default state?</p>
+              <p style={{ fontSize: "14px", color: "#666", marginTop: "8px" }}>
+                This will overwrite the current default state and become the new starting point for the app.
+              </p>
+            </div>
+            <div className="edit-window-footer">
+              <button
+                className="save-btn"
+                onClick={handleSaveAsDefault}
+                style={{
+                  background: "#8EAF86",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "8px",
+                  padding: "8px 16px",
+                  fontSize: "14px",
+                  cursor: "pointer",
+                  outline: "none",
+                }}
+              >
+                Save as Default
+              </button>
+              <button
+                className="cancel-btn"
+                onClick={() => setShowSaveDefaultConfirmation(false)}
+                style={{
+                  background: "#E9DDD3",
+                  color: "#003250",
+                  border: "none",
+                  borderRadius: "8px",
+                  padding: "8px 16px",
+                  fontSize: "14px",
+                  cursor: "pointer",
+                  marginLeft: "8px",
+                  outline: "none",
+                }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Delete Confirmation Modal */}
       {deleteConfirmation && (

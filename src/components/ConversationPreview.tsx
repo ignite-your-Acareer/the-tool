@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, Fragment, useCallback } from "react";
 import "./ConversationPreview.css";
+import { loadDefaultState } from "../utils/defaultState";
 
 type MessageType = "text" | "card" | "pills";
 
@@ -125,6 +126,15 @@ export default function ConversationPreview() {
     const event = new CustomEvent("exitTestMode");
     window.dispatchEvent(event);
   };
+
+  // Load default state on mount
+  useEffect(() => {
+    const defaultState = loadDefaultState();
+    if (defaultState && defaultState.messages.length > 0) {
+      setMessages(defaultState.messages);
+      setOrphanMessageIds(new Set(defaultState.orphanMessageIds || []));
+    }
+  }, []);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -311,6 +321,11 @@ export default function ConversationPreview() {
       );
     };
 
+    const handleGetCurrentMessages = (event: CustomEvent) => {
+      const { callback } = event.detail;
+      callback(messages);
+    };
+
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("scrollToMessage", handleScrollToMessage as EventListener);
     window.addEventListener("highlightMessage", handleHighlightMessage as EventListener);
@@ -323,6 +338,7 @@ export default function ConversationPreview() {
     window.addEventListener("nodeSelection", handleNodeSelection as EventListener);
     window.addEventListener("updateMessageContent", handleUpdateMessageContent as EventListener);
     window.addEventListener("updateComponentData", handleUpdateComponentData as EventListener);
+    window.addEventListener("getCurrentMessages", handleGetCurrentMessages as EventListener);
     window.addEventListener("showExitTestWarning", () => setShowExitTestWarning(true));
 
     return () => {
@@ -337,6 +353,8 @@ export default function ConversationPreview() {
       window.removeEventListener("syncMessageOrder", handleSyncMessageOrder as EventListener);
       window.removeEventListener("nodeSelection", handleNodeSelection as EventListener);
       window.removeEventListener("updateMessageContent", handleUpdateMessageContent as EventListener);
+      window.removeEventListener("updateComponentData", handleUpdateComponentData as EventListener);
+      window.removeEventListener("getCurrentMessages", handleGetCurrentMessages as EventListener);
       window.removeEventListener("showExitTestWarning", () => setShowExitTestWarning(true));
     };
   }, [messages, showSelectComponentPopup, startTestMode]);
