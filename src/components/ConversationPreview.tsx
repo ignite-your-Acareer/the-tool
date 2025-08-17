@@ -3,6 +3,12 @@ import "./ConversationPreview.css";
 
 type MessageType = "text" | "card" | "pills";
 
+type MultiSelectOption = {
+  text: string;
+  image?: string;
+  icon?: string;
+};
+
 type Message = {
   id: string;
   sender: "user" | "ai";
@@ -16,6 +22,8 @@ type Message = {
   showDropdown?: boolean;
   suggestions?: string[];
   image?: string;
+  multiSelectOptions?: MultiSelectOption[];
+  maxSelection?: number;
   cardData?: {
     title: string;
     description: string;
@@ -281,6 +289,8 @@ export default function ConversationPreview() {
                   ? componentData.content.banner?.text || "New banner"
                   : componentData.uiToolType === "question"
                   ? componentData.content.question?.text || "New question"
+                  : componentData.uiToolType === "multiSelect"
+                  ? componentData.content.multiSelect?.text || "New multi-select question"
                   : componentData.content.message?.text || "New component added",
                 uiToolType: componentData.uiToolType,
                 suggestions: componentData.uiToolType === "question" 
@@ -288,6 +298,12 @@ export default function ConversationPreview() {
                   : undefined,
                 image: componentData.uiToolType === "question"
                   ? componentData.content.question?.image || undefined
+                  : undefined,
+                multiSelectOptions: componentData.uiToolType === "multiSelect"
+                  ? componentData.content.multiSelect?.options || []
+                  : undefined,
+                maxSelection: componentData.uiToolType === "multiSelect"
+                  ? componentData.content.multiSelect?.maxSelection || 1
                   : undefined
               }
             : msg
@@ -354,6 +370,52 @@ export default function ConversationPreview() {
               {message.suggestions.map((suggestion, index) => (
                 <button key={index} className="suggestion-button">
                   {suggestion}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+    
+    // Check if this is a multi select type message
+    if (message.uiToolType === "multiSelect") {
+      const hasImages = message.multiSelectOptions?.some(option => option.image);
+      const maxSelection = message.maxSelection || 1;
+      const selectedCount = 1; // Always show first option as selected
+      
+      return (
+        <div className="message-multi-select">
+          <div className="multi-select-question">{message.content}</div>
+          
+          {/* Progress bar - always show when maxSelection > 1 */}
+          {maxSelection > 1 && (
+            <div className="multi-select-progress">
+              <div 
+                className="multi-select-progress-fill"
+                style={{ width: `${(selectedCount / maxSelection) * 100}%` }}
+              />
+            </div>
+          )}
+          
+          {message.multiSelectOptions && message.multiSelectOptions.length > 0 && (
+            <div className={`multi-select-options ${hasImages ? 'has-images' : ''}`}>
+              {message.multiSelectOptions.map((option, index) => (
+                <button 
+                  key={index} 
+                  className={`multi-select-option ${index === 0 ? 'selected' : ''} ${option.image ? 'has-image' : ''}`}
+                >
+                  {option.image && (
+                    <div className="option-image">
+                      <img src={option.image} alt={option.text} />
+                    </div>
+                  )}
+                  <div className="option-content">
+                    <span className="option-text">{option.text}</span>
+                    {option.icon && (
+                      <span className="option-icon">{option.icon}</span>
+                    )}
+                  </div>
                 </button>
               ))}
             </div>

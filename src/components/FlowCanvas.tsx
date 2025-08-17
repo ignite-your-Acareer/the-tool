@@ -16,6 +16,12 @@ import "../flow.css";
 type UIToolType = "message" | "question" | "form" | "freeChat" | "accordion" | "banner" | "intro" | "multiSelect";
 
 // Comprehensive component data structure - single source of truth
+type MultiSelectOption = {
+  text: string;
+  image?: string;
+  icon?: string;
+};
+
 type ComponentData = {
   id: string;                    // Unique component ID
   name: string;                  // Display name (required)
@@ -29,7 +35,11 @@ type ComponentData = {
     accordion?: { title: string; content: string; };
     banner?: { text: string; type: string; };
     intro?: { text: string; };
-    multiSelect?: { text: string; options: string[]; };
+    multiSelect?: { 
+      text?: string; 
+      options?: MultiSelectOption[]; 
+      maxSelection?: number;
+    };
   };
   createdAt: Date;
   updatedAt: Date;
@@ -54,12 +64,13 @@ export default function FlowCanvas() {
   const [lastClickedNodeId, setLastClickedNodeId] = useState<string | null>(null);
   const [selectedNodeIds, setSelectedNodeIds] = useState<Set<string>>(new Set());
   const [editingMessageId, setEditingMessageId] = useState<string | null>(null);
+  const [originalComponentData, setOriginalComponentData] = useState<ComponentData | null>(null);
   const [deleteConfirmation, setDeleteConfirmation] = useState<{ messageId: string; componentName: string } | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number; rightClickedMessageId?: string; } | null>(null);
   const [isTestMode, setIsTestMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Set<string>>(new Set());
-  const [imageDropdownOpen, setImageDropdownOpen] = useState(false);
+  const [imageDropdownOpen, setImageDropdownOpen] = useState<string | false>(false);
   const [uiToolTypeDropdownOpen, setUiToolTypeDropdownOpen] = useState(false);
   
   // UI Tool Type options - single source of truth
@@ -209,7 +220,7 @@ export default function FlowCanvas() {
         // Search in multiSelect content
         if (component.content.multiSelect?.text?.toLowerCase().includes(lowerQuery) ||
             component.content.multiSelect?.options?.some(option => 
-              option.toLowerCase().includes(lowerQuery)
+              option.text?.toLowerCase().includes(lowerQuery)
             )) {
           results.add(node.id);
         }
@@ -625,6 +636,15 @@ export default function FlowCanvas() {
     const handleOpenEditWindow = (event: CustomEvent) => {
       const { messageId } = event.detail;
       setEditingMessageId(messageId);
+      
+      // Store the original component data for potential cancellation
+      const node = nodes.find(n => n.data.messageId === messageId);
+      if (node) {
+        const component = components.get(node.data.componentId);
+        if (component) {
+          setOriginalComponentData(JSON.parse(JSON.stringify(component))); // Deep copy
+        }
+      }
     };
 
     window.addEventListener("updateNodeContent", handleUpdateNodeContent as EventListener);
@@ -824,17 +844,17 @@ export default function FlowCanvas() {
           displayText = content.length > 50 ? content.substring(0, 50) + "..." : content;
           
           return (
-            <div className="card-node__desc" style={{
-              fontSize: "12px",
-              color: "#FFF",
-              marginTop: "4px",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-              maxWidth: "200px"
-            }}>
+          <div className="card-node__desc" style={{
+            fontSize: "12px",
+            color: "#FFF",
+            marginTop: "4px",
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+            maxWidth: "200px"
+          }}>
               {displayText}
-            </div>
+          </div>
           );
         })()}
         {component.uiToolType && (
@@ -1121,6 +1141,15 @@ export default function FlowCanvas() {
                 // Edit only the right-clicked component
                 if (contextMenu.rightClickedMessageId) {
                   setEditingMessageId(contextMenu.rightClickedMessageId);
+                  
+                  // Store the original component data for potential cancellation
+                  const node = nodes.find(n => n.data.messageId === contextMenu.rightClickedMessageId);
+                  if (node) {
+                    const component = components.get(node.data.componentId);
+                    if (component) {
+                      setOriginalComponentData(JSON.parse(JSON.stringify(component))); // Deep copy
+                    }
+                  }
                 }
                 setContextMenu(null);
               }}
@@ -1536,7 +1565,7 @@ export default function FlowCanvas() {
                       <div style={{ display: "flex", gap: "12px", alignItems: "flex-start", marginBottom: "16px" }}>
                         <div className="image-dropdown-container" style={{ flex: 1, position: "relative" }}>
                           <div
-                            onClick={() => setImageDropdownOpen(!imageDropdownOpen)}
+                            onClick={() => setImageDropdownOpen(imageDropdownOpen ? false : "question")}
                             style={{
                               padding: "8px 12px",
                               border: "1px solid #E9DDD3",
@@ -1558,7 +1587,7 @@ export default function FlowCanvas() {
                             <span style={{ fontSize: "18px", color: "#333", fontWeight: "600", transform: "translateY(-3px)" }}>⌵</span>
                           </div>
                           
-                          {imageDropdownOpen && (
+                          {imageDropdownOpen === "question" && (
                             <div
                               style={{
                                 position: "absolute",
@@ -1721,10 +1750,10 @@ export default function FlowCanvas() {
                             <input
                               type="text"
                               value={suggestion}
-                              onChange={(e) => {
-                                if (node) {
-                                  const component = components.get(node.data.componentId);
-                                  if (component) {
+                        onChange={(e) => {
+                          if (node) {
+                            const component = components.get(node.data.componentId);
+                            if (component) {
                                     const currentSuggestions = component.content.question?.suggestions || [""];
                                     const newSuggestions = [...currentSuggestions];
                                     newSuggestions[index] = e.target.value;
@@ -1734,32 +1763,32 @@ export default function FlowCanvas() {
                                       s.trim() !== "" || i === newSuggestions.length - 1
                                     );
                                     
-                                    const updatedComponent = {
-                                      ...component,
-                                      content: {
-                                        ...component.content,
-                                        question: {
-                                          ...component.content.question,
+                              const updatedComponent = {
+                                ...component,
+                                content: {
+                                  ...component.content,
+                                  question: {
+                                    ...component.content.question,
                                           suggestions: filteredSuggestions
-                                        }
-                                      },
-                                      updatedAt: new Date()
-                                    };
-                                    setComponents(prev => new Map(prev).set(component.id, updatedComponent));
-                                    
-                                    // Dispatch event to update preview
-                                    const event = new CustomEvent("updateComponentData", {
-                                      detail: { 
-                                        messageId: editingMessageId, 
-                                        componentData: updatedComponent 
-                                      },
-                                    });
-                                    window.dispatchEvent(event);
                                   }
-                                }
-                              }}
-                              onKeyDown={(e) => {
-                                if (e.key === 'Enter') {
+                                },
+                                updatedAt: new Date()
+                              };
+                              setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                              
+                              // Dispatch event to update preview
+                              const event = new CustomEvent("updateComponentData", {
+                                detail: { 
+                                  messageId: editingMessageId, 
+                                  componentData: updatedComponent 
+                                },
+                              });
+                              window.dispatchEvent(event);
+                            }
+                          }
+                        }}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
                                   e.preventDefault();
                                   if (node) {
                                     const component = components.get(node.data.componentId);
@@ -1913,6 +1942,464 @@ export default function FlowCanvas() {
                       </div>
                     </>
                   );
+                } else if (uiToolType === "multiSelect") {
+                  return (
+                    <>
+                      <label>Question Text:</label>
+                      <textarea
+                        value={component?.content.multiSelect?.text || ""}
+                        onChange={(e) => {
+                          if (node) {
+                            const component = components.get(node.data.componentId);
+                            if (component) {
+                              const updatedComponent = {
+                                ...component,
+                                content: {
+                                  ...component.content,
+                                  multiSelect: {
+                                    ...component.content.multiSelect,
+                                    text: e.target.value
+                                  }
+                                },
+                                updatedAt: new Date()
+                              };
+                              setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                              
+                              // Dispatch event to update preview
+                              const event = new CustomEvent("updateComponentData", {
+                                detail: { 
+                                  messageId: editingMessageId, 
+                                  componentData: updatedComponent 
+                                },
+                              });
+                              window.dispatchEvent(event);
+                            }
+                          }
+                        }}
+                        placeholder="Enter your multi-select question..."
+                        style={{
+                          width: "100%",
+                          minHeight: "80px",
+                          padding: "12px",
+                          border: "1px solid #E9DDD3",
+                          borderRadius: "8px",
+                          fontSize: "14px",
+                          fontFamily: "inherit",
+                          marginBottom: "16px",
+                          resize: "vertical",
+                          boxSizing: "border-box",
+                        }}
+                      />
+                      
+                      <label>Max Selection:</label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={component?.content.multiSelect?.maxSelection || 1}
+                        onChange={(e) => {
+                          if (node) {
+                            const component = components.get(node.data.componentId);
+                            if (component) {
+                              const updatedComponent = {
+                                ...component,
+                                content: {
+                                  ...component.content,
+                                  multiSelect: {
+                                    ...component.content.multiSelect,
+                                    maxSelection: parseInt(e.target.value) || 1
+                                  }
+                                },
+                                updatedAt: new Date()
+                              };
+                              setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                              
+                              // Dispatch event to update preview
+                              const event = new CustomEvent("updateComponentData", {
+                                detail: { 
+                                  messageId: editingMessageId, 
+                                  componentData: updatedComponent 
+                                },
+                              });
+                              window.dispatchEvent(event);
+                            }
+                          }
+                        }}
+                        style={{
+                          width: "100%",
+                          padding: "8px 12px",
+                          border: "1px solid #E9DDD3",
+                          borderRadius: "8px",
+                          fontSize: "14px",
+                          fontFamily: "inherit",
+                          marginBottom: "16px",
+                          height: "33px",
+                          boxSizing: "border-box",
+                        }}
+                      />
+                      
+                      <label>Options:</label>
+                      <div style={{ marginBottom: "16px" }}>
+                        {(component?.content.multiSelect?.options || [{ text: "" }]).map((option, index) => (
+                          <div key={index} style={{ display: "flex", gap: "8px", marginBottom: "8px", alignItems: "flex-start" }}>
+                            <input
+                              type="text"
+                              value={option.text || ""}
+                              onChange={(e) => {
+                                if (node) {
+                                  const component = components.get(node.data.componentId);
+                                  if (component) {
+                                    const currentOptions = component.content.multiSelect?.options || [{ text: "" }];
+                                    const newOptions = [...currentOptions];
+                                    newOptions[index] = { ...newOptions[index], text: e.target.value };
+                                    
+                                    // Remove empty options except the last one
+                                    const filteredOptions = newOptions.filter((opt, i) => 
+                                      opt.text?.trim() !== "" || i === newOptions.length - 1
+                                    );
+                                    
+                                    const updatedComponent = {
+                                      ...component,
+                                      content: {
+                                        ...component.content,
+                                        multiSelect: {
+                                          ...component.content.multiSelect,
+                                          options: filteredOptions
+                                        }
+                                      },
+                                      updatedAt: new Date()
+                                    };
+                                    setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                    
+                                    // Dispatch event to update preview
+                                    const event = new CustomEvent("updateComponentData", {
+                                      detail: { 
+                                        messageId: editingMessageId, 
+                                        componentData: updatedComponent 
+                                      },
+                                    });
+                                    window.dispatchEvent(event);
+                                  }
+                                }
+                              }}
+                              placeholder={`Option ${index + 1}`}
+                              style={{
+                                flex: 1,
+                                padding: "8px 12px",
+                                border: "1px solid #E9DDD3",
+                                borderRadius: "6px",
+                                fontSize: "14px",
+                                fontFamily: "inherit",
+                                boxSizing: "border-box",
+                                height: "33px",
+                                minWidth: "200px"
+                              }}
+                            />
+                            
+                            {/* Image dropdown for this option */}
+                            <div style={{ display: "flex", gap: "12px", alignItems: "flex-start" }}>
+                              <div className="image-dropdown-container" style={{ flex: 1, position: "relative", minWidth: "200px" }}>
+                                <div
+                                  onClick={() => {
+                                    // Toggle dropdown for this specific option
+                                    const dropdownKey = `imageDropdown_${index}`;
+                                    setImageDropdownOpen(prev => prev === dropdownKey ? false : dropdownKey);
+                                  }}
+                                  style={{
+                                    padding: "8px 12px",
+                                    border: "1px solid #E9DDD3",
+                                    borderRadius: "8px",
+                                    fontSize: "14px",
+                                    fontFamily: "inherit",
+                                    background: "white",
+                                    cursor: "pointer",
+                                    display: "flex",
+                                    justifyContent: "space-between",
+                                    alignItems: "center",
+                                    height: "33px",
+                                    boxSizing: "border-box",
+                                    minWidth: "200px",
+                                    width: "200px",
+                                  }}
+                                >
+                                  <span style={{ 
+                                    overflow: "hidden", 
+                                    textOverflow: "ellipsis", 
+                                    whiteSpace: "nowrap",
+                                    flex: 1,
+                                    marginRight: "3px"
+                                  }}>
+                                    {availableImages.find(img => img.value === option.image)?.label || "No image"}
+                                  </span>
+                                  <span style={{ 
+                                    fontSize: "18px", 
+                                    color: "#333", 
+                                    fontWeight: "600", 
+                                    transform: "translateY(-3px)",
+                                    flexShrink: 0,
+                                    paddingLeft: "3px"
+                                  }}>⌵</span>
+                                </div>
+                                
+                                {imageDropdownOpen === `imageDropdown_${index}` && (
+                                  <div
+                                    style={{
+                                      position: "absolute",
+                                      top: "100%",
+                                      left: 0,
+                                      right: 0,
+                                      background: "white",
+                                      border: "1px solid #E9DDD3",
+                                      borderRadius: "8px",
+                                      marginTop: "4px",
+                                      maxHeight: "200px",
+                                      overflowY: "auto",
+                                      zIndex: 1000,
+                                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+                                    }}
+                                  >
+                                    {availableImages.map((image) => (
+                                      <div
+                                        key={image.value}
+                                        onClick={() => {
+                                          // Remove any existing popups
+                                          const existingPopups = document.querySelectorAll('[data-image-preview]');
+                                          existingPopups.forEach(popup => popup.remove());
+                                          
+                                          if (node) {
+                                            const component = components.get(node.data.componentId);
+                                            if (component) {
+                                              const currentOptions = component.content.multiSelect?.options || [{ text: "" }];
+                                              const newOptions = [...currentOptions];
+                                              newOptions[index] = { ...newOptions[index], image: image.value };
+                                              
+                                              const updatedComponent = {
+                                                ...component,
+                                                content: {
+                                                  ...component.content,
+                                                  multiSelect: {
+                                                    ...component.content.multiSelect,
+                                                    options: newOptions
+                                                  }
+                                                },
+                                                updatedAt: new Date()
+                                              };
+                                              setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                              
+                                              // Dispatch event to update preview
+                                              const event = new CustomEvent("updateComponentData", {
+                                                detail: { 
+                                                  messageId: editingMessageId, 
+                                                  componentData: updatedComponent 
+                                                },
+                                              });
+                                              window.dispatchEvent(event);
+                                            }
+                                          }
+                                          setImageDropdownOpen(false);
+                                        }}
+                                        onMouseEnter={(e) => {
+                                          e.currentTarget.style.background = "#f5f5f5";
+                                          if (image.value) {
+                                            const popup = document.createElement('div');
+                                            popup.setAttribute('data-image-preview', 'true');
+                                            popup.style.cssText = `
+                                              position: fixed;
+                                              top: ${e.clientY + 10}px;
+                                              left: ${e.clientX + 10}px;
+                                              z-index: 10001;
+                                              background: white;
+                                              border: 1px solid #E9DDD3;
+                                              border-radius: 8px;
+                                              padding: 8px;
+                                              box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                                              max-width: 200px;
+                                              max-height: 200px;
+                                            `;
+                                            popup.innerHTML = `<img src="${image.value}" style="width: 100%; height: 100%; object-fit: contain;" alt="Preview" />`;
+                                            document.body.appendChild(popup);
+                                            e.currentTarget.addEventListener('mouseleave', () => {
+                                              popup.remove();
+                                            }, { once: true });
+                                          }
+                                        }}
+                                        onMouseLeave={(e) => {
+                                          e.currentTarget.style.background = "white";
+                                          // Remove any existing popups
+                                          const existingPopups = document.querySelectorAll('[data-image-preview]');
+                                          existingPopups.forEach(popup => popup.remove());
+                                        }}
+                                        style={{
+                                          padding: "8px 12px",
+                                          cursor: "pointer",
+                                          borderBottom: "1px solid #f0f0f0",
+                                          fontSize: "14px",
+                                          display: "flex",
+                                          alignItems: "center",
+                                          gap: "8px",
+                                        }}
+                                      >
+                                        <img 
+                                          src={image.value} 
+                                          alt={image.label} 
+                                          style={{ 
+                                            width: "20px", 
+                                            height: "15px", 
+                                            objectFit: "cover",
+                                            borderRadius: "2px"
+                                          }} 
+                                        />
+                                        {image.label}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                              
+                              {/* Image thumbnail preview */}
+                              <div style={{ 
+                                width: "45px", 
+                                height: "45px", 
+                                borderRadius: "8px", 
+                                overflow: "hidden", 
+                                background: "#F5F5F5",
+                                flexShrink: 0,
+                                display: "flex",
+                                alignItems: "center",
+                                justifyContent: "center"
+                              }}>
+                                {option.image ? (
+                                  <img 
+                                    src={option.image} 
+                                    alt="Preview" 
+                                    style={{ 
+                                      width: "100%", 
+                                      height: "100%", 
+                                      objectFit: "cover" 
+                                    }} 
+                                  />
+                                ) : (
+                                  <span style={{ 
+                                    color: "#999", 
+                                    fontSize: "11px", 
+                                    textAlign: "center",
+                                    fontWeight: "400"
+                                  }}>
+                                    No img
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                            
+                            {(component?.content.multiSelect?.options?.length || 1) > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (node) {
+                                    const component = components.get(node.data.componentId);
+                                    if (component) {
+                                      const currentOptions = component.content.multiSelect?.options || [{ text: "" }];
+                                      const newOptions = currentOptions.filter((_, i) => i !== index);
+                                      
+                                      // Ensure we always have at least one option field
+                                      if (newOptions.length === 0) {
+                                        newOptions.push({ text: "" });
+                                      }
+                                      
+                                      const updatedComponent = {
+                                        ...component,
+                                        content: {
+                                          ...component.content,
+                                          multiSelect: {
+                                            ...component.content.multiSelect,
+                                            options: newOptions
+                                          }
+                                        },
+                                        updatedAt: new Date()
+                                      };
+                                      setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                      
+                                      // Dispatch event to update preview
+                                      const event = new CustomEvent("updateComponentData", {
+                                        detail: { 
+                                          messageId: editingMessageId, 
+                                          componentData: updatedComponent 
+                                        },
+                                      });
+                                      window.dispatchEvent(event);
+                                    }
+                                  }
+                                }}
+                                style={{
+                                  background: "#F16B68",
+                                  color: "white",
+                                  border: "none",
+                                  borderRadius: "4px",
+                                  width: "24px",
+                                  height: "24px",
+                                  fontSize: "12px",
+                                  cursor: "pointer",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  flexShrink: 0,
+                                  outline: "none",
+                                }}
+                              >
+                                ×
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (node) {
+                              const component = components.get(node.data.componentId);
+                              if (component) {
+                                const currentOptions = component.content.multiSelect?.options || [{ text: "" }];
+                                const newOptions = [...currentOptions, { text: "" }];
+                                
+                                const updatedComponent = {
+                                  ...component,
+                                  content: {
+                                    ...component.content,
+                                    multiSelect: {
+                                      ...component.content.multiSelect,
+                                      options: newOptions
+                                    }
+                                  },
+                                  updatedAt: new Date()
+                                };
+                                setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                
+                                // Dispatch event to update preview
+                                const event = new CustomEvent("updateComponentData", {
+                                  detail: { 
+                                    messageId: editingMessageId, 
+                                    componentData: updatedComponent 
+                                  },
+                                });
+                                window.dispatchEvent(event);
+                              }
+                            }
+                          }}
+                          style={{
+                            background: "#8EAF86",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "6px",
+                            padding: "6px 12px",
+                            fontSize: "12px",
+                            cursor: "pointer",
+                            marginTop: "4px",
+                            outline: "none",
+                          }}
+                        >
+                          + Add Option
+                        </button>
+                      </div>
+                    </>
+                  );
                 } else {
                   return (
                     <>
@@ -1978,6 +2465,8 @@ export default function FlowCanvas() {
                         content = component.content.banner?.text || "";
                       } else if (component.uiToolType === "question") {
                         content = component.content.question?.text || "";
+                      } else if (component.uiToolType === "multiSelect") {
+                        content = component.content.multiSelect?.text || "";
                       } else {
                         content = component.content.message?.text || "";
                       }
@@ -1992,6 +2481,7 @@ export default function FlowCanvas() {
                     }
                   }
                   setEditingMessageId(null);
+                  setOriginalComponentData(null);
                   // Dispatch event to clear highlight in preview
                   const event = new CustomEvent("editWindowClose");
                   window.dispatchEvent(event);
@@ -2012,7 +2502,25 @@ export default function FlowCanvas() {
               <button
                 className="cancel-btn"
                 onClick={() => {
+                  // Restore original component data if it exists
+                  if (originalComponentData && editingMessageId) {
+                    const node = nodes.find(n => n.data.messageId === editingMessageId);
+                    if (node) {
+                      setComponents(prev => new Map(prev).set(originalComponentData.id, originalComponentData));
+                      
+                      // Dispatch event to update preview with original data
+                      const event = new CustomEvent("updateComponentData", {
+                        detail: { 
+                          messageId: editingMessageId, 
+                          componentData: originalComponentData 
+                        },
+                      });
+                      window.dispatchEvent(event);
+                    }
+                  }
+                  
                   setEditingMessageId(null);
+                  setOriginalComponentData(null);
                   // Dispatch event to clear highlight in preview
                   const event = new CustomEvent("editWindowClose");
                   window.dispatchEvent(event);
