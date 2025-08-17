@@ -131,7 +131,19 @@ export default function ConversationPreview() {
   // Load default state on mount
   useEffect(() => {
     if (defaultState.messages.length > 0) {
-      setMessages(defaultState.messages);
+      // Process messages to include banner data from components
+      const processedMessages = defaultState.messages.map(message => {
+        const component = (defaultState.components as any)[message.componentId];
+        if (component && component.content.banner?.text) {
+          return {
+            ...message,
+            bannerText: component.content.banner.text
+          };
+        }
+        return message;
+      });
+      
+      setMessages(processedMessages);
       setOrphanMessageIds(new Set(defaultState.orphanMessageIds || []));
     }
   }, []);
