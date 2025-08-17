@@ -1366,8 +1366,10 @@ export default function FlowCanvas() {
               
             {/* Primary UI Tool Type dropdown - separate from header */}
             <div style={{ position: "sticky", top: "69px", backgroundColor: "#FFF7F1", zIndex: 4, marginBottom: "27px", minWidth: 0, paddingTop: "8px", paddingBottom: "11px", borderBottom: "1px solid #E9DDD3" }}>
-              <label style={{ display: "block", marginBottom: "8px", color: "#003250", fontWeight: "500", fontSize: "14px" }}>Primary UI Tool Type:</label>
-              <div className="ui-tool-type-dropdown-container" style={{ position: "relative" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+                <div style={{ flex: "1" }}>
+                  <label style={{ display: "block", marginBottom: "8px", color: "#003250", fontWeight: "500", fontSize: "14px" }}>Primary UI Tool Type:</label>
+                  <div className="ui-tool-type-dropdown-container" style={{ position: "relative" }}>
                 <div
                   onClick={() => setUiToolTypeDropdownOpen(!uiToolTypeDropdownOpen)}
                   style={{
@@ -1470,6 +1472,86 @@ export default function FlowCanvas() {
                     ))}
                   </div>
                 )}
+              </div>
+                </div>
+                
+                {/* Add Ons Section - Right Side */}
+                <div style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                  gap: "8px",
+                  marginLeft: "20px",
+                  marginTop: "5px"
+                }}>
+                  <div style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "8px"
+                  }}>
+                    <span style={{
+                      fontSize: "14px",
+                      color: "#003250",
+                      fontWeight: "500",
+                      whiteSpace: "nowrap"
+                    }}>
+                      Add Ons:
+                    </span>
+                    <label style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      fontSize: "14px",
+                      color: "#003250",
+                      cursor: "pointer"
+                    }}>
+                      <input
+                        type="checkbox"
+                        style={{
+                          accentColor: "#F16B68",
+                          transform: "scale(1.1)"
+                        }}
+                      />
+                      Banner
+                    </label>
+                    <label style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      fontSize: "14px",
+                      color: "#003250",
+                      cursor: "pointer"
+                    }}>
+                      <input
+                        type="checkbox"
+                        style={{
+                          accentColor: "#F16B68",
+                          transform: "scale(1.1)"
+                        }}
+                      />
+                      Text
+                    </label>
+                  </div>
+                  <div style={{ marginLeft: "69px" }}>
+                    <label style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "4px",
+                      fontSize: "14px",
+                      color: "#003250",
+                      cursor: "pointer"
+                    }}>
+                      <input
+                        type="checkbox"
+                        style={{
+                          accentColor: "#F16B68",
+                          transform: "scale(1.1)"
+                        }}
+                      />
+                      Celebration Modal
+                    </label>
+                  </div>
+                </div>
               </div>
             </div>
             <div className="edit-window-content" style={{ width: "100%" }}>
