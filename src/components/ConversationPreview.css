@@ -5,7 +5,7 @@
   width: 400px;
   height: 100vh;
   background: #FFF7F1;
-  border-left: 1px solid #333;
+  border-left: 0.5px solid #E9DDD3;
   display: flex;
   flex-direction: column;
   z-index: 1000;
@@ -14,7 +14,7 @@
 
 .conversation-header {
   padding: 9px 20px;
-  border-bottom: 1px solid #333;
+  border-bottom: 0.5px solid #E9DDD3;
   display: flex;
   align-items: center;
   gap: 30px;
@@ -177,7 +177,7 @@
 
 .conversation-input {
   padding: 20px;
-  border-top: 1px solid #333;
+  border-top: 0.5px solid #E9DDD3;
   display: flex;
   gap: 12px;
   align-items: center;
