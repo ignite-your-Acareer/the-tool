@@ -14,6 +14,8 @@ type Message = {
   type: MessageType;
   uiToolType?: string;
   showDropdown?: boolean;
+  suggestions?: string[];
+  image?: string;
   cardData?: {
     title: string;
     description: string;
@@ -168,6 +170,10 @@ export default function ConversationPreview() {
       setHighlightedMessageId(null);
     };
 
+    const handleEditWindowClose = () => {
+      setHighlightedMessageId(null);
+    };
+
     const handleAddMessage = (event: CustomEvent) => {
       const { messageId, componentId, uiToolType, showDropdown } = event.detail;
       
@@ -273,8 +279,16 @@ export default function ConversationPreview() {
                 ...msg, 
                 content: componentData.uiToolType === "banner" 
                   ? componentData.content.banner?.text || "New banner"
+                  : componentData.uiToolType === "question"
+                  ? componentData.content.question?.text || "New question"
                   : componentData.content.message?.text || "New component added",
-                uiToolType: componentData.uiToolType
+                uiToolType: componentData.uiToolType,
+                suggestions: componentData.uiToolType === "question" 
+                  ? componentData.content.question?.suggestions || []
+                  : undefined,
+                image: componentData.uiToolType === "question"
+                  ? componentData.content.question?.image || undefined
+                  : undefined
               }
             : msg
         )
@@ -285,6 +299,7 @@ export default function ConversationPreview() {
     window.addEventListener("scrollToMessage", handleScrollToMessage as EventListener);
     window.addEventListener("highlightMessage", handleHighlightMessage as EventListener);
     window.addEventListener("unhighlightMessage", handleUnhighlightMessage as EventListener);
+    window.addEventListener("editWindowClose", handleEditWindowClose as EventListener);
     window.addEventListener("addMessage", handleAddMessage as EventListener);
     window.addEventListener("updateMessage", handleUpdateMessage as EventListener);
     window.addEventListener("deleteMessage", handleDeleteMessage as EventListener);
@@ -297,9 +312,10 @@ export default function ConversationPreview() {
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("scrollToMessage", handleScrollToMessage as EventListener);
-      window.removeEventListener("highlightMessage", handleHighlightMessage as EventListener);
-      window.removeEventListener("unhighlightMessage", handleUnhighlightMessage as EventListener);
-      window.removeEventListener("addMessage", handleAddMessage as EventListener);
+          window.removeEventListener("highlightMessage", handleHighlightMessage as EventListener);
+    window.removeEventListener("unhighlightMessage", handleUnhighlightMessage as EventListener);
+    window.removeEventListener("editWindowClose", handleEditWindowClose as EventListener);
+    window.removeEventListener("addMessage", handleAddMessage as EventListener);
       window.removeEventListener("updateMessage", handleUpdateMessage as EventListener);
       window.removeEventListener("deleteMessage", handleDeleteMessage as EventListener);
       window.removeEventListener("syncMessageOrder", handleSyncMessageOrder as EventListener);
@@ -315,6 +331,33 @@ export default function ConversationPreview() {
       return (
         <div className="message-banner">
           <h2 className="banner-title">{message.content}</h2>
+        </div>
+      );
+    }
+    
+    // Check if this is a question type message
+    if (message.uiToolType === "question") {
+      return (
+        <div className="message-question">
+          <div className="question-card">
+            <div className="question-top-section">
+              {message.image && (
+                <div className="question-image">
+                  <img src={message.image} alt="Question illustration" />
+                </div>
+              )}
+              <div className="question-text">{message.content}</div>
+            </div>
+          </div>
+          {message.suggestions && message.suggestions.length > 0 && (
+            <div className="question-suggestions">
+              {message.suggestions.map((suggestion, index) => (
+                <button key={index} className="suggestion-button">
+                  {suggestion}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       );
     }
@@ -396,7 +439,7 @@ export default function ConversationPreview() {
       )}
       <div className="conversation-header">
         <div className="hamburger-menu">☰</div>
-        <h3>Clarity</h3>
+        <h3></h3>
         <div className="profile-photo">
           <div className="profile-circle">R</div>
         </div>
@@ -487,6 +530,7 @@ export default function ConversationPreview() {
                       justifyContent: "center",
                       zIndex: 10,
                       transition: "background-color 0.2s ease",
+                      outline: "none",
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.background = "rgba(0, 0, 0, 0.2)";
@@ -615,6 +659,7 @@ export default function ConversationPreview() {
                 color: "#FA8072",
                 fontWeight: "500",
                 borderBottom: "1px solid #E9DDD3",
+                outline: "none",
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = "#F5F5F5";
@@ -656,6 +701,7 @@ export default function ConversationPreview() {
                 fontSize: "14px",
                 color: "#F16B68",
                 fontWeight: "500",
+                outline: "none",
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = "#F5F5F5";
@@ -710,6 +756,7 @@ export default function ConversationPreview() {
                   padding: "8px 16px",
                   fontSize: "14px",
                   cursor: "pointer",
+                  outline: "none",
                 }}
               >
                 Delete
@@ -726,6 +773,7 @@ export default function ConversationPreview() {
                   fontSize: "14px",
                   cursor: "pointer",
                   marginLeft: "8px",
+                  outline: "none",
                 }}
               >
                 Cancel
@@ -757,6 +805,7 @@ export default function ConversationPreview() {
                   padding: "8px 16px",
                   fontSize: "14px",
                   cursor: "pointer",
+                  outline: "none",
                 }}
               >
                 OK

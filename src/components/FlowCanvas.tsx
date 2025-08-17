@@ -23,7 +23,7 @@ type ComponentData = {
   uiToolType: UIToolType;        // UI tool type
   content: {
     message?: { text: string; richText?: boolean; };
-    question?: { text: string; options: string[]; };
+    question?: { text?: string; options?: string[]; image?: string; suggestions?: string[]; };
     form?: { fields: Record<string, unknown>[]; };
     freeChat?: { text: string; };
     accordion?: { title: string; content: string; };
@@ -59,6 +59,99 @@ export default function FlowCanvas() {
   const [isTestMode, setIsTestMode] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState<Set<string>>(new Set());
+  const [imageDropdownOpen, setImageDropdownOpen] = useState(false);
+  const [uiToolTypeDropdownOpen, setUiToolTypeDropdownOpen] = useState(false);
+  
+  // UI Tool Type options - single source of truth
+  const uiToolTypeOptions = [
+    { value: "message", label: "Message" },
+    { value: "question", label: "Question" },
+    { value: "form", label: "Form" },
+    { value: "freeChat", label: "Free Chat" },
+    { value: "accordion", label: "Accordion" },
+    { value: "banner", label: "Banner" },
+    { value: "intro", label: "Intro" },
+    { value: "multiSelect", label: "Multi Select" },
+  ];
+  
+  // Available images for dropdown - all actual files from public/img folder
+  const availableImages = [
+    { value: "", label: "No image" },
+    { value: "/img/assessment-start.png", label: "Assessment Start" },
+    { value: "/img/avatar.png", label: "Avatar" },
+    { value: "/img/axial-mark.svg", label: "Axial Mark" },
+    { value: "/img/career-findings-header.png", label: "Career Findings Header" },
+    { value: "/img/chat.png", label: "Chat" },
+    { value: "/img/clarity-header.png", label: "Clarity Header" },
+    { value: "/img/clarity-header.svg", label: "Clarity Header SVG" },
+    { value: "/img/clouds.svg", label: "Clouds" },
+    { value: "/img/home-clarity.png", label: "Home Clarity" },
+    { value: "/img/home-other.png", label: "Home Other" },
+    { value: "/img/home/clarity-thumb.png", label: "Home - Clarity Thumb" },
+    { value: "/img/home/connections-thumb.png", label: "Home - Connections Thumb" },
+    { value: "/img/home/credentials-thumb.png", label: "Home - Credentials Thumb" },
+    { value: "/img/home/visibility-thumb.png", label: "Home - Visibility Thumb" },
+    { value: "/img/intro/intro-connections.png", label: "Intro - Connections" },
+    { value: "/img/intro/intro-profile.png", label: "Intro - Profile" },
+    { value: "/img/login-thumb.png", label: "Login Thumb" },
+    { value: "/img/onboarding/career-growth.png", label: "Onboarding - Career Growth" },
+    { value: "/img/onboarding/finding-the-right-career.png", label: "Onboarding - Finding Right Career" },
+    { value: "/img/onboarding/getting-a-job.png", label: "Onboarding - Getting a Job" },
+    { value: "/img/onboarding/leadership-development.png", label: "Onboarding - Leadership Development" },
+    { value: "/img/onboarding/networking-opportunities.png", label: "Onboarding - Networking" },
+    { value: "/img/onboarding/personal-growth.png", label: "Onboarding - Personal Growth" },
+    { value: "/img/profile-mock.png", label: "Profile Mock" },
+    { value: "/img/steps/assessment/celebration.png", label: "Steps - Assessment Celebration" },
+    { value: "/img/steps/careerPaths/celebration.png", label: "Steps - Career Paths Celebration" },
+    { value: "/img/steps/careerStatement/celebration.png", label: "Steps - Career Statement Celebration" },
+    { value: "/img/steps/careerStatement/question/1.png", label: "Steps - Career Statement Q1" },
+    { value: "/img/steps/dreamJob/celebration.png", label: "Steps - Dream Job Celebration" },
+    { value: "/img/steps/dreamJob/celebration-alt.png", label: "Steps - Dream Job Celebration Alt" },
+    { value: "/img/steps/financialNeeds/celebration.png", label: "Steps - Financial Needs Celebration" },
+    { value: "/img/steps/financialNeeds/question/1.png", label: "Steps - Financial Needs Q1" },
+    { value: "/img/steps/financialNeeds/question/2.png", label: "Steps - Financial Needs Q2" },
+    { value: "/img/steps/financialNeeds/question/3.png", label: "Steps - Financial Needs Q3" },
+    { value: "/img/steps/financialNeeds/question/4.png", label: "Steps - Financial Needs Q4" },
+    { value: "/img/steps/financialNeeds/question/5.png", label: "Steps - Financial Needs Q5" },
+    { value: "/img/steps/financialNeeds/question/6.png", label: "Steps - Financial Needs Q6" },
+    { value: "/img/steps/financialNeeds/question/7.png", label: "Steps - Financial Needs Q7" },
+    { value: "/img/steps/financialNeeds/question/8.png", label: "Steps - Financial Needs Q8" },
+    { value: "/img/steps/inspirations/celebration.png", label: "Steps - Inspirations Celebration" },
+    { value: "/img/steps/inspirations/question/1.png", label: "Steps - Inspirations Q1" },
+    { value: "/img/steps/inspirations/question/2.png", label: "Steps - Inspirations Q2" },
+    { value: "/img/steps/inspirations/question/3.png", label: "Steps - Inspirations Q3" },
+    { value: "/img/steps/inspirations/question/4.png", label: "Steps - Inspirations Q4" },
+    { value: "/img/steps/inspirations/question/5.png", label: "Steps - Inspirations Q5" },
+    { value: "/img/steps/inspirations/question/6.png", label: "Steps - Inspirations Q6" },
+    { value: "/img/steps/livingEnvironment/celebration.png", label: "Steps - Living Environment Celebration" },
+    { value: "/img/steps/livingEnvironment/question/1.png", label: "Steps - Living Environment Q1" },
+    { value: "/img/steps/livingEnvironment/question/2.png", label: "Steps - Living Environment Q2" },
+    { value: "/img/steps/livingEnvironment/question/3.png", label: "Steps - Living Environment Q3" },
+    { value: "/img/steps/livingEnvironment/question/4.png", label: "Steps - Living Environment Q4" },
+    { value: "/img/steps/livingEnvironment/question/5.png", label: "Steps - Living Environment Q5" },
+    { value: "/img/steps/livingEnvironment/question/6.png", label: "Steps - Living Environment Q6" },
+    { value: "/img/steps/strengths/celebration.png", label: "Steps - Strengths Celebration" },
+    { value: "/img/steps/strengths/question/1.png", label: "Steps - Strengths Q1" },
+    { value: "/img/steps/strengths/question/2.png", label: "Steps - Strengths Q2" },
+    { value: "/img/steps/strengths/question/3.png", label: "Steps - Strengths Q3" },
+    { value: "/img/steps/strengths/question/4.png", label: "Steps - Strengths Q4" },
+    { value: "/img/steps/strengths/question/5.png", label: "Steps - Strengths Q5" },
+    { value: "/img/steps/strengths/question/6.png", label: "Steps - Strengths Q6" },
+    { value: "/img/steps/values/celebration.png", label: "Steps - Values Celebration" },
+    { value: "/img/steps/values/question/1.png", label: "Steps - Values Q1" },
+    { value: "/img/steps/values/question/2.png", label: "Steps - Values Q2" },
+    { value: "/img/steps/values/question/3.png", label: "Steps - Values Q3" },
+    { value: "/img/steps/values/question/4.png", label: "Steps - Values Q4" },
+    { value: "/img/steps/values/question/5.png", label: "Steps - Values Q5" },
+    { value: "/img/steps/values/question/6.png", label: "Steps - Values Q6" },
+    { value: "/img/steps/workEnvironment/celebration.png", label: "Steps - Work Environment Celebration" },
+    { value: "/img/steps/workEnvironment/question/1.png", label: "Steps - Work Environment Q1" },
+    { value: "/img/steps/workEnvironment/question/2.png", label: "Steps - Work Environment Q2" },
+    { value: "/img/steps/workEnvironment/question/3.png", label: "Steps - Work Environment Q3" },
+    { value: "/img/steps/workEnvironment/question/4.png", label: "Steps - Work Environment Q4" },
+    { value: "/img/steps/workEnvironment/question/5.png", label: "Steps - Work Environment Q5" },
+    { value: "/img/steps/workEnvironment/question/6.png", label: "Steps - Work Environment Q6" },
+  ];
 
   const onConnect = useCallback((connection: Connection) => setEdges((eds) => addEdge(connection, eds)), [setEdges]);
 
@@ -208,7 +301,8 @@ export default function FlowCanvas() {
       uiToolType: "message", // Default to message
       content: {
         message: { text: selectedText, richText: true },
-        banner: { text: "New Banner", type: "default" }
+        banner: { text: "New Banner", type: "default" },
+        question: { text: "", options: [], suggestions: [] }
       },
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -283,10 +377,10 @@ export default function FlowCanvas() {
 
     // Dispatch events to delete messages from conversation
     messageIdArray.forEach(messageId => {
-      const event = new CustomEvent("deleteMessage", {
-        detail: { messageId },
-      });
-      window.dispatchEvent(event);
+    const event = new CustomEvent("deleteMessage", {
+      detail: { messageId },
+    });
+    window.dispatchEvent(event);
     });
   }, [nodes, setNodes, setEdges]);
 
@@ -474,6 +568,24 @@ export default function FlowCanvas() {
   useEffect(() => {
     searchNodes(searchQuery);
   }, [searchQuery, searchNodes]);
+
+  // Close dropdowns when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (!target.closest('.image-dropdown-container')) {
+        setImageDropdownOpen(false);
+      }
+      if (!target.closest('.ui-tool-type-dropdown-container')) {
+        setUiToolTypeDropdownOpen(false);
+      }
+    };
+
+    if (imageDropdownOpen || uiToolTypeDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+      return () => document.removeEventListener('mousedown', handleClickOutside);
+    }
+  }, [imageDropdownOpen, uiToolTypeDropdownOpen]);
 
   useEffect(() => {
     const handleUpdateNodeContent = (event: CustomEvent) => {
@@ -676,32 +788,55 @@ export default function FlowCanvas() {
         }}>
           {component.slug}
         </div>
-        {component.uiToolType === "banner" ? (
-          <div className="card-node__desc" style={{
-            fontSize: "12px",
-            color: "#FFF",
-            marginTop: "4px",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-            maxWidth: "200px"
-          }}>
-            {component.content.banner?.text || "New Banner"}
-          </div>
-        ) : component.content.message?.text && (
-          <div className="card-node__desc" style={{
-            fontSize: "12px",
-            color: "#FFF",
-            marginTop: "4px",
-            overflow: "hidden",
-            textOverflow: "ellipsis",
-            whiteSpace: "nowrap",
-            maxWidth: "200px"
-          }}>
-            {component.content.message.text.substring(0, 50)}
-            {component.content.message.text.length > 50 ? "..." : ""}
-          </div>
-        )}
+        {(() => {
+          let content = "";
+          let displayText = "";
+          
+          switch (component.uiToolType) {
+            case "banner":
+              content = component.content.banner?.text || "New Banner";
+              break;
+            case "question":
+              content = component.content.question?.text || "New Question";
+              break;
+            case "message":
+              content = component.content.message?.text || "New Message";
+              break;
+            case "form":
+              content = "Form Component";
+              break;
+            case "freeChat":
+              content = component.content.freeChat?.text || "Free Chat";
+              break;
+            case "accordion":
+              content = component.content.accordion?.title || "Accordion";
+              break;
+            case "intro":
+              content = component.content.intro?.text || "Intro";
+              break;
+            case "multiSelect":
+              content = component.content.multiSelect?.text || "Multi Select";
+              break;
+            default:
+              content = "Component";
+          }
+          
+          displayText = content.length > 50 ? content.substring(0, 50) + "..." : content;
+          
+          return (
+            <div className="card-node__desc" style={{
+              fontSize: "12px",
+              color: "#FFF",
+              marginTop: "4px",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              maxWidth: "200px"
+            }}>
+              {displayText}
+            </div>
+          );
+        })()}
         {component.uiToolType && (
           <div className="card-node__tool-type" style={{ 
             marginTop: "8px", 
@@ -728,6 +863,7 @@ export default function FlowCanvas() {
               });
             }
           }}
+          style={{ outline: "none" }}
         >
           ⋯
         </button>
@@ -780,7 +916,7 @@ export default function FlowCanvas() {
         elementsSelectable={false}
         fitView
         snapToGrid={true}
-        snapGrid={[480, 120]}
+        snapGrid={[480, 60]}
         className={searchQuery ? "searching" : ""}
         onPaneClick={() => {
           // Clear selection when clicking on empty space
@@ -887,6 +1023,7 @@ export default function FlowCanvas() {
               alignItems: "center",
               justifyContent: "center",
               zIndex: 11,
+              outline: "none",
             }}
           >
             ×
@@ -923,6 +1060,7 @@ export default function FlowCanvas() {
                   padding: "8px 16px",
                   fontSize: "14px",
                   cursor: "pointer",
+                  outline: "none",
                 }}
               >
                 Delete
@@ -939,6 +1077,7 @@ export default function FlowCanvas() {
                   fontSize: "14px",
                   cursor: "pointer",
                   marginLeft: "8px",
+                  outline: "none",
                 }}
               >
                 Cancel
@@ -996,6 +1135,7 @@ export default function FlowCanvas() {
                 color: "#FA8072",
                 fontWeight: "500",
                 borderBottom: "1px solid #E9DDD3",
+                outline: "none",
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = "#F5F5F5";
@@ -1044,6 +1184,7 @@ export default function FlowCanvas() {
                 fontSize: "14px",
                 color: "#F16B68",
                 fontWeight: "500",
+                outline: "none",
               }}
               onMouseEnter={(e) => {
                 e.currentTarget.style.background = "#F5F5F5";
@@ -1061,178 +1202,235 @@ export default function FlowCanvas() {
       {/* Edit Window */}
       {editingMessageId && (
         <div className="edit-window-overlay">
-          <div className="edit-window">
+          <div className="edit-window" style={{ maxWidth: "577px" }}>
             <div className="edit-window-header">
-              <h4>Edit Message</h4>
+              <h4>Edit Component</h4>
               <button
                 className="close-edit-btn"
-                onClick={() => setEditingMessageId(null)}
+                onClick={() => {
+                  setEditingMessageId(null);
+                  // Dispatch event to clear highlight in preview
+                  const event = new CustomEvent("editWindowClose");
+                  window.dispatchEvent(event);
+                }}
                 style={{
                   background: "none",
                   border: "none",
                   fontSize: "18px",
                   cursor: "pointer",
                   color: "#003250",
+                  outline: "none",
                 }}
               >
                 ×
               </button>
             </div>
-            <div className="edit-window-content">
-              <label>Component Name:</label>
-              <input
-                type="text"
-                value={(() => {
-                  const node = nodes.find(n => n.data.messageId === editingMessageId);
-                  if (!node) return "";
-                  const component = components.get(node.data.componentId);
-                  return component?.name || "";
-                })()}
-                onChange={(e) => {
-                  const node = nodes.find(n => n.data.messageId === editingMessageId);
-                  if (node) {
-                    const component = components.get(node.data.componentId);
-                    if (component) {
-                      const updatedComponent = {
-                        ...component,
-                        name: e.target.value,
-                        updatedAt: new Date()
-                      };
-                      setComponents(prev => new Map(prev).set(component.id, updatedComponent));
-                      
-                      // Dispatch event to update preview
-                      const event = new CustomEvent("updateComponentData", {
-                        detail: { 
-                          messageId: editingMessageId, 
-                          componentData: updatedComponent 
-                        },
-                      });
-                      window.dispatchEvent(event);
-                    }
-                  }
-                }}
-                placeholder="Enter component name..."
-                style={{
-                  width: "100%",
-                  padding: "12px",
-                  border: "1px solid #E9DDD3",
-                  borderRadius: "8px",
-                  fontSize: "14px",
-                  fontFamily: "inherit",
-                  marginBottom: "16px",
-                }}
-              />
-              
-              <label>Slug:</label>
-              <input
-                type="text"
-                value={(() => {
-                  const node = nodes.find(n => n.data.messageId === editingMessageId);
-                  if (!node) return "";
-                  const component = components.get(node.data.componentId);
-                  return component?.slug || "";
-                })()}
-                onChange={(e) => {
-                  const node = nodes.find(n => n.data.messageId === editingMessageId);
-                  if (node) {
-                    const component = components.get(node.data.componentId);
-                    if (component) {
-                      const updatedComponent = {
-                        ...component,
-                        slug: e.target.value,
-                        updatedAt: new Date()
-                      };
-                      setComponents(prev => new Map(prev).set(component.id, updatedComponent));
-                      
-                      // Dispatch event to update preview
-                      const event = new CustomEvent("updateComponentData", {
-                        detail: { 
-                          messageId: editingMessageId, 
-                          componentData: updatedComponent 
-                        },
-                      });
-                      window.dispatchEvent(event);
-                    }
-                  }
-                }}
-                placeholder="e.g., 01.03.06"
-                style={{
-                  width: "100%",
-                  padding: "12px",
-                  border: "1px solid #E9DDD3",
-                  borderRadius: "8px",
-                  fontSize: "14px",
-                  fontFamily: "inherit",
-                  marginBottom: "16px",
-                }}
-              />
+            <div className="edit-window-content" style={{ width: "100%" }}>
+              <div style={{ display: "flex", gap: "12px", marginBottom: "16px", minWidth: 0 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <label>Component Name:</label>
+                  <input
+                    type="text"
+                    value={(() => {
+                      const node = nodes.find(n => n.data.messageId === editingMessageId);
+                      if (!node) return "";
+                      const component = components.get(node.data.componentId);
+                      return component?.name || "";
+                    })()}
+                    onChange={(e) => {
+                      const node = nodes.find(n => n.data.messageId === editingMessageId);
+                      if (node) {
+                        const component = components.get(node.data.componentId);
+                        if (component) {
+                          const updatedComponent = {
+                            ...component,
+                            name: e.target.value,
+                            updatedAt: new Date()
+                          };
+                          setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                          
+                          // Dispatch event to update preview
+                          const event = new CustomEvent("updateComponentData", {
+                            detail: { 
+                              messageId: editingMessageId, 
+                              componentData: updatedComponent 
+                            },
+                          });
+                          window.dispatchEvent(event);
+                        }
+                      }
+                    }}
+                    placeholder="Enter component name..."
+                    style={{
+                      width: "100%",
+                      padding: "8px 12px",
+                      border: "1px solid #E9DDD3",
+                      borderRadius: "8px",
+                      fontSize: "14px",
+                      fontFamily: "inherit",
+                      height: "33px",
+                      boxSizing: "border-box",
+                    }}
+                  />
+                </div>
+                
+                <div style={{ flex: 0.7, minWidth: 0 }}>
+                  <label>Slug:</label>
+                  <input
+                    type="text"
+                    value={(() => {
+                      const node = nodes.find(n => n.data.messageId === editingMessageId);
+                      if (!node) return "";
+                      const component = components.get(node.data.componentId);
+                      return component?.slug || "";
+                    })()}
+                    onChange={(e) => {
+                      const node = nodes.find(n => n.data.messageId === editingMessageId);
+                      if (node) {
+                        const component = components.get(node.data.componentId);
+                        if (component) {
+                          const updatedComponent = {
+                            ...component,
+                            slug: e.target.value,
+                            updatedAt: new Date()
+                          };
+                          setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                          
+                          // Dispatch event to update preview
+                          const event = new CustomEvent("updateComponentData", {
+                            detail: { 
+                              messageId: editingMessageId, 
+                              componentData: updatedComponent 
+                            },
+                          });
+                          window.dispatchEvent(event);
+                        }
+                      }
+                    }}
+                    placeholder="e.g., 01.03.06"
+                    style={{
+                      width: "100%",
+                      padding: "8px 12px",
+                      border: "1px solid #E9DDD3",
+                      borderRadius: "8px",
+                      fontSize: "14px",
+                      fontFamily: "inherit",
+                      height: "33px",
+                      boxSizing: "border-box",
+                    }}
+                  />
+                </div>
+              </div>
               
               <label>UI Tool Type:</label>
-              <select
-                value={(() => {
-                  const node = nodes.find(n => n.data.messageId === editingMessageId);
-                  if (!node) return "message";
-                  const component = components.get(node.data.componentId);
-                  return component?.uiToolType || "message";
-                })()}
-                onChange={(e) => {
-                  const node = nodes.find(n => n.data.messageId === editingMessageId);
-                  if (node) {
-                    const component = components.get(node.data.componentId);
-                    if (component) {
-                      const newUiToolType = e.target.value as UIToolType;
-                      const updatedComponent = {
-                        ...component,
-                        uiToolType: newUiToolType,
-                        updatedAt: new Date()
-                      };
-                      setComponents(prev => new Map(prev).set(component.id, updatedComponent));
-                      
-                      // Dispatch component data update first
-                      const componentDataEvent = new CustomEvent("updateComponentData", {
-                        detail: { 
-                          messageId: editingMessageId, 
-                          componentData: updatedComponent 
-                        },
-                      });
-                      window.dispatchEvent(componentDataEvent);
-                      
-                      // Then dispatch event to update preview with new UI tool type
-                      const event = new CustomEvent("updateMessage", {
-                        detail: { 
-                          messageId: editingMessageId, 
-                          uiToolType: newUiToolType, 
-                          showDropdown: false 
-                        },
-                      });
-                      window.dispatchEvent(event);
-                    }
-                  }
-                }}
-                style={{
-                  width: "100%",
-                  padding: "12px",
-                  border: "1px solid #E9DDD3",
-                  borderRadius: "8px",
-                  fontSize: "14px",
-                  fontFamily: "inherit",
-                  marginBottom: "16px",
-                }}
-              >
-                <option value="message">Message</option>
-                <option value="question">Question</option>
-                <option value="form">Form</option>
-                <option value="freeChat">Free Chat</option>
-                <option value="accordion">Accordion</option>
-                <option value="banner">Banner</option>
-                <option value="intro">Intro</option>
-                <option value="multiSelect">Multi Select</option>
-              </select>
+              <div className="ui-tool-type-dropdown-container" style={{ position: "relative", marginBottom: "16px" }}>
+                <div
+                  onClick={() => setUiToolTypeDropdownOpen(!uiToolTypeDropdownOpen)}
+                  style={{
+                    width: "100%",
+                    padding: "8px 12px",
+                    border: "1px solid #E9DDD3",
+                    borderRadius: "8px",
+                    fontSize: "14px",
+                    fontFamily: "inherit",
+                    background: "white",
+                    cursor: "pointer",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    alignItems: "center",
+                    height: "33px",
+                    boxSizing: "border-box",
+                  }}
+                >
+                                    <span>
+                    {(() => {
+                      const node = nodes.find(n => n.data.messageId === editingMessageId);
+                      if (!node) return "Message";
+                      const component = components.get(node.data.componentId);
+                      const uiToolType = component?.uiToolType || "message";
+                      return uiToolTypeOptions.find(option => option.value === uiToolType)?.label || "Message";
+                    })()}
+                  </span>
+                  <span style={{ fontSize: "18px", color: "#333", fontWeight: "600", transform: "translate(-3px, -3px)" }}>⌵</span>
+                </div>
+                
+                {uiToolTypeDropdownOpen && (
+                  <div
+                    style={{
+                      position: "absolute",
+                      top: "100%",
+                      left: 0,
+                      right: 0,
+                      background: "white",
+                      border: "1px solid #E9DDD3",
+                      borderRadius: "8px",
+                      marginTop: "4px",
+                      zIndex: 1000,
+                      boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+                    }}
+                  >
+                                        {uiToolTypeOptions.map((option) => (
+                      <div
+                        key={option.value}
+                        onClick={() => {
+                          const node = nodes.find(n => n.data.messageId === editingMessageId);
+                          if (node) {
+                            const component = components.get(node.data.componentId);
+                            if (component) {
+                              const newUiToolType = option.value as UIToolType;
+                              const updatedComponent = {
+                                ...component,
+                                uiToolType: newUiToolType,
+                                updatedAt: new Date()
+                              };
+                              setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                              
+                              // Dispatch component data update first
+                              const componentDataEvent = new CustomEvent("updateComponentData", {
+                                detail: { 
+                                  messageId: editingMessageId, 
+                                  componentData: updatedComponent 
+                                },
+                              });
+                              window.dispatchEvent(componentDataEvent);
+                              
+                              // Then dispatch event to update preview with new UI tool type
+                              const event = new CustomEvent("updateMessage", {
+                                detail: { 
+                                  messageId: editingMessageId, 
+                                  uiToolType: newUiToolType, 
+                                  showDropdown: false 
+                                },
+                              });
+                              window.dispatchEvent(event);
+                            }
+                          }
+                          setUiToolTypeDropdownOpen(false);
+                        }}
+                        style={{
+                          padding: "8px 12px",
+                          cursor: "pointer",
+                          borderBottom: "1px solid #f0f0f0",
+                          fontSize: "14px",
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = "#f5f5f5";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = "white";
+                        }}
+                      >
+                        {option.label}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
               
               {(() => {
-                const node = nodes.find(n => n.data.messageId === editingMessageId);
+                  const node = nodes.find(n => n.data.messageId === editingMessageId);
                 if (!node) return null;
-                const component = components.get(node.data.componentId);
+                  const component = components.get(node.data.componentId);
                 const uiToolType = component?.uiToolType || "message";
                 
                 if (uiToolType === "banner") {
@@ -1242,7 +1440,7 @@ export default function FlowCanvas() {
                       <input
                         type="text"
                         value={component?.content.banner?.text || ""}
-                        onChange={(e) => {
+                onChange={(e) => {
                           if (node) {
                             const component = components.get(node.data.componentId);
                             if (component) {
@@ -1255,40 +1453,42 @@ export default function FlowCanvas() {
                                     type: "default"
                                   }
                                 },
-                                updatedAt: new Date()
-                              };
-                              setComponents(prev => new Map(prev).set(component.id, updatedComponent));
-                              
-                              // Dispatch event to update preview
-                              const event = new CustomEvent("updateComponentData", {
-                                detail: { 
-                                  messageId: editingMessageId, 
-                                  componentData: updatedComponent 
-                                },
-                              });
-                              window.dispatchEvent(event);
-                            }
-                          }
-                        }}
+                        updatedAt: new Date()
+                      };
+                      setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                      
+                      // Dispatch event to update preview
+                      const event = new CustomEvent("updateComponentData", {
+                        detail: { 
+                          messageId: editingMessageId, 
+                          componentData: updatedComponent 
+                        },
+                      });
+                      window.dispatchEvent(event);
+                    }
+                  }
+                }}
                         placeholder="Enter banner title (e.g., 'Strengths')..."
-                        style={{
-                          width: "100%",
-                          padding: "12px",
+                style={{
+                  width: "100%",
+                          padding: "8px 12px",
                           border: "1px solid #E9DDD3",
                           borderRadius: "8px",
                           fontSize: "14px",
                           fontFamily: "inherit",
                           marginBottom: "16px",
+                          height: "33px",
+                          boxSizing: "border-box",
                         }}
                       />
                     </>
                   );
-                } else {
+                } else if (uiToolType === "question") {
                   return (
                     <>
-                      <label>Message Content:</label>
+                      <label>Question Text:</label>
                       <textarea
-                        value={component?.content.message?.text || ""}
+                        value={component?.content.question?.text || ""}
                         onChange={(e) => {
                           if (node) {
                             const component = components.get(node.data.componentId);
@@ -1297,8 +1497,8 @@ export default function FlowCanvas() {
                                 ...component,
                                 content: {
                                   ...component.content,
-                                  message: {
-                                    ...component.content.message,
+                                  question: {
+                                    ...component.content.question,
                                     text: e.target.value
                                   }
                                 },
@@ -1317,18 +1517,448 @@ export default function FlowCanvas() {
                             }
                           }
                         }}
-                        placeholder="Enter your message content..."
-                        style={{
+                        placeholder="Enter your question text (supports Markdown)..."
+                                                style={{
                           width: "100%",
-                          minHeight: "100px",
+                          minHeight: "80px",
                           padding: "12px",
                           border: "1px solid #E9DDD3",
                           borderRadius: "8px",
                           fontSize: "14px",
                           fontFamily: "inherit",
+                          marginBottom: "16px",
                           resize: "vertical",
+                          boxSizing: "border-box",
                         }}
                       />
+                      
+                      <label>Image:</label>
+                      <div style={{ display: "flex", gap: "12px", alignItems: "flex-start", marginBottom: "16px" }}>
+                        <div className="image-dropdown-container" style={{ flex: 1, position: "relative" }}>
+                          <div
+                            onClick={() => setImageDropdownOpen(!imageDropdownOpen)}
+                            style={{
+                              padding: "8px 12px",
+                              border: "1px solid #E9DDD3",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              fontFamily: "inherit",
+                              background: "white",
+                              cursor: "pointer",
+                              display: "flex",
+                              justifyContent: "space-between",
+                              alignItems: "center",
+                              height: "33px",
+                              boxSizing: "border-box",
+                            }}
+                          >
+                            <span>
+                              {availableImages.find(img => img.value === component?.content.question?.image)?.label || "No image"}
+                            </span>
+                            <span style={{ fontSize: "18px", color: "#333", fontWeight: "600", transform: "translateY(-3px)" }}>⌵</span>
+                          </div>
+                          
+                          {imageDropdownOpen && (
+                            <div
+                              style={{
+                                position: "absolute",
+                                top: "100%",
+                                left: 0,
+                                right: 0,
+                                background: "white",
+                                border: "1px solid #E9DDD3",
+                                borderRadius: "8px",
+                                marginTop: "4px",
+                                maxHeight: "200px",
+                                overflowY: "auto",
+                                zIndex: 1000,
+                                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+                              }}
+                            >
+                              {availableImages.map((image) => (
+                                <div
+                                  key={image.value}
+                                  onClick={() => {
+                                    // Remove any existing popups
+                                    const existingPopups = document.querySelectorAll('[data-image-preview]');
+                                    existingPopups.forEach(popup => popup.remove());
+                                    
+                                    if (node) {
+                                      const component = components.get(node.data.componentId);
+                                      if (component) {
+                                        const updatedComponent = {
+                                          ...component,
+                                          content: {
+                                            ...component.content,
+                                            question: {
+                                              ...component.content.question,
+                                              image: image.value
+                                            }
+                                          },
+                                          updatedAt: new Date()
+                                        };
+                                        setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                        
+                                        // Dispatch event to update preview
+                                        const event = new CustomEvent("updateComponentData", {
+                                          detail: { 
+                                            messageId: editingMessageId, 
+                                            componentData: updatedComponent 
+                                          },
+                                        });
+                                        window.dispatchEvent(event);
+                                      }
+                                    }
+                                    setImageDropdownOpen(false);
+                                  }}
+                                  onMouseEnter={(e) => {
+                                    e.currentTarget.style.background = "#f5f5f5";
+                                    if (image.value) {
+                                      const popup = document.createElement('div');
+                                      popup.setAttribute('data-image-preview', 'true');
+                                      popup.style.cssText = `
+                                        position: fixed;
+                                        top: ${e.clientY + 10}px;
+                                        left: ${e.clientX + 10}px;
+                                        z-index: 10001;
+                                        background: white;
+                                        border: 1px solid #E9DDD3;
+                                        border-radius: 8px;
+                                        padding: 8px;
+                                        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                                        max-width: 200px;
+                                        max-height: 200px;
+                                      `;
+                                      popup.innerHTML = `<img src="${image.value}" style="width: 100%; height: 100%; object-fit: contain;" alt="Preview" />`;
+                                      document.body.appendChild(popup);
+                                      e.currentTarget.addEventListener('mouseleave', () => {
+                                        if (popup.parentNode) {
+                                          popup.parentNode.removeChild(popup);
+                                        }
+                                      }, { once: true });
+                                    }
+                                  }}
+                                  style={{
+                                    padding: "8px 12px",
+                                    cursor: "pointer",
+                                    borderBottom: "1px solid #f0f0f0",
+                                    fontSize: "14px",
+                                  }}
+                                  onMouseLeave={(e) => {
+                                    e.currentTarget.style.background = "white";
+                                  }}
+                                >
+                                  {image.label}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        
+                        {/* Thumbnail Preview */}
+                        <div
+                          style={{
+                            width: "44px",
+                            height: "44px",
+                            border: "1px solid #E9DDD3",
+                            borderRadius: "8px",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            background: component?.content.question?.image ? "white" : "#f5f5f5",
+                            position: "relative",
+                            cursor: component?.content.question?.image ? "pointer" : "default",
+                          }}
+                          onMouseEnter={(e) => {
+                            if (component?.content.question?.image) {
+                              const popup = document.createElement('div');
+                              popup.setAttribute('data-image-preview', 'true');
+                              popup.style.cssText = `
+                                position: fixed;
+                                top: ${e.clientY + 10}px;
+                                left: ${e.clientX + 10}px;
+                                z-index: 10000;
+                                background: white;
+                                border: 1px solid #E9DDD3;
+                                border-radius: 8px;
+                                padding: 8px;
+                                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                                max-width: 200px;
+                                max-height: 200px;
+                              `;
+                              popup.innerHTML = `<img src="${component.content.question.image}" style="width: 100%; height: 100%; object-fit: contain;" alt="Preview" />`;
+                              document.body.appendChild(popup);
+                              e.currentTarget.setAttribute('data-popup', 'true');
+                              e.currentTarget.addEventListener('mouseleave', () => {
+                                if (popup.parentNode) {
+                                  popup.parentNode.removeChild(popup);
+                                }
+                              }, { once: true });
+                            }
+                          }}
+                        >
+                          {component?.content.question?.image ? (
+                            <img
+                              src={component.content.question.image}
+                              alt="Selected"
+                              style={{
+                                width: "100%",
+                                height: "100%",
+                                objectFit: "cover",
+                                borderRadius: "6px",
+                              }}
+                            />
+                          ) : (
+                            <span style={{ color: "#999", fontSize: "12px" }}>No img</span>
+                          )}
+                        </div>
+                      </div>
+                      
+                      <label>Suggested Responses:</label>
+                      <div style={{ marginBottom: "16px" }}>
+                        {(component?.content.question?.suggestions || [""]).map((suggestion, index) => (
+                          <div key={index} style={{ display: "flex", gap: "8px", marginBottom: "8px", alignItems: "center" }}>
+                            <input
+                              type="text"
+                              value={suggestion}
+                              onChange={(e) => {
+                                if (node) {
+                                  const component = components.get(node.data.componentId);
+                                  if (component) {
+                                    const currentSuggestions = component.content.question?.suggestions || [""];
+                                    const newSuggestions = [...currentSuggestions];
+                                    newSuggestions[index] = e.target.value;
+                                    
+                                    // Remove empty suggestions except the last one
+                                    const filteredSuggestions = newSuggestions.filter((s, i) => 
+                                      s.trim() !== "" || i === newSuggestions.length - 1
+                                    );
+                                    
+                                    const updatedComponent = {
+                                      ...component,
+                                      content: {
+                                        ...component.content,
+                                        question: {
+                                          ...component.content.question,
+                                          suggestions: filteredSuggestions
+                                        }
+                                      },
+                                      updatedAt: new Date()
+                                    };
+                                    setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                    
+                                    // Dispatch event to update preview
+                                    const event = new CustomEvent("updateComponentData", {
+                                      detail: { 
+                                        messageId: editingMessageId, 
+                                        componentData: updatedComponent 
+                                      },
+                                    });
+                                    window.dispatchEvent(event);
+                                  }
+                                }
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                  e.preventDefault();
+                                  if (node) {
+                                    const component = components.get(node.data.componentId);
+                                    if (component) {
+                                      const currentSuggestions = component.content.question?.suggestions || [""];
+                                      const newSuggestions = [...currentSuggestions, ""];
+                                      
+                                      const updatedComponent = {
+                                        ...component,
+                                        content: {
+                                          ...component.content,
+                                          question: {
+                                            ...component.content.question,
+                                            suggestions: newSuggestions
+                                          }
+                                        },
+                                        updatedAt: new Date()
+                                      };
+                                      setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                      
+                                      // Dispatch event to update preview
+                                      const event = new CustomEvent("updateComponentData", {
+                                        detail: { 
+                                          messageId: editingMessageId, 
+                                          componentData: updatedComponent 
+                                        },
+                                      });
+                                      window.dispatchEvent(event);
+                                    }
+                                  }
+                                }
+                              }}
+                              placeholder={`Suggestion ${index + 1}`}
+                              style={{
+                                flex: 1,
+                                padding: "8px 12px",
+                                border: "1px solid #E9DDD3",
+                                borderRadius: "6px",
+                                fontSize: "14px",
+                                fontFamily: "inherit",
+                                boxSizing: "border-box",
+                              }}
+                            />
+                            {(component?.content.question?.suggestions?.length || 1) > 1 && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (node) {
+                                    const component = components.get(node.data.componentId);
+                                    if (component) {
+                                      const currentSuggestions = component.content.question?.suggestions || [""];
+                                      const newSuggestions = currentSuggestions.filter((_, i) => i !== index);
+                                      
+                                      // Ensure we always have at least one suggestion field
+                                      if (newSuggestions.length === 0) {
+                                        newSuggestions.push("");
+                                      }
+                                      
+                                      const updatedComponent = {
+                                        ...component,
+                                        content: {
+                                          ...component.content,
+                                          question: {
+                                            ...component.content.question,
+                                            suggestions: newSuggestions
+                                          }
+                                        },
+                                        updatedAt: new Date()
+                                      };
+                                      setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                      
+                                      // Dispatch event to update preview
+                                      const event = new CustomEvent("updateComponentData", {
+                                        detail: { 
+                                          messageId: editingMessageId, 
+                                          componentData: updatedComponent 
+                                        },
+                                      });
+                                      window.dispatchEvent(event);
+                                    }
+                                  }
+                                }}
+                                style={{
+                                  background: "#F16B68",
+                                  color: "white",
+                                  border: "none",
+                                  borderRadius: "4px",
+                                  width: "24px",
+                                  height: "24px",
+                                  fontSize: "12px",
+                                  cursor: "pointer",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  flexShrink: 0,
+                                  outline: "none",
+                                }}
+                              >
+                                ×
+                              </button>
+                            )}
+                          </div>
+                        ))}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (node) {
+                              const component = components.get(node.data.componentId);
+                              if (component) {
+                                const currentSuggestions = component.content.question?.suggestions || [""];
+                                const newSuggestions = [...currentSuggestions, ""];
+                                
+                                const updatedComponent = {
+                                  ...component,
+                                  content: {
+                                    ...component.content,
+                                    question: {
+                                      ...component.content.question,
+                                      suggestions: newSuggestions
+                                    }
+                                  },
+                                  updatedAt: new Date()
+                                };
+                                setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                
+                                // Dispatch event to update preview
+                                const event = new CustomEvent("updateComponentData", {
+                                  detail: { 
+                                    messageId: editingMessageId, 
+                                    componentData: updatedComponent 
+                                  },
+                                });
+                                window.dispatchEvent(event);
+                              }
+                            }
+                          }}
+                          style={{
+                            background: "#8EAF86",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "6px",
+                            padding: "6px 12px",
+                            fontSize: "12px",
+                            cursor: "pointer",
+                            marginTop: "4px",
+                            outline: "none",
+                          }}
+                        >
+                          + Add Suggestion
+                        </button>
+                      </div>
+                    </>
+                  );
+                } else {
+                  return (
+                    <>
+                      <label>Message Content:</label>
+                      <textarea
+                        value={component?.content.message?.text || ""}
+                onChange={(e) => {
+                  if (node) {
+                    const component = components.get(node.data.componentId);
+                    if (component) {
+                      const updatedComponent = {
+                        ...component,
+                        content: {
+                          ...component.content,
+                          message: {
+                            ...component.content.message,
+                            text: e.target.value
+                          }
+                        },
+                        updatedAt: new Date()
+                      };
+                      setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                      
+                      // Dispatch event to update preview
+                      const event = new CustomEvent("updateComponentData", {
+                        detail: { 
+                          messageId: editingMessageId, 
+                          componentData: updatedComponent 
+                        },
+                      });
+                      window.dispatchEvent(event);
+                    }
+                  }
+                }}
+                placeholder="Enter your message content..."
+                style={{
+                  width: "100%",
+                  minHeight: "100px",
+                  padding: "12px",
+                  border: "1px solid #E9DDD3",
+                  borderRadius: "8px",
+                  fontSize: "14px",
+                  fontFamily: "inherit",
+                  resize: "vertical",
+                }}
+              />
                     </>
                   );
                 }
@@ -1343,9 +1973,14 @@ export default function FlowCanvas() {
                   if (node) {
                     const component = components.get(node.data.componentId);
                     if (component) {
-                      const content = component.uiToolType === "banner" 
-                        ? component.content.banner?.text || ""
-                        : component.content.message?.text || "";
+                      let content = "";
+                      if (component.uiToolType === "banner") {
+                        content = component.content.banner?.text || "";
+                      } else if (component.uiToolType === "question") {
+                        content = component.content.question?.text || "";
+                      } else {
+                        content = component.content.message?.text || "";
+                      }
                         
                       const event = new CustomEvent("updateMessageContent", {
                         detail: { 
@@ -1357,6 +1992,9 @@ export default function FlowCanvas() {
                     }
                   }
                   setEditingMessageId(null);
+                  // Dispatch event to clear highlight in preview
+                  const event = new CustomEvent("editWindowClose");
+                  window.dispatchEvent(event);
                 }}
                 style={{
                   background: "#F16B68",
@@ -1366,13 +2004,19 @@ export default function FlowCanvas() {
                   padding: "8px 16px",
                   fontSize: "14px",
                   cursor: "pointer",
+                  outline: "none",
                 }}
               >
                 Save
               </button>
               <button
                 className="cancel-btn"
-                onClick={() => setEditingMessageId(null)}
+                onClick={() => {
+                  setEditingMessageId(null);
+                  // Dispatch event to clear highlight in preview
+                  const event = new CustomEvent("editWindowClose");
+                  window.dispatchEvent(event);
+                }}
                 style={{
                   background: "#E9DDD3",
                   color: "#003250",
@@ -1382,6 +2026,7 @@ export default function FlowCanvas() {
                   fontSize: "14px",
                   cursor: "pointer",
                   marginLeft: "8px",
+                  outline: "none",
                 }}
               >
                 Cancel
