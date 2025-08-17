@@ -75,6 +75,7 @@ export default function FlowCanvas() {
   const [imageDropdownOpen, setImageDropdownOpen] = useState<string | false>(false);
   const [uiToolTypeDropdownOpen, setUiToolTypeDropdownOpen] = useState(false);
   const [bannerAddOn, setBannerAddOn] = useState(false);
+  const [textAddOn, setTextAddOn] = useState(false);
 
   
   // UI Tool Type options - single source of truth
@@ -1093,6 +1094,11 @@ export default function FlowCanvas() {
                   cleanComponent.content.banner = component.content.banner;
                 }
                 
+                // Add text data if it exists
+                if ((component.content as any).text?.text) {
+                  cleanComponent.content.text = (component.content as any).text;
+                }
+                
                 cleanComponents[key] = cleanComponent;
               });
 
@@ -1325,6 +1331,8 @@ export default function FlowCanvas() {
                       setOriginalComponentData(JSON.parse(JSON.stringify(component))); // Deep copy
                       // Initialize banner add-on state based on existing banner data
                       setBannerAddOn(!!component.content.banner?.text);
+                      // Initialize text add-on state based on existing text data
+                      setTextAddOn(!!(component.content as any).text?.text);
                     }
                   }
                 }
@@ -1750,14 +1758,44 @@ export default function FlowCanvas() {
                       alignItems: "center",
                       gap: "4px",
                       fontSize: "14px",
-                      color: "#999999",
-                      cursor: "not-allowed"
+                      color: "#003250",
+                      cursor: "pointer"
                     }}>
                       <input
                         type="checkbox"
-                        disabled
+                        checked={textAddOn}
+                        onChange={(e) => {
+                          setTextAddOn(e.target.checked);
+                          
+                          // Update preview immediately when checkbox changes
+                          const node = nodes.find(n => n.data.messageId === editingMessageId);
+                          if (node) {
+                            const component = components.get(node.data.componentId);
+                            if (component) {
+                              const updatedComponent = {
+                                ...component,
+                                content: {
+                                  ...component.content,
+                                  text: e.target.checked ? {
+                                    text: (component.content as any).text?.text || "",
+                                    type: "default"
+                                  } : undefined
+                                }
+                              };
+                              
+                              // Dispatch event to update component data immediately
+                              const componentEvent = new CustomEvent("updateComponentData", {
+                                detail: { 
+                                  messageId: editingMessageId, 
+                                  componentData: updatedComponent
+                                },
+                              });
+                              window.dispatchEvent(componentEvent);
+                            }
+                          }
+                        }}
                         style={{
-                          accentColor: "#999999",
+                          accentColor: "#003250",
                           transform: "scale(1.1)"
                         }}
                       />
@@ -1854,11 +1892,71 @@ export default function FlowCanvas() {
                       />
                   </>
                 );
+
+                // Text add-on field
+                const textField = textAddOn && (
+                  <>
+                    <label>Text Content:</label>
+                    <textarea
+                      value={(component?.content as any)?.text?.text || ""}
+                      onChange={(e) => {
+                        if (node) {
+                          const component = components.get(node.data.componentId);
+                          if (component) {
+                            const updatedComponent = {
+                              ...component,
+                              content: {
+                                ...component.content,
+                                text: {
+                                  text: e.target.value,
+                                  type: "default"
+                                }
+                              },
+                              updatedAt: new Date()
+                            };
+                            setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                            
+                            // Dispatch event to update preview
+                            const event = new CustomEvent("updateComponentData", {
+                              detail: { 
+                                messageId: editingMessageId, 
+                                componentData: updatedComponent 
+                              },
+                            });
+                            window.dispatchEvent(event);
+                          }
+                        }
+                      }}
+                      placeholder="Enter your text content..."
+                      style={{
+                        width: "100%",
+                        minHeight: "80px",
+                        padding: "12px",
+                        border: "1px solid #E9DDD3",
+                        borderRadius: "8px",
+                        fontSize: "14px",
+                        fontFamily: "inherit",
+                        marginBottom: "16px",
+                        resize: "vertical",
+                        boxSizing: "border-box",
+                        transform: "translate(-2px, -3px)",
+                        outline: "none"
+                      }}
+                      onFocus={(e) => {
+                        e.target.style.border = "2px solid #003250";
+                      }}
+                      onBlur={(e) => {
+                        e.target.style.border = "1px solid #E9DDD3";
+                      }}
+                    />
+                  </>
+                );
                 
                 if (uiToolType === "question") {
                   return (
                     <>
                       {bannerField}
+                      {textField}
                       <label>Question Text:</label>
                       <textarea
                         value={component?.content.question?.text || ""}
@@ -2306,6 +2404,7 @@ export default function FlowCanvas() {
                   return (
                     <>
                       {bannerField}
+                      {textField}
                       <label>Question Text:</label>
                       <textarea
                         value={component?.content.multiSelect?.text || ""}
@@ -2783,6 +2882,7 @@ export default function FlowCanvas() {
                   return (
                     <>
                       {bannerField}
+                      {textField}
                       <label>Message Content:</label>
                       <textarea
                         value={component?.content.message?.text || ""}
@@ -2850,13 +2950,17 @@ export default function FlowCanvas() {
                   if (node) {
                     const component = components.get(node.data.componentId);
                     if (component) {
-                      // Update component with banner add-on state
+                      // Update component with banner and text add-on state
                       const updatedComponent = {
                         ...component,
                         content: {
                           ...component.content,
                           banner: bannerAddOn ? {
                             text: component.content.banner?.text || "",
+                            type: "default"
+                          } : undefined,
+                          text: textAddOn ? {
+                            text: (component.content as any).text?.text || "",
                             type: "default"
                           } : undefined
                         },

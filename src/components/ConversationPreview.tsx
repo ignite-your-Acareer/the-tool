@@ -26,6 +26,7 @@ type Message = {
   multiSelectOptions?: MultiSelectOption[];
   maxSelection?: number;
   bannerText?: string; // Banner add-on text
+  textContent?: string; // Text add-on content
   cardData?: {
     title: string;
     description: string;
@@ -131,16 +132,20 @@ export default function ConversationPreview() {
   // Load default state on mount
   useEffect(() => {
     if (defaultState.messages.length > 0) {
-      // Process messages to include banner data from components
+      // Process messages to include banner and text data from components
       const processedMessages = defaultState.messages.map(message => {
         const component = (defaultState.components as any)[message.componentId];
+        let updatedMessage: Message = { ...message };
+        
         if (component && component.content.banner?.text) {
-          return {
-            ...message,
-            bannerText: component.content.banner.text
-          };
+          updatedMessage.bannerText = component.content.banner.text;
         }
-        return message;
+        
+        if (component && (component.content as any).text?.text) {
+          updatedMessage.textContent = (component.content as any).text.text;
+        }
+        
+        return updatedMessage;
       });
       
       setMessages(processedMessages);
@@ -315,7 +320,8 @@ export default function ConversationPreview() {
                   ? componentData.content.multiSelect?.text || "New multi-select question"
                   : componentData.content.message?.text || "New component added",
                 uiToolType: componentData.uiToolType,
-                bannerText: componentData.content.banner?.text || undefined,
+                                  bannerText: componentData.content.banner?.text || undefined,
+                  textContent: (componentData.content as any).text?.text || undefined,
                 suggestions: componentData.uiToolType === "question" 
                   ? componentData.content.question?.suggestions || []
                   : undefined,
@@ -388,12 +394,20 @@ export default function ConversationPreview() {
         <h2 className="banner-title">{message.bannerText}</h2>
       </div>
     );
+
+    // Render text add-on if it exists
+    const textContent = message.textContent && (
+      <div className="message-text-content">
+        <p style={{ whiteSpace: 'pre-wrap' }}>{message.textContent}</p>
+      </div>
+    );
     
     // Check if this is a question type message
     if (message.uiToolType === "question") {
       return (
         <>
           {bannerContent}
+          {textContent}
           <div className="message-question">
             <div className="question-card">
               <div className="question-top-section">
@@ -431,6 +445,7 @@ export default function ConversationPreview() {
       return (
         <>
           {bannerContent}
+          {textContent}
           {/* Question text as regular chat text */}
           <div className="message-text">
             {message.content}
@@ -483,6 +498,7 @@ export default function ConversationPreview() {
       return (
         <>
           {bannerContent}
+          {textContent}
           <div className="message-text">
             {message.content}
           </div>
