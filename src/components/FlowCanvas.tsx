@@ -77,11 +77,7 @@ export default function FlowCanvas() {
   const uiToolTypeOptions = [
     { value: "message", label: "Message" },
     { value: "question", label: "Question" },
-    { value: "form", label: "Form" },
-    { value: "freeChat", label: "Free Chat" },
-    { value: "accordion", label: "Accordion" },
     { value: "banner", label: "Banner" },
-    { value: "intro", label: "Intro" },
     { value: "multiSelect", label: "Multi Select" },
   ];
   
@@ -1236,9 +1232,9 @@ export default function FlowCanvas() {
       {/* Edit Window */}
       {editingMessageId && (
         <div className="edit-window-overlay">
-          <div className="edit-window" style={{ maxWidth: "577px" }}>
-            <div className="edit-window-header">
-              <h4>Edit Component</h4>
+          <div className="edit-window" style={{ maxWidth: "600px", alignSelf: "flex-start", marginTop: "151px" }}>
+                        <div className="edit-window-header" style={{ position: "sticky", top: "0", backgroundColor: "#FFF7F1", zIndex: 5, marginTop: "-3px", paddingTop: "3px" }}>
+              {/* X button positioned at top right of entire edit window */}
               <button
                 className="close-edit-btn"
                 onClick={() => {
@@ -1248,21 +1244,30 @@ export default function FlowCanvas() {
                   window.dispatchEvent(event);
                 }}
                 style={{
+                    position: "absolute",
+                    top: "-18px",
+                    right: "-24px",
                   background: "none",
                   border: "none",
                   fontSize: "18px",
                   cursor: "pointer",
                   color: "#003250",
-                  outline: "none",
+                    outline: "none",
+                    height: "33px",
+                    width: "33px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    zIndex: 10,
                 }}
               >
                 ×
               </button>
-            </div>
-            <div className="edit-window-content" style={{ width: "100%" }}>
-              <div style={{ display: "flex", gap: "12px", marginBottom: "16px", minWidth: 0 }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <label>Component Name:</label>
+              
+              {/* Top line: Component Name + Slug (full width) */}
+              <div style={{ display: "flex", gap: "12px", marginBottom: "-28px", minWidth: 0, alignItems: "flex-end", width: "100%" }}>
+                <div style={{ flex: "2 1 0", minWidth: 0 }}>
+                  <label style={{ display: "block", marginBottom: "8px", color: "#003250", fontWeight: "500", fontSize: "14px" }}>Component Name:</label>
                   <input
                     type="text"
                     value={(() => {
@@ -1304,12 +1309,13 @@ export default function FlowCanvas() {
                       fontFamily: "inherit",
                       height: "33px",
                       boxSizing: "border-box",
+                      transform: "translate(-2px, -3px)",
                     }}
                   />
                 </div>
                 
-                <div style={{ flex: 0.7, minWidth: 0 }}>
-                  <label>Slug:</label>
+                <div style={{ flex: "1 1 0", minWidth: 0 }}>
+                  <label style={{ display: "block", marginBottom: "8px", color: "#003250", fontWeight: "500", fontSize: "14px" }}>Slug:</label>
                   <input
                     type="text"
                     value={(() => {
@@ -1351,13 +1357,17 @@ export default function FlowCanvas() {
                       fontFamily: "inherit",
                       height: "33px",
                       boxSizing: "border-box",
+                      transform: "translate(-2px, -3px)",
                     }}
                   />
                 </div>
+                </div>
               </div>
               
-              <label>UI Tool Type:</label>
-              <div className="ui-tool-type-dropdown-container" style={{ position: "relative", marginBottom: "16px" }}>
+            {/* Primary UI Tool Type dropdown - separate from header */}
+            <div style={{ position: "sticky", top: "69px", backgroundColor: "#FFF7F1", zIndex: 4, marginBottom: "27px", minWidth: 0, paddingTop: "8px", paddingBottom: "11px", borderBottom: "1px solid #E9DDD3" }}>
+              <label style={{ display: "block", marginBottom: "8px", color: "#003250", fontWeight: "500", fontSize: "14px" }}>Primary UI Tool Type:</label>
+              <div className="ui-tool-type-dropdown-container" style={{ position: "relative" }}>
                 <div
                   onClick={() => setUiToolTypeDropdownOpen(!uiToolTypeDropdownOpen)}
                   style={{
@@ -1374,6 +1384,7 @@ export default function FlowCanvas() {
                     alignItems: "center",
                     height: "33px",
                     boxSizing: "border-box",
+                    transform: "translate(-2px, -3px)",
                   }}
                 >
                                     <span>
@@ -1460,6 +1471,8 @@ export default function FlowCanvas() {
                   </div>
                 )}
               </div>
+            </div>
+            <div className="edit-window-content" style={{ width: "100%" }}>
               
               {(() => {
                   const node = nodes.find(n => n.data.messageId === editingMessageId);
@@ -1513,6 +1526,7 @@ export default function FlowCanvas() {
                           marginBottom: "16px",
                           height: "33px",
                           boxSizing: "border-box",
+                          transform: "translate(-2px, -3px)",
                         }}
                       />
                     </>
@@ -1563,6 +1577,7 @@ export default function FlowCanvas() {
                           marginBottom: "16px",
                           resize: "vertical",
                           boxSizing: "border-box",
+                          transform: "translate(-2px, -3px)",
                         }}
                       />
                       
@@ -1584,6 +1599,7 @@ export default function FlowCanvas() {
                               alignItems: "center",
                               height: "33px",
                               boxSizing: "border-box",
+                              transform: "translate(-2px, -3px)",
                             }}
                           >
                             <span>
@@ -1993,6 +2009,7 @@ export default function FlowCanvas() {
                           marginBottom: "16px",
                           resize: "vertical",
                           boxSizing: "border-box",
+                          transform: "translate(-2px, -3px)",
                         }}
                       />
                       
@@ -2039,6 +2056,7 @@ export default function FlowCanvas() {
                           marginBottom: "16px",
                           height: "33px",
                           boxSizing: "border-box",
+                          transform: "translate(-2px, -3px)",
                         }}
                       />
                       
@@ -2096,7 +2114,8 @@ export default function FlowCanvas() {
                                 fontFamily: "inherit",
                                 boxSizing: "border-box",
                                 height: "33px",
-                                minWidth: "200px"
+                                minWidth: "200px",
+                                transform: "translate(-2px, -3px)",
                               }}
                             />
                             
@@ -2124,6 +2143,7 @@ export default function FlowCanvas() {
                                     boxSizing: "border-box",
                                     minWidth: "200px",
                                     width: "200px",
+                                    transform: "translate(-2px, -3px)",
                                   }}
                                 >
                                   <span style={{ 
@@ -2448,7 +2468,10 @@ export default function FlowCanvas() {
                   borderRadius: "8px",
                   fontSize: "14px",
                   fontFamily: "inherit",
+                  marginBottom: "16px",
                   resize: "vertical",
+                  boxSizing: "border-box",
+                  transform: "translate(-2px, -3px)",
                 }}
               />
                     </>
