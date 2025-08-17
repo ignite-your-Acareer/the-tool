@@ -38,8 +38,10 @@
 }
 
 .card-node:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  transform: scale(1.07);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 /* UI Tool Dropdown */
@@ -127,21 +129,13 @@
 
 /* Node highlighting when message is hovered */
 .node-highlighted {
-  transform: scale(1.05);
-  box-shadow: 0 0 0 3px #F16B68, 0 8px 25px rgba(241, 107, 104, 0.3);
-  background: #F2E8E0 !important;
-  color: #003250 !important;
+  transform: scale(1.07);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
   z-index: 10;
-  transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
-.node-highlighted .card-node__title {
-  color: #555 !important;
-}
 
-.node-highlighted .card-node__desc {
-  color: #555 !important;
-}
 
 /* Edit Window Styling */
 .edit-window-overlay {

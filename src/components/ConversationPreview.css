@@ -165,17 +165,14 @@
   position: relative;
 }
 
-.message.ai:hover::before {
-  content: '';
-  position: absolute;
-  top: -8px;
-  left: -16px;
-  right: -16px;
-  bottom: -8px;
-  background: #E9DDD3;
-  border-radius: 0;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
-  z-index: -1;
+.message.ai:hover {
+  transform: scale(0.98);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border: 11px solid transparent;
+  border-radius: 12px;
+  padding: 9px 11px;
+  margin: -9px -11px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 .conversation-input {
@@ -258,12 +255,13 @@
 
 /* Message highlighting when node is hovered */
 .message-node-highlighted {
-  transform: scale(1.02);
-  box-shadow: 0 0 0 2px #F16B68, 0 4px 15px rgba(241, 107, 104, 0.2);
-  border-radius: 0;
+  transform: scale(0.98);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  border: 11px solid transparent;
+  border-radius: 12px;
+  padding: 9px 11px;
+  margin: -9px -11px;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  padding: 4px 8px 8px 8px;
-  margin: -4px -8px -8px -8px;
 }
 
 .message-node-highlighted .message-text {
@@ -393,8 +391,10 @@
 }
 
 .card-node:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4);
+  transform: scale(1.07);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  z-index: 10;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 
 /* Three dots menu hover effect for messages */

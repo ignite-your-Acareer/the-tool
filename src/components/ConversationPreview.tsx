@@ -385,42 +385,48 @@ export default function ConversationPreview() {
       const selectedCount = 1; // Always show first option as selected
       
       return (
-        <div className="message-multi-select">
-          <div className="multi-select-question">{message.content}</div>
+        <>
+          {/* Question text as regular chat text */}
+          <div className="message-text">
+            {message.content}
+          </div>
           
-          {/* Progress bar - always show when maxSelection > 1 */}
-          {maxSelection > 1 && (
-            <div className="multi-select-progress">
-              <div 
-                className="multi-select-progress-fill"
-                style={{ width: `${(selectedCount / maxSelection) * 100}%` }}
-              />
-            </div>
-          )}
-          
-          {message.multiSelectOptions && message.multiSelectOptions.length > 0 && (
-            <div className={`multi-select-options ${hasImages ? 'has-images' : ''}`}>
-              {message.multiSelectOptions.map((option, index) => (
-                <button 
-                  key={index} 
-                  className={`multi-select-option ${index === 0 ? 'selected' : ''} ${option.image ? 'has-image' : ''}`}
-                >
-                  {option.image && (
-                    <div className="option-image">
-                      <img src={option.image} alt={option.text} />
-                    </div>
-                  )}
-                  <div className="option-content">
-                    <span className="option-text">{option.text}</span>
-                    {option.icon && (
-                      <span className="option-icon">{option.icon}</span>
+          {/* Multi Select options */}
+          <div className="message-multi-select">
+            {/* Progress bar - always show when maxSelection > 1 */}
+            {maxSelection > 1 && (
+              <div className="multi-select-progress">
+                <div 
+                  className="multi-select-progress-fill"
+                  style={{ width: `${(selectedCount / maxSelection) * 100}%` }}
+                />
+              </div>
+            )}
+            
+            {message.multiSelectOptions && message.multiSelectOptions.length > 0 && (
+              <div className={`multi-select-options ${hasImages ? 'has-images' : ''}`}>
+                {message.multiSelectOptions.map((option, index) => (
+                  <button 
+                    key={index} 
+                    className={`multi-select-option ${index === 0 ? 'selected' : ''} ${option.image ? 'has-image' : ''}`}
+                  >
+                    {option.image && (
+                      <div className="option-image">
+                        <img src={option.image} alt={option.text} />
+                      </div>
                     )}
-                  </div>
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+                    <div className="option-content">
+                      <span className="option-text">{option.text}</span>
+                      {option.icon && (
+                        <span className="option-icon">{option.icon}</span>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </>
       );
     }
     
@@ -610,8 +616,8 @@ export default function ConversationPreview() {
               </div>
             </div>
             
-            {/* Add user placeholder after AI messages */}
-            {message.sender === "ai" && (
+            {/* Add user placeholder after AI messages (but not for Multi Select) */}
+            {message.sender === "ai" && message.uiToolType !== "multiSelect" && (
               // Show placeholder in normal mode, or in test mode for messages before the selected one
               (!isTestMode || (isTestMode && message.messageId !== testStartMessageId)) && (
                 <div className="message user placeholder">
