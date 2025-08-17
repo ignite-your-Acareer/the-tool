@@ -1,5 +1,5 @@
 // Default state that loads when the app starts
-// Edit this file to set what components appear by default
+// This is built into the app and loads for everyone
 
 export const defaultState = {
   nodes: [

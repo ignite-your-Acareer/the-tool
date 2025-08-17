@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, Fragment, useCallback } from "react";
 import "./ConversationPreview.css";
-import { loadDefaultState } from "../utils/defaultState";
+import { defaultState } from "../defaultState";
 
 type MessageType = "text" | "card" | "pills";
 
@@ -129,8 +129,7 @@ export default function ConversationPreview() {
 
   // Load default state on mount
   useEffect(() => {
-    const defaultState = loadDefaultState();
-    if (defaultState && defaultState.messages.length > 0) {
+    if (defaultState.messages.length > 0) {
       setMessages(defaultState.messages);
       setOrphanMessageIds(new Set(defaultState.orphanMessageIds || []));
     }

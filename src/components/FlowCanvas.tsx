@@ -12,7 +12,8 @@ import {
 } from "@xyflow/react";
 import type { Connection, Edge as FlowEdge, Node as FlowNode, NodeProps, NodeTypes, NodeChange } from "@xyflow/react";
 import "../flow.css";
-import { saveDefaultState, loadDefaultState } from "../utils/defaultState";
+import { saveDefaultState } from "../utils/defaultState";
+import { defaultState } from "../defaultState";
 
 type UIToolType = "message" | "question" | "form" | "freeChat" | "accordion" | "banner" | "intro" | "multiSelect";
 
@@ -607,44 +608,41 @@ export default function FlowCanvas() {
 
   // Load default state on mount
   useEffect(() => {
-    const defaultState = loadDefaultState();
-    if (defaultState) {
-      // Load nodes and edges
-      setNodes(defaultState.nodes);
-      setEdges(defaultState.edges);
-      
-      // Load components
-      const componentMap = new Map<string, ComponentData>();
-      Object.entries(defaultState.components).forEach(([key, component]) => {
-        componentMap.set(key, component as ComponentData);
+    // Load nodes and edges
+    setNodes(defaultState.nodes);
+    setEdges(defaultState.edges);
+    
+    // Load components
+    const componentMap = new Map<string, ComponentData>();
+    Object.entries(defaultState.components).forEach(([key, component]) => {
+      componentMap.set(key, component as ComponentData);
+    });
+    setComponents(componentMap);
+    
+    // Dispatch events to update conversation preview
+    defaultState.messages.forEach((message: any) => {
+      const event = new CustomEvent("addMessage", {
+        detail: { 
+          messageId: message.messageId,
+          componentId: message.componentId,
+          uiToolType: message.uiToolType,
+          showDropdown: false 
+        },
       });
-      setComponents(componentMap);
+      window.dispatchEvent(event);
       
-      // Dispatch events to update conversation preview
-      defaultState.messages.forEach(message => {
-        const event = new CustomEvent("addMessage", {
+      // Dispatch component data
+      const component = componentMap.get(message.componentId);
+      if (component) {
+        const componentDataEvent = new CustomEvent("updateComponentData", {
           detail: { 
-            messageId: message.messageId,
-            componentId: message.componentId,
-            uiToolType: message.uiToolType,
-            showDropdown: false 
+            messageId: message.messageId, 
+            componentData: component 
           },
         });
-        window.dispatchEvent(event);
-        
-        // Dispatch component data
-        const component = componentMap.get(message.componentId);
-        if (component) {
-          const componentDataEvent = new CustomEvent("updateComponentData", {
-            detail: { 
-              messageId: message.messageId, 
-              componentData: component 
-            },
-          });
-          window.dispatchEvent(componentDataEvent);
-        }
-      });
-    }
+        window.dispatchEvent(componentDataEvent);
+      }
+    });
   }, []);
 
   // Sync order whenever nodes or edges change
