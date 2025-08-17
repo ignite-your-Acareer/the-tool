@@ -40,3 +40,37 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Override default browser focus styling */
+.edit-window input:focus,
+.edit-window textarea:focus {
+  outline: none !important;
+  border: 2px solid #003250 !important;
+  box-shadow: none !important;
+}
+
+.edit-window input,
+.edit-window textarea {
+  outline: none;
+}
+
+/* Override checkbox styling - remove white checkmark */
+.edit-window input[type="checkbox"] {
+  accent-color: #003250 !important;
+  filter: brightness(0) saturate(100%) invert(15%) sepia(100%) saturate(1000%) hue-rotate(200deg) brightness(0.2) contrast(1);
+}
+
+/* Ensure all form elements in edit window have consistent focus */
+.edit-window input,
+.edit-window textarea,
+.edit-window select {
+  outline: none !important;
+}
+
+.edit-window input:focus,
+.edit-window textarea:focus,
+.edit-window select:focus {
+  outline: none !important;
+  border: 2px solid #003250 !important;
+  box-shadow: none !important;
+}

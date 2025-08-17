@@ -13,9 +13,9 @@ import {
 import type { Connection, Edge as FlowEdge, Node as FlowNode, NodeProps, NodeTypes, NodeChange } from "@xyflow/react";
 import "../flow.css";
 
-import { defaultState } from "../defaultState";
+import defaultState from "../defaultState";
 
-type UIToolType = "message" | "question" | "form" | "freeChat" | "accordion" | "banner" | "intro" | "multiSelect";
+type UIToolType = "message" | "question" | "form" | "freeChat" | "accordion" | "intro" | "multiSelect";
 
 // Comprehensive component data structure - single source of truth
 type MultiSelectOption = {
@@ -74,13 +74,14 @@ export default function FlowCanvas() {
   const [searchResults, setSearchResults] = useState<Set<string>>(new Set());
   const [imageDropdownOpen, setImageDropdownOpen] = useState<string | false>(false);
   const [uiToolTypeDropdownOpen, setUiToolTypeDropdownOpen] = useState(false);
+  const [bannerAddOn, setBannerAddOn] = useState(false);
 
   
   // UI Tool Type options - single source of truth
   const uiToolTypeOptions = [
     { value: "message", label: "Message" },
     { value: "question", label: "Question" },
-    { value: "banner", label: "Banner" },
+
     { value: "multiSelect", label: "Multi Select" },
   ];
   
@@ -853,9 +854,7 @@ export default function FlowCanvas() {
           let displayText = "";
           
           switch (component.uiToolType) {
-            case "banner":
-              content = component.content.banner?.text || "New Banner";
-              break;
+            
             case "question":
               content = component.content.question?.text || "New Question";
               break;
@@ -1068,7 +1067,7 @@ export default function FlowCanvas() {
                 data: node.data
               }));
 
-              // Clean up components - only include active tool type content
+              // Clean up components - only include active tool type content and banner add-on
               const cleanComponents: Record<string, any> = {};
               components.forEach((component, key) => {
                 const cleanComponent = {
@@ -1082,6 +1081,12 @@ export default function FlowCanvas() {
                   createdAt: component.createdAt,
                   updatedAt: component.updatedAt
                 };
+                
+                // Add banner data if it exists
+                if (component.content.banner?.text) {
+                  cleanComponent.content.banner = component.content.banner;
+                }
+                
                 cleanComponents[key] = cleanComponent;
               });
 
@@ -1312,6 +1317,8 @@ export default function FlowCanvas() {
                     const component = components.get(node.data.componentId);
                     if (component) {
                       setOriginalComponentData(JSON.parse(JSON.stringify(component))); // Deep copy
+                      // Initialize banner add-on state based on existing banner data
+                      setBannerAddOn(!!component.content.banner?.text);
                     }
                   }
                 }
@@ -1475,6 +1482,13 @@ export default function FlowCanvas() {
                       height: "33px",
                       boxSizing: "border-box",
                       transform: "translate(-2px, -3px)",
+                      outline: "none"
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.border = "2px solid #003250";
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.border = "1px solid #E9DDD3";
                     }}
                   />
                 </div>
@@ -1523,6 +1537,13 @@ export default function FlowCanvas() {
                       height: "33px",
                       boxSizing: "border-box",
                       transform: "translate(-2px, -3px)",
+                      outline: "none"
+                    }}
+                    onFocus={(e) => {
+                      e.target.style.border = "2px solid #003250";
+                    }}
+                    onBlur={(e) => {
+                      e.target.style.border = "1px solid #E9DDD3";
                     }}
                   />
                 </div>
@@ -1672,8 +1693,39 @@ export default function FlowCanvas() {
                     }}>
                       <input
                         type="checkbox"
+                        checked={bannerAddOn}
+                        onChange={(e) => {
+                          setBannerAddOn(e.target.checked);
+                          
+                          // Update preview immediately when checkbox changes
+                          const node = nodes.find(n => n.data.messageId === editingMessageId);
+                          if (node) {
+                            const component = components.get(node.data.componentId);
+                            if (component) {
+                              const updatedComponent = {
+                                ...component,
+                                content: {
+                                  ...component.content,
+                                  banner: e.target.checked ? {
+                                    text: component.content.banner?.text || "",
+                                    type: "default"
+                                  } : undefined
+                                }
+                              };
+                              
+                              // Dispatch event to update component data immediately
+                              const componentEvent = new CustomEvent("updateComponentData", {
+                                detail: { 
+                                  messageId: editingMessageId, 
+                                  componentData: updatedComponent
+                                },
+                              });
+                              window.dispatchEvent(componentEvent);
+                            }
+                          }
+                        }}
                         style={{
-                          accentColor: "#F16B68",
+                          accentColor: "#003250",
                           transform: "scale(1.1)"
                         }}
                       />
@@ -1690,7 +1742,7 @@ export default function FlowCanvas() {
                       <input
                         type="checkbox"
                         style={{
-                          accentColor: "#F16B68",
+                          accentColor: "#003250",
                           transform: "scale(1.1)"
                         }}
                       />
@@ -1709,7 +1761,7 @@ export default function FlowCanvas() {
                       <input
                         type="checkbox"
                         style={{
-                          accentColor: "#F16B68",
+                          accentColor: "#003250",
                           transform: "scale(1.1)"
                         }}
                       />
@@ -1719,7 +1771,7 @@ export default function FlowCanvas() {
                 </div>
               </div>
             </div>
-            <div className="edit-window-content" style={{ width: "100%" }}>
+                        <div className="edit-window-content" style={{ width: "100%" }}>
               
               {(() => {
                   const node = nodes.find(n => n.data.messageId === editingMessageId);
@@ -1727,14 +1779,14 @@ export default function FlowCanvas() {
                   const component = components.get(node.data.componentId);
                 const uiToolType = component?.uiToolType || "message";
                 
-                if (uiToolType === "banner") {
-                  return (
-                    <>
-                      <label>Banner Title:</label>
-                      <input
+                // Banner add-on field
+                const bannerField = bannerAddOn && (
+                  <>
+                    <label>Banner Title:</label>
+                                          <input
                         type="text"
                         value={component?.content.banner?.text || ""}
-                onChange={(e) => {
+                        onChange={(e) => {
                           if (node) {
                             const component = components.get(node.data.componentId);
                             if (component) {
@@ -1747,24 +1799,24 @@ export default function FlowCanvas() {
                                     type: "default"
                                   }
                                 },
-                        updatedAt: new Date()
-                      };
-                      setComponents(prev => new Map(prev).set(component.id, updatedComponent));
-                      
-                      // Dispatch event to update preview
-                      const event = new CustomEvent("updateComponentData", {
-                        detail: { 
-                          messageId: editingMessageId, 
-                          componentData: updatedComponent 
-                        },
-                      });
-                      window.dispatchEvent(event);
-                    }
-                  }
-                }}
+                                updatedAt: new Date()
+                              };
+                              setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                              
+                              // Dispatch event to update preview
+                              const event = new CustomEvent("updateComponentData", {
+                                detail: { 
+                                  messageId: editingMessageId, 
+                                  componentData: updatedComponent 
+                                },
+                              });
+                              window.dispatchEvent(event);
+                            }
+                          }
+                        }}
                         placeholder="Enter banner title (e.g., 'Strengths')..."
-                style={{
-                  width: "100%",
+                        style={{
+                          width: "100%",
                           padding: "8px 12px",
                           border: "1px solid #E9DDD3",
                           borderRadius: "8px",
@@ -1774,13 +1826,23 @@ export default function FlowCanvas() {
                           height: "33px",
                           boxSizing: "border-box",
                           transform: "translate(-2px, -3px)",
+                          background: "white",
+                          outline: "none"
+                        }}
+                        onFocus={(e) => {
+                          e.target.style.border = "2px solid #003250";
+                        }}
+                        onBlur={(e) => {
+                          e.target.style.border = "1px solid #E9DDD3";
                         }}
                       />
-                    </>
-                  );
-                } else if (uiToolType === "question") {
+                  </>
+                );
+                
+                if (uiToolType === "question") {
                   return (
                     <>
+                      {bannerField}
                       <label>Question Text:</label>
                       <textarea
                         value={component?.content.question?.text || ""}
@@ -1813,7 +1875,7 @@ export default function FlowCanvas() {
                           }
                         }}
                         placeholder="Enter your question text (supports Markdown)..."
-                                                style={{
+                        style={{
                           width: "100%",
                           minHeight: "80px",
                           padding: "12px",
@@ -1825,6 +1887,13 @@ export default function FlowCanvas() {
                           resize: "vertical",
                           boxSizing: "border-box",
                           transform: "translate(-2px, -3px)",
+                          outline: "none"
+                        }}
+                        onFocus={(e) => {
+                          e.target.style.border = "2px solid #003250";
+                        }}
+                        onBlur={(e) => {
+                          e.target.style.border = "1px solid #E9DDD3";
                         }}
                       />
                       
@@ -2098,6 +2167,13 @@ export default function FlowCanvas() {
                                 fontSize: "14px",
                                 fontFamily: "inherit",
                                 boxSizing: "border-box",
+                                outline: "none"
+                              }}
+                              onFocus={(e) => {
+                                e.target.style.border = "2px solid #003250";
+                              }}
+                              onBlur={(e) => {
+                                e.target.style.border = "1px solid #E9DDD3";
                               }}
                             />
                             {(component?.content.question?.suggestions?.length || 1) > 1 && (
@@ -2213,6 +2289,7 @@ export default function FlowCanvas() {
                 } else if (uiToolType === "multiSelect") {
                   return (
                     <>
+                      {bannerField}
                       <label>Question Text:</label>
                       <textarea
                         value={component?.content.multiSelect?.text || ""}
@@ -2257,6 +2334,13 @@ export default function FlowCanvas() {
                           resize: "vertical",
                           boxSizing: "border-box",
                           transform: "translate(-2px, -3px)",
+                          outline: "none"
+                        }}
+                        onFocus={(e) => {
+                          e.target.style.border = "2px solid #003250";
+                        }}
+                        onBlur={(e) => {
+                          e.target.style.border = "1px solid #E9DDD3";
                         }}
                       />
                       
@@ -2363,6 +2447,13 @@ export default function FlowCanvas() {
                                 height: "33px",
                                 minWidth: "200px",
                                 transform: "translate(-2px, -3px)",
+                                outline: "none"
+                              }}
+                              onFocus={(e) => {
+                                e.target.style.border = "2px solid #003250";
+                              }}
+                              onBlur={(e) => {
+                                e.target.style.border = "1px solid #E9DDD3";
                               }}
                             />
                             
@@ -2675,52 +2766,60 @@ export default function FlowCanvas() {
                 } else {
                   return (
                     <>
+                      {bannerField}
                       <label>Message Content:</label>
                       <textarea
                         value={component?.content.message?.text || ""}
-                onChange={(e) => {
-                  if (node) {
-                    const component = components.get(node.data.componentId);
-                    if (component) {
-                      const updatedComponent = {
-                        ...component,
-                        content: {
-                          ...component.content,
-                          message: {
-                            ...component.content.message,
-                            text: e.target.value
+                        onChange={(e) => {
+                          if (node) {
+                            const component = components.get(node.data.componentId);
+                            if (component) {
+                              const updatedComponent = {
+                                ...component,
+                                content: {
+                                  ...component.content,
+                                  message: {
+                                    ...component.content.message,
+                                    text: e.target.value
+                                  }
+                                },
+                                updatedAt: new Date()
+                              };
+                              setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                              
+                              // Dispatch event to update preview
+                              const event = new CustomEvent("updateComponentData", {
+                                detail: { 
+                                  messageId: editingMessageId, 
+                                  componentData: updatedComponent 
+                                },
+                              });
+                              window.dispatchEvent(event);
+                            }
                           }
-                        },
-                        updatedAt: new Date()
-                      };
-                      setComponents(prev => new Map(prev).set(component.id, updatedComponent));
-                      
-                      // Dispatch event to update preview
-                      const event = new CustomEvent("updateComponentData", {
-                        detail: { 
-                          messageId: editingMessageId, 
-                          componentData: updatedComponent 
-                        },
-                      });
-                      window.dispatchEvent(event);
-                    }
-                  }
-                }}
-                placeholder="Enter your message content..."
-                style={{
-                  width: "100%",
-                  minHeight: "100px",
-                  padding: "12px",
-                  border: "1px solid #E9DDD3",
-                  borderRadius: "8px",
-                  fontSize: "14px",
-                  fontFamily: "inherit",
-                  marginBottom: "16px",
-                  resize: "vertical",
-                  boxSizing: "border-box",
-                  transform: "translate(-2px, -3px)",
-                }}
-              />
+                        }}
+                        placeholder="Enter your message content..."
+                        style={{
+                          width: "100%",
+                          minHeight: "100px",
+                          padding: "12px",
+                          border: "1px solid #E9DDD3",
+                          borderRadius: "8px",
+                          fontSize: "14px",
+                          fontFamily: "inherit",
+                          marginBottom: "16px",
+                          resize: "vertical",
+                          boxSizing: "border-box",
+                          transform: "translate(-2px, -3px)",
+                          outline: "none"
+                        }}
+                        onFocus={(e) => {
+                          e.target.style.border = "2px solid #003250";
+                        }}
+                        onBlur={(e) => {
+                          e.target.style.border = "1px solid #E9DDD3";
+                        }}
+                      />
                     </>
                   );
                 }
@@ -2730,15 +2829,29 @@ export default function FlowCanvas() {
               <button
                 className="save-btn"
                 onClick={() => {
-                  // Dispatch event to update preview message based on UI tool type
+                  // Update component data with current banner add-on state
                   const node = nodes.find(n => n.data.messageId === editingMessageId);
                   if (node) {
                     const component = components.get(node.data.componentId);
                     if (component) {
+                      // Update component with banner add-on state
+                      const updatedComponent = {
+                        ...component,
+                        content: {
+                          ...component.content,
+                          banner: bannerAddOn ? {
+                            text: component.content.banner?.text || "",
+                            type: "default"
+                          } : undefined
+                        },
+                        updatedAt: new Date()
+                      };
+                      
+                      // Save updated component to state
+                      setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                      
                       let content = "";
-                      if (component.uiToolType === "banner") {
-                        content = component.content.banner?.text || "";
-                      } else if (component.uiToolType === "question") {
+                      if (component.uiToolType === "question") {
                         content = component.content.question?.text || "";
                       } else if (component.uiToolType === "multiSelect") {
                         content = component.content.multiSelect?.text || "";
@@ -2746,13 +2859,23 @@ export default function FlowCanvas() {
                         content = component.content.message?.text || "";
                       }
                         
-                      const event = new CustomEvent("updateMessageContent", {
+                      // Dispatch event to update message content
+                      const contentEvent = new CustomEvent("updateMessageContent", {
                         detail: { 
                           messageId: editingMessageId, 
                           content: content
                         },
                       });
-                      window.dispatchEvent(event);
+                      window.dispatchEvent(contentEvent);
+                      
+                      // Dispatch event to update component data (for banner, etc.)
+                      const componentEvent = new CustomEvent("updateComponentData", {
+                        detail: { 
+                          messageId: editingMessageId, 
+                          componentData: updatedComponent
+                        },
+                      });
+                      window.dispatchEvent(componentEvent);
                     }
                   }
                   setEditingMessageId(null);

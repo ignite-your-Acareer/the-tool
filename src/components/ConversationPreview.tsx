@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, Fragment, useCallback } from "react";
 import "./ConversationPreview.css";
-import { defaultState } from "../defaultState";
+import defaultState from "../defaultState";
 
 type MessageType = "text" | "card" | "pills";
 
@@ -25,6 +25,7 @@ type Message = {
   image?: string;
   multiSelectOptions?: MultiSelectOption[];
   maxSelection?: number;
+  bannerText?: string; // Banner add-on text
   cardData?: {
     title: string;
     description: string;
@@ -302,6 +303,7 @@ export default function ConversationPreview() {
                   ? componentData.content.multiSelect?.text || "New multi-select question"
                   : componentData.content.message?.text || "New component added",
                 uiToolType: componentData.uiToolType,
+                bannerText: componentData.content.banner?.text || undefined,
                 suggestions: componentData.uiToolType === "question" 
                   ? componentData.content.question?.suggestions || []
                   : undefined,
@@ -359,7 +361,7 @@ export default function ConversationPreview() {
   }, [messages, showSelectComponentPopup, startTestMode]);
 
   const renderMessageContent = (message: Message) => {
-    // Check if this is a banner type message
+    // Check if this is a banner type message (legacy - should be removed)
     if (message.uiToolType === "banner") {
       return (
         <div className="message-banner">
@@ -368,30 +370,43 @@ export default function ConversationPreview() {
       );
     }
     
+    // Render banner add-on if it exists
+    const bannerContent = message.bannerText && (
+      <div className="message-banner">
+        <h2 className="banner-title">{message.bannerText}</h2>
+      </div>
+    );
+    
     // Check if this is a question type message
     if (message.uiToolType === "question") {
       return (
-        <div className="message-question">
-          <div className="question-card">
-            <div className="question-top-section">
-              {message.image && (
-                <div className="question-image">
-                  <img src={message.image} alt="Question illustration" />
+        <>
+          {bannerContent}
+          <div className="message-question">
+            <div className="question-card">
+              <div className="question-top-section">
+                {message.image && (
+                  <div className="question-image">
+                    <img src={message.image} alt="Question illustration" />
+                  </div>
+                )}
+                <div className="question-text">{message.content}</div>
+              </div>
+            </div>
+            {message.suggestions && message.suggestions.length > 0 && (
+              // In test mode, only show suggestions for the selected component
+              (!isTestMode || (isTestMode && message.messageId === testStartMessageId)) && (
+                <div className="question-suggestions">
+                  {message.suggestions.map((suggestion, index) => (
+                    <button key={index} className="suggestion-button">
+                      {suggestion}
+                    </button>
+                  ))}
                 </div>
-              )}
-              <div className="question-text">{message.content}</div>
-            </div>
+              )
+            )}
           </div>
-          {message.suggestions && message.suggestions.length > 0 && (
-            <div className="question-suggestions">
-              {message.suggestions.map((suggestion, index) => (
-                <button key={index} className="suggestion-button">
-                  {suggestion}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
+        </>
       );
     }
     
@@ -403,6 +418,7 @@ export default function ConversationPreview() {
       
       return (
         <>
+          {bannerContent}
           {/* Question text as regular chat text */}
           <div className="message-text">
             {message.content}
@@ -421,26 +437,29 @@ export default function ConversationPreview() {
             )}
             
             {message.multiSelectOptions && message.multiSelectOptions.length > 0 && (
-              <div className={`multi-select-options ${hasImages ? 'has-images' : ''}`}>
-                {message.multiSelectOptions.map((option, index) => (
-                  <button 
-                    key={index} 
-                    className={`multi-select-option ${index === 0 ? 'selected' : ''} ${option.image ? 'has-image' : ''}`}
-                  >
-                    {option.image && (
-                      <div className="option-image">
-                        <img src={option.image} alt={option.text} />
-                      </div>
-                    )}
-                    <div className="option-content">
-                      <span className="option-text">{option.text}</span>
-                      {option.icon && (
-                        <span className="option-icon">{option.icon}</span>
+              // In test mode, only show multi-select options for the selected component
+              (!isTestMode || (isTestMode && message.messageId === testStartMessageId)) && (
+                <div className={`multi-select-options ${hasImages ? 'has-images' : ''}`}>
+                  {message.multiSelectOptions.map((option, index) => (
+                    <button 
+                      key={index} 
+                      className={`multi-select-option ${index === 0 ? 'selected' : ''} ${option.image ? 'has-image' : ''}`}
+                    >
+                      {option.image && (
+                        <div className="option-image">
+                          <img src={option.image} alt={option.text} />
+                        </div>
                       )}
-                    </div>
-                  </button>
-                ))}
-              </div>
+                      <div className="option-content">
+                        <span className="option-text">{option.text}</span>
+                        {option.icon && (
+                          <span className="option-icon">{option.icon}</span>
+                        )}
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              )
             )}
           </div>
         </>
@@ -450,9 +469,12 @@ export default function ConversationPreview() {
     // For regular message type, show the content in a text bubble
     if (message.uiToolType === "message" || !message.uiToolType) {
       return (
-        <div className="message-text">
-          {message.content}
-        </div>
+        <>
+          {bannerContent}
+          <div className="message-text">
+            {message.content}
+          </div>
+        </>
       );
     }
     
