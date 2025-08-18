@@ -135,7 +135,12 @@ export default function ConversationPreview() {
       // Process messages to include banner and text data from components
       const processedMessages = defaultState.messages.map(message => {
         const component = (defaultState.components as any)[message.componentId];
-        let updatedMessage: Message = { ...message };
+        let updatedMessage: Message = { 
+          ...message,
+          sender: message.sender as "user" | "ai",
+          timestamp: "01:14 PM", // Default timestamp
+          type: "text" as MessageType // Default type
+        };
         
         if (component && component.content.banner?.text) {
           updatedMessage.bannerText = component.content.banner.text;
