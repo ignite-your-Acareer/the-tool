@@ -464,29 +464,26 @@ export default function ConversationPreview() {
             )}
             
             {message.multiSelectOptions && message.multiSelectOptions.length > 0 && (
-              // In test mode, only show multi-select options for the selected component
-              (!isTestMode || (isTestMode && message.messageId === testStartMessageId)) && (
-                <div className={`multi-select-options ${hasImages ? 'has-images' : ''}`}>
-                  {message.multiSelectOptions.map((option, index) => (
-                    <button 
-                      key={index} 
-                      className={`multi-select-option ${index === 0 ? 'selected' : ''} ${option.image ? 'has-image' : ''}`}
-                    >
-                      {option.image && (
-                        <div className="option-image">
-                          <img src={option.image} alt={option.text} />
-                        </div>
-                      )}
-                      <div className="option-content">
-                        <span className="option-text">{option.text}</span>
-                        {option.icon && (
-                          <span className="option-icon">{option.icon}</span>
-                        )}
+              <div className={`multi-select-options ${hasImages ? 'has-images' : ''}`}>
+                {message.multiSelectOptions.map((option, index) => (
+                  <button 
+                    key={index} 
+                    className={`multi-select-option ${index === 0 ? 'selected' : ''} ${option.image ? 'has-image' : ''}`}
+                  >
+                    {option.image && (
+                      <div className="option-image">
+                        <img src={option.image} alt={option.text} />
                       </div>
-                    </button>
-                  ))}
-                </div>
-              )
+                    )}
+                    <div className="option-content">
+                      <span className="option-text">{option.text}</span>
+                      {option.icon && (
+                        <span className="option-icon">{option.icon}</span>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
             )}
           </div>
         </>

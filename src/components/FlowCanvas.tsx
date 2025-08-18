@@ -43,6 +43,7 @@ type ComponentData = {
       maxSelection?: number;
     };
   };
+  aiGenerated?: boolean;         // AI-generated flag
   createdAt: Date;
   updatedAt: Date;
 };
@@ -76,6 +77,7 @@ export default function FlowCanvas() {
   const [uiToolTypeDropdownOpen, setUiToolTypeDropdownOpen] = useState(false);
   const [bannerAddOn, setBannerAddOn] = useState(false);
   const [textAddOn, setTextAddOn] = useState(false);
+  const [aiGenerated, setAiGenerated] = useState(false);
 
   
   // UI Tool Type options - single source of truth
@@ -844,6 +846,7 @@ export default function FlowCanvas() {
         onContextMenu={handleNodeRightClick}
         onMouseEnter={handleNodeMouseEnter}
         onMouseLeave={handleNodeMouseLeave}
+        style={{}}
       >
         <div className="card-node__title">{component.name}</div>
         <div className="card-node__slug" style={{ 
@@ -909,9 +912,21 @@ export default function FlowCanvas() {
             fontSize: "11px", 
             color: "#F16B68", 
             fontWeight: "600",
-            textTransform: "uppercase"
+            textTransform: "uppercase",
+            display: "flex",
+            alignItems: "center",
+            gap: "4px"
           }}>
             {component.uiToolType}
+            {component.aiGenerated && (
+              <span style={{
+                fontSize: "12px",
+                color: "#FFD700",
+                filter: "drop-shadow(0 0 4px rgba(255, 215, 0, 0.6))"
+              }}>
+                ⭐
+              </span>
+            )}
           </div>
         )}
         
@@ -1077,17 +1092,18 @@ export default function FlowCanvas() {
               // Clean up components - only include active tool type content and banner add-on
               const cleanComponents: Record<string, any> = {};
               components.forEach((component, key) => {
-                const cleanComponent = {
-                  id: component.id,
-                  name: component.name,
-                  slug: component.slug,
-                  uiToolType: component.uiToolType,
-                  content: {
-                    [component.uiToolType]: component.content[component.uiToolType]
-                  },
-                  createdAt: component.createdAt,
-                  updatedAt: component.updatedAt
-                };
+                                      const cleanComponent = {
+                        id: component.id,
+                        name: component.name,
+                        slug: component.slug,
+                        uiToolType: component.uiToolType,
+                        content: {
+                          [component.uiToolType]: component.content[component.uiToolType]
+                        },
+                        aiGenerated: component.aiGenerated,
+                        createdAt: component.createdAt,
+                        updatedAt: component.updatedAt
+                      };
                 
                 // Add banner data if it exists
                 if (component.content.banner?.text) {
@@ -1329,10 +1345,10 @@ export default function FlowCanvas() {
                     const component = components.get(node.data.componentId);
                     if (component) {
                       setOriginalComponentData(JSON.parse(JSON.stringify(component))); // Deep copy
-                      // Initialize banner add-on state based on existing banner data
+                      // Initialize all add-on states based on existing component data
                       setBannerAddOn(!!component.content.banner?.text);
-                      // Initialize text add-on state based on existing text data
                       setTextAddOn(!!(component.content as any).text?.text);
+                      setAiGenerated(!!component.aiGenerated);
                     }
                   }
                 }
@@ -1683,155 +1699,397 @@ export default function FlowCanvas() {
               </div>
                 </div>
                 
-                {/* Add Ons Section - Right Side */}
+                {/* AI-Generated Toggle - Right Side */}
                 <div style={{
                   display: "flex",
-                  flexDirection: "column",
-                  alignItems: "flex-start",
-                  gap: "8px",
+                  alignItems: "center",
                   marginLeft: "20px",
-                  marginTop: "5px"
+                  marginTop: "28px"
                 }}>
-                  <div style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px"
+                  <span style={{
+                    fontSize: "14px",
+                    color: "#003250",
+                    fontWeight: "500",
+                    marginRight: "8px"
                   }}>
-                    <span style={{
-                      fontSize: "14px",
-                      color: "#003250",
-                      fontWeight: "500",
-                      whiteSpace: "nowrap"
-                    }}>
-                      Add Ons:
-                    </span>
-                    <label style={{
+                    AI-Generated:
+                  </span>
+                  <div
+                    onClick={() => {
+                      setAiGenerated(!aiGenerated);
+                      // TODO: Update component with AI-generated state when we add this field
+                    }}
+                    style={{
+                      width: "36px",
+                      height: "20px",
+                      backgroundColor: aiGenerated ? "#87A96B" : "#E9DDD3",
+                      borderRadius: "10px",
+                      cursor: "pointer",
+                      position: "relative",
+                      transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
                       display: "flex",
                       alignItems: "center",
-                      gap: "4px",
-                      fontSize: "14px",
-                      color: "#003250",
-                      cursor: "pointer"
-                    }}>
-                      <input
-                        type="checkbox"
-                        checked={bannerAddOn}
-                        onChange={(e) => {
-                          setBannerAddOn(e.target.checked);
-                          
-                          // Update preview immediately when checkbox changes
-                          const node = nodes.find(n => n.data.messageId === editingMessageId);
-                          if (node) {
-                            const component = components.get(node.data.componentId);
-                            if (component) {
-                              const updatedComponent = {
-                                ...component,
-                                content: {
-                                  ...component.content,
-                                  banner: e.target.checked ? {
-                                    text: component.content.banner?.text || "",
-                                    type: "default"
-                                  } : undefined
-                                }
-                              };
-                              
-                              // Dispatch event to update component data immediately
-                              const componentEvent = new CustomEvent("updateComponentData", {
-                                detail: { 
-                                  messageId: editingMessageId, 
-                                  componentData: updatedComponent
-                                },
-                              });
-                              window.dispatchEvent(componentEvent);
-                            }
-                          }
-                        }}
-                        style={{
-                          accentColor: "#003250",
-                          transform: "scale(1.1)"
-                        }}
-                      />
-                      Banner
-                    </label>
-                    <label style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "4px",
-                      fontSize: "14px",
-                      color: "#003250",
-                      cursor: "pointer"
-                    }}>
-                      <input
-                        type="checkbox"
-                        checked={textAddOn}
-                        onChange={(e) => {
-                          setTextAddOn(e.target.checked);
-                          
-                          // Update preview immediately when checkbox changes
-                          const node = nodes.find(n => n.data.messageId === editingMessageId);
-                          if (node) {
-                            const component = components.get(node.data.componentId);
-                            if (component) {
-                              const updatedComponent = {
-                                ...component,
-                                content: {
-                                  ...component.content,
-                                  text: e.target.checked ? {
-                                    text: (component.content as any).text?.text || "",
-                                    type: "default"
-                                  } : undefined
-                                }
-                              };
-                              
-                              // Dispatch event to update component data immediately
-                              const componentEvent = new CustomEvent("updateComponentData", {
-                                detail: { 
-                                  messageId: editingMessageId, 
-                                  componentData: updatedComponent
-                                },
-                              });
-                              window.dispatchEvent(componentEvent);
-                            }
-                          }
-                        }}
-                        style={{
-                          accentColor: "#003250",
-                          transform: "scale(1.1)"
-                        }}
-                      />
-                      Text
-                    </label>
-                  </div>
-                  <div style={{ marginLeft: "69px" }}>
-                    <label style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: "4px",
-                      fontSize: "14px",
-                      color: "#999999",
-                      cursor: "not-allowed"
-                    }}>
-                      <input
-                        type="checkbox"
-                        disabled
-                        style={{
-                          accentColor: "#999999",
-                          transform: "scale(1.1)"
-                        }}
-                      />
-                      Celebration Modal
-                    </label>
+                      padding: "2px",
+                      boxShadow: aiGenerated 
+                        ? "inset 0 1px 3px rgba(0, 0, 0, 0.1), 0 2px 8px rgba(135, 169, 107, 0.3)" 
+                        : "inset 0 1px 3px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.1)",
+                      border: aiGenerated 
+                        ? "1px solid rgba(135, 169, 107, 0.4)" 
+                        : "1px solid rgba(233, 221, 211, 0.6)"
+                    }}
+                  >
+                    <div
+                      style={{
+                        width: "16px",
+                        height: "16px",
+                        backgroundColor: "white",
+                        borderRadius: "50%",
+                        transform: aiGenerated ? "translateX(16px)" : "translateX(0px)",
+                        transition: "all 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+                        boxShadow: aiGenerated 
+                          ? "0 2px 8px rgba(0, 0, 0, 0.15), 0 1px 3px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8)" 
+                          : "0 2px 4px rgba(0, 0, 0, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.8)",
+                        filter: aiGenerated ? "drop-shadow(0 1px 2px rgba(135, 169, 107, 0.3))" : "none"
+                      }}
+                    />
                   </div>
                 </div>
               </div>
             </div>
-                        <div className="edit-window-content" style={{ width: "100%" }}>
+            
+            {/* Third Row: Add Ons */}
+            <div style={{ 
+              position: "sticky", 
+              top: "120px", 
+              backgroundColor: "#FFF7F1", 
+              zIndex: 3, 
+              marginBottom: "20px", 
+              paddingTop: "12px", 
+              paddingBottom: "12px", 
+              display: "flex",
+              alignItems: "center",
+              gap: "16px"
+            }}>
+              <span style={{
+                fontSize: "14px",
+                color: "#003250",
+                fontWeight: "500",
+                whiteSpace: "nowrap"
+              }}>
+                Add Ons:
+              </span>
+              <div style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "16px"
+              }}>
+                <label style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  fontSize: "14px",
+                  color: "#003250",
+                  cursor: "pointer"
+                }}>
+                  <input
+                    type="checkbox"
+                    checked={bannerAddOn}
+                    onChange={(e) => {
+                      setBannerAddOn(e.target.checked);
+                      
+                      // Update preview immediately when checkbox changes
+                      const node = nodes.find(n => n.data.messageId === editingMessageId);
+                      if (node) {
+                        const component = components.get(node.data.componentId);
+                        if (component) {
+                          const updatedComponent = {
+                            ...component,
+                            content: {
+                              ...component.content,
+                              banner: e.target.checked ? {
+                                text: component.content.banner?.text || "",
+                                type: "default"
+                              } : undefined
+                            }
+                          };
+                          
+                          // Dispatch event to update component data immediately
+                          const componentEvent = new CustomEvent("updateComponentData", {
+                            detail: { 
+                              messageId: editingMessageId, 
+                              componentData: updatedComponent
+                            },
+                          });
+                          window.dispatchEvent(componentEvent);
+                        }
+                      }
+                    }}
+                    style={{
+                      accentColor: "#003250",
+                      transform: "scale(1.1)"
+                    }}
+                  />
+                  Banner
+                </label>
+                <label style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  fontSize: "14px",
+                  color: "#003250",
+                  cursor: "pointer"
+                }}>
+                  <input
+                    type="checkbox"
+                    checked={textAddOn}
+                    onChange={(e) => {
+                      setTextAddOn(e.target.checked);
+                      
+                      // Update preview immediately when checkbox changes
+                      const node = nodes.find(n => n.data.messageId === editingMessageId);
+                      if (node) {
+                        const component = components.get(node.data.componentId);
+                        if (component) {
+                          const updatedComponent = {
+                            ...component,
+                            content: {
+                              ...component.content,
+                              text: e.target.checked ? {
+                                text: (component.content as any).text?.text || "",
+                                type: "default"
+                              } : undefined
+                            }
+                          };
+                          
+                          // Dispatch event to update component data immediately
+                          const componentEvent = new CustomEvent("updateComponentData", {
+                            detail: { 
+                              messageId: editingMessageId, 
+                              componentData: updatedComponent
+                            },
+                          });
+                          window.dispatchEvent(componentEvent);
+                        }
+                      }
+                    }}
+                    style={{
+                      accentColor: "#003250",
+                      transform: "scale(1.1)"
+                    }}
+                  />
+                  Text
+                </label>
+                <label style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  fontSize: "14px",
+                  color: "#999999",
+                  cursor: "not-allowed"
+                }}>
+                  <input
+                    type="checkbox"
+                    disabled
+                    style={{
+                      accentColor: "#999999",
+                      transform: "scale(1.1)"
+                    }}
+                  />
+                  Move On Button
+                </label>
+                <label style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  fontSize: "14px",
+                  color: "#999999",
+                  cursor: "not-allowed"
+                }}>
+                  <input
+                    type="checkbox"
+                    disabled
+                    style={{
+                      accentColor: "#999999",
+                      transform: "scale(1.1)"
+                    }}
+                  />
+                  Celebration Modal
+                </label>
+              </div>
+            </div>
+            
+            <div className="edit-window-content" style={{ width: "100%" }}>
               
               {(() => {
                   const node = nodes.find(n => n.data.messageId === editingMessageId);
                 if (!node) return null;
                   const component = components.get(node.data.componentId);
                 const uiToolType = component?.uiToolType || "message";
+                
+                // Show "Coming Soon" screen when AI-generated is toggled on
+                if (aiGenerated) {
+                  return (
+                    <>
+                      {/* Show banner and text fields above the Coming Soon window if they're checked */}
+                      {bannerAddOn && (
+                        <>
+                          <label>Banner Title:</label>
+                          <input
+                            type="text"
+                            value={component?.content.banner?.text || ""}
+                            onChange={(e) => {
+                              if (node) {
+                                const component = components.get(node.data.componentId);
+                                if (component) {
+                                  const updatedComponent = {
+                                    ...component,
+                                    content: {
+                                      ...component.content,
+                                      banner: {
+                                        text: e.target.value,
+                                        type: "default"
+                                      }
+                                    },
+                                    updatedAt: new Date()
+                                  };
+                                  setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                  
+                                  // Dispatch event to update preview
+                                  const event = new CustomEvent("updateComponentData", {
+                                    detail: { 
+                                      messageId: editingMessageId, 
+                                      componentData: updatedComponent 
+                                    },
+                                  });
+                                  window.dispatchEvent(event);
+                                }
+                              }
+                            }}
+                            placeholder="Enter banner title (e.g., 'Strengths')..."
+                            style={{
+                              width: "100%",
+                              padding: "8px 12px",
+                              border: "1px solid #E9DDD3",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              fontFamily: "inherit",
+                              marginBottom: "16px",
+                              height: "33px",
+                              boxSizing: "border-box",
+                              transform: "translate(-2px, -3px)",
+                              background: "white",
+                              outline: "none"
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.border = "2px solid #003250";
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.border = "1px solid #E9DDD3";
+                            }}
+                          />
+                        </>
+                      )}
+                      
+                      {textAddOn && (
+                        <>
+                          <label>Text Content:</label>
+                          <textarea
+                            value={(component?.content as any)?.text?.text || ""}
+                            onChange={(e) => {
+                              if (node) {
+                                const component = components.get(node.data.componentId);
+                                if (component) {
+                                  const updatedComponent = {
+                                    ...component,
+                                    content: {
+                                      ...component.content,
+                                      text: {
+                                        text: e.target.value,
+                                        type: "default"
+                                      }
+                                    },
+                                    updatedAt: new Date()
+                                  };
+                                  setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                  
+                                  // Dispatch event to update preview
+                                  const event = new CustomEvent("updateComponentData", {
+                                    detail: { 
+                                      messageId: editingMessageId, 
+                                      componentData: updatedComponent 
+                                    },
+                                  });
+                                  window.dispatchEvent(event);
+                                }
+                              }
+                            }}
+                            placeholder="Enter your text content..."
+                            style={{
+                              width: "100%",
+                              minHeight: "80px",
+                              padding: "12px",
+                              border: "1px solid #E9DDD3",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              fontFamily: "inherit",
+                              marginBottom: "16px",
+                              resize: "vertical",
+                              boxSizing: "border-box",
+                              transform: "translate(-2px, -3px)",
+                              outline: "none"
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.border = "2px solid #003250";
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.border = "1px solid #E9DDD3";
+                            }}
+                          />
+                        </>
+                      )}
+                      
+                      {/* Coming Soon window */}
+                      <div style={{
+                        display: "flex",
+                        flexDirection: "column",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        minHeight: "300px",
+                        backgroundColor: "#f8f8f8",
+                        borderRadius: "8px",
+                        border: "2px dashed #ccc",
+                        margin: "20px 0",
+                        padding: "40px 20px"
+                      }}>
+                        <div style={{
+                          fontSize: "48px",
+                          color: "#999",
+                          marginBottom: "20px"
+                        }}>
+                          ⭐
+                        </div>
+                        <div style={{
+                          fontSize: "24px",
+                          fontWeight: "600",
+                          color: "#666",
+                          marginBottom: "12px",
+                          textAlign: "center"
+                        }}>
+                          AI-Generated Content
+                        </div>
+                        <div style={{
+                          fontSize: "16px",
+                          color: "#999",
+                          textAlign: "center",
+                          maxWidth: "300px",
+                          lineHeight: "1.5"
+                        }}>
+                          Coming Soon! This feature will allow AI to generate content for your components.
+                        </div>
+                      </div>
+                    </>
+                  );
+                }
                 
                 // Banner add-on field
                 const bannerField = bannerAddOn && (
@@ -1957,6 +2215,13 @@ export default function FlowCanvas() {
                     <>
                       {bannerField}
                       {textField}
+                      {(bannerAddOn || textAddOn) && (
+                        <div style={{
+                          borderBottom: "1px solid #E9DDD3",
+                          marginBottom: "20px",
+                          paddingBottom: "16px"
+                        }} />
+                      )}
                       <label>Question Text:</label>
                       <textarea
                         value={component?.content.question?.text || ""}
@@ -2405,6 +2670,13 @@ export default function FlowCanvas() {
                     <>
                       {bannerField}
                       {textField}
+                      {(bannerAddOn || textAddOn) && (
+                        <div style={{
+                          borderBottom: "1px solid #E9DDD3",
+                          marginBottom: "20px",
+                          paddingBottom: "16px"
+                        }} />
+                      )}
                       <label>Question Text:</label>
                       <textarea
                         value={component?.content.multiSelect?.text || ""}
@@ -2883,6 +3155,13 @@ export default function FlowCanvas() {
                     <>
                       {bannerField}
                       {textField}
+                      {(bannerAddOn || textAddOn) && (
+                        <div style={{
+                          borderBottom: "1px solid #E9DDD3",
+                          marginBottom: "20px",
+                          paddingBottom: "16px"
+                        }} />
+                      )}
                       <label>Message Content:</label>
                       <textarea
                         value={component?.content.message?.text || ""}
@@ -2950,7 +3229,7 @@ export default function FlowCanvas() {
                   if (node) {
                     const component = components.get(node.data.componentId);
                     if (component) {
-                      // Update component with banner and text add-on state
+                      // Update component with banner, text add-on, and AI-generated state
                       const updatedComponent = {
                         ...component,
                         content: {
@@ -2964,6 +3243,7 @@ export default function FlowCanvas() {
                             type: "default"
                           } : undefined
                         },
+                        aiGenerated: aiGenerated,
                         updatedAt: new Date()
                       };
                       
