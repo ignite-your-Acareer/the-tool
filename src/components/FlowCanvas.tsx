@@ -79,6 +79,29 @@ export default function FlowCanvas() {
   const [textAddOn, setTextAddOn] = useState(false);
   const [aiGenerated, setAiGenerated] = useState(false);
 
+  // Navigation bar state
+  const [selectedBranch, setSelectedBranch] = useState("main");
+  const [selectedTrack, setSelectedTrack] = useState("clarity");
+  const [selectedSegment, setSelectedSegment] = useState("student");
+  const [selectedUser, setSelectedUser] = useState("user1");
+  const [showImagesPopup, setShowImagesPopup] = useState(false);
+
+  // Mock users data
+  const mockUsers = [
+    { id: "user1", name: "Sarah Chen", age: 22, description: "Ambitious tech enthusiast" },
+    { id: "user2", name: "Marcus Rodriguez", age: 24, description: "Creative problem solver" },
+    { id: "user3", name: "Emily Watson", age: 26, description: "Analytical team leader" },
+    { id: "user4", name: "David Kim", age: 23, description: "Innovative startup founder" },
+    { id: "user5", name: "Jessica Patel", age: 25, description: "Strategic communicator" },
+    { id: "user6", name: "Alex Thompson", age: 27, description: "Data-driven decision maker" },
+    { id: "user7", name: "Maria Garcia", age: 24, description: "Customer-focused designer" },
+    { id: "user8", name: "James Wilson", age: 26, description: "Results-oriented manager" },
+    { id: "user9", name: "Lisa Anderson", age: 25, description: "Collaborative team player" },
+    { id: "user10", name: "Ryan O'Connor", age: 23, description: "Adaptive quick learner" },
+    { id: "user11", name: "Amanda Foster", age: 28, description: "Experienced mentor" },
+    { id: "user12", name: "Kevin Zhang", age: 24, description: "Technical innovator" },
+  ];
+
   // Calculate zoom limits based on node positions and sizes
   const calculateZoomLimits = useCallback(() => {
     if (nodes.length === 0) {
@@ -1077,15 +1100,172 @@ export default function FlowCanvas() {
         <Background />
       </ReactFlow>
       
+      {/* Top Navigation Bar */}
       <div style={{
         position: "absolute",
-        top: "20px",
-        left: "20px",
-        zIndex: 10,
+        top: "0",
+        left: "0",
+        right: "0",
+        height: "60px",
+        background: "#F8F6F3",
+        borderBottom: "1px solid #E9DDD3",
+        zIndex: 20,
         display: "flex",
-        flexDirection: "column",
-        gap: "8px",
+        alignItems: "center",
+        padding: "0 20px",
+        gap: "20px",
+        boxShadow: "0 2px 4px rgba(0, 0, 0, 0.1)",
       }}>
+        {/* Branch Dropdown */}
+        <div style={{ position: "relative" }}>
+          <div style={{
+            fontSize: "11px",
+            color: "#666",
+            marginBottom: "2px",
+            fontWeight: "500",
+          }}>
+            Branch
+          </div>
+          <select 
+            value={selectedBranch}
+            onChange={(e) => setSelectedBranch(e.target.value)}
+            style={{
+              padding: "8px 12px",
+              border: "1px solid #E9DDD3",
+              borderRadius: "6px",
+              fontSize: "14px",
+              background: "white",
+              cursor: "pointer",
+              outline: "none",
+            }}
+          >
+            <option value="main">main</option>
+            <option value="staging">staging</option>
+            <option value="dev">dev</option>
+            <option value="prompt-dev">prompt-dev</option>
+          </select>
+        </div>
+
+        {/* Track Dropdown */}
+        <div style={{ position: "relative" }}>
+          <div style={{
+            fontSize: "11px",
+            color: "#666",
+            marginBottom: "2px",
+            fontWeight: "500",
+          }}>
+            Track
+          </div>
+          <select 
+            value={selectedTrack}
+            onChange={(e) => setSelectedTrack(e.target.value)}
+            style={{
+              padding: "8px 12px",
+              border: "1px solid #E9DDD3",
+              borderRadius: "6px",
+              fontSize: "14px",
+              background: "white",
+              cursor: "pointer",
+              outline: "none",
+            }}
+          >
+            <option value="clarity">Clarity</option>
+            <option value="connections">Connections</option>
+            <option value="visibility">Visibility</option>
+            <option value="credentials">Credentials</option>
+          </select>
+        </div>
+
+        {/* Segment Dropdown */}
+        <div style={{ position: "relative" }}>
+          <div style={{
+            fontSize: "11px",
+            color: "#666",
+            marginBottom: "2px",
+            fontWeight: "500",
+          }}>
+            Segment
+          </div>
+          <select 
+            value={selectedSegment}
+            onChange={(e) => setSelectedSegment(e.target.value)}
+            style={{
+              padding: "8px 12px",
+              border: "1px solid #E9DDD3",
+              borderRadius: "6px",
+              fontSize: "14px",
+              background: "white",
+              cursor: "pointer",
+              outline: "none",
+            }}
+          >
+            <option value="student">Student</option>
+            <option value="graduate">Graduate</option>
+            <option value="mid-career">Mid Career</option>
+          </select>
+        </div>
+
+        {/* Mock Dataset Dropdown */}
+        <div style={{ position: "relative" }}>
+          <div style={{
+            fontSize: "11px",
+            color: "#666",
+            marginBottom: "2px",
+            fontWeight: "500",
+          }}>
+            Mock Dataset
+          </div>
+          <select 
+            value={selectedUser}
+            onChange={(e) => setSelectedUser(e.target.value)}
+            style={{
+              padding: "8px 12px",
+              border: "1px solid #E9DDD3",
+              borderRadius: "6px",
+              fontSize: "14px",
+              background: "white",
+              cursor: "pointer",
+              outline: "none",
+              minWidth: "200px",
+            }}
+          >
+            {mockUsers.map(user => (
+              <option key={user.id} value={user.id}>
+                {user.name} ({user.age}) - {user.description}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Spacer to push buttons to the right */}
+        <div style={{ flex: 1 }}></div>
+        
+        {/* Images Button - Right justified */}
+        <button
+          onClick={() => setShowImagesPopup(true)}
+          style={{
+            padding: "8px 16px",
+            border: "none",
+            borderRadius: "6px",
+            fontSize: "14px",
+            background: "#F16B68",
+            cursor: "pointer",
+            outline: "none",
+            color: "white",
+            fontWeight: "500",
+            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+          }}
+          onFocus={(e) => {
+            e.target.style.boxShadow = "0 0 0 2px rgba(241, 107, 104, 0.3)";
+          }}
+          onBlur={(e) => {
+            e.target.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.1)";
+          }}
+        >
+          Images
+        </button>
+
+        {/* Add Component Button - Right justified, farthest to the right */}
         <button 
           className="add-component-btn"
           onClick={addNewComponent}
@@ -1093,8 +1273,8 @@ export default function FlowCanvas() {
             background: "#F16B68",
             color: "white",
             border: "none",
-            borderRadius: "8px",
-            padding: "12px 20px",
+            borderRadius: "6px",
+            padding: "8px 16px",
             fontSize: "14px",
             fontWeight: "500",
             cursor: "pointer",
@@ -1110,9 +1290,15 @@ export default function FlowCanvas() {
         >
           Add Component
         </button>
-        
+      </div>
 
-        
+      {/* Copy State Button - Bottom Left */}
+      <div style={{
+        position: "absolute",
+        bottom: "13px",
+        left: "49px",
+        zIndex: 10,
+      }}>
         <button 
           className="copy-default-btn"
           onClick={() => {
@@ -1215,32 +1401,33 @@ export default function FlowCanvas() {
             });
           }}
           style={{
-            background: "#F16B68",
-            color: "white",
+            background: "#9CAF88", // Sage green
+            color: "white", // White text
             border: "none",
-            borderRadius: "8px",
-            padding: "12px 20px",
-            fontSize: "14px",
+            borderRadius: "6px", // Reduced from 8px
+            padding: "9px 15px", // Reduced from 12px 20px (75% of original)
+            fontSize: "10.5px", // Reduced from 14px (75% of original)
             fontWeight: "500",
             cursor: "pointer",
-            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+            boxShadow: "0 1.5px 6px rgba(0, 0, 0, 0.1)", // Reduced shadow
             outline: "none",
+            opacity: "0.8", // Additional gray out effect
           }}
           onFocus={(e) => {
-            e.target.style.boxShadow = "0 0 0 2px rgba(241, 107, 104, 0.3)";
+            e.target.style.boxShadow = "0 0 0 1.5px rgba(156, 175, 136, 0.3)"; // Sage green focus
           }}
           onBlur={(e) => {
-            e.target.style.boxShadow = "0 2px 8px rgba(0, 0, 0, 0.1)";
+            e.target.style.boxShadow = "0 1.5px 6px rgba(0, 0, 0, 0.1)";
           }}
         >
           Copy State
         </button>
       </div>
 
-      {/* Search Bar */}
+      {/* Search Bar - Moved below nav bar */}
       <div style={{
         position: "absolute",
-        top: "20px",
+        top: "80px",
         right: "20px",
         zIndex: 10,
         display: "flex",
@@ -3390,6 +3577,349 @@ export default function FlowCanvas() {
               >
                 Cancel
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Images Popup Overlay */}
+      {showImagesPopup && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: "rgba(0, 0, 0, 0.5)",
+          zIndex: 1000,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}>
+          <div style={{
+            background: "white",
+            borderRadius: "12px",
+            padding: "24px",
+            maxWidth: "90vw",
+            maxHeight: "90vh",
+            overflow: "auto",
+            position: "relative",
+          }}>
+            <div style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginBottom: "20px",
+            }}>
+              <h2 style={{ margin: 0, color: "#333" }}>Image Library</h2>
+              <button
+                onClick={() => setShowImagesPopup(false)}
+                style={{
+                  background: "none",
+                  border: "none",
+                  fontSize: "24px",
+                  cursor: "pointer",
+                  color: "#666",
+                }}
+              >
+                ×
+              </button>
+            </div>
+            
+            <div style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fill, minmax(200px, 1fr))",
+              gap: "16px",
+              maxHeight: "70vh",
+              overflow: "auto",
+            }}>
+              {/* All images from public folder */}
+              {[
+                // Main images
+                { name: "assessment-start.png", path: "/img/assessment-start.png" },
+                { name: "avatar.png", path: "/img/avatar.png" },
+                { name: "axial-mark.svg", path: "/img/axial-mark.svg" },
+                { name: "career-findings-header.png", path: "/img/career-findings-header.png" },
+                { name: "chat.png", path: "/img/chat.png" },
+                { name: "clarity-header.png", path: "/img/clarity-header.png" },
+                { name: "clarity-header.svg", path: "/img/clarity-header.svg" },
+                { name: "clouds.svg", path: "/img/clouds.svg" },
+                { name: "profile-mock.png", path: "/img/profile-mock.png" },
+                { name: "login-thumb.png", path: "/img/login-thumb.png" },
+                { name: "home-clarity.png", path: "/img/home-clarity.png" },
+                { name: "home-other.png", path: "/img/home-other.png" },
+                { name: "vite.svg", path: "/vite.svg" },
+                
+                // Home thumbnails
+                { name: "clarity-thumb.png", path: "/img/home/clarity-thumb.png" },
+                { name: "connections-thumb.png", path: "/img/home/connections-thumb.png" },
+                { name: "credentials-thumb.png", path: "/img/home/credentials-thumb.png" },
+                { name: "visibility-thumb.png", path: "/img/home/visibility-thumb.png" },
+                
+                // Intro images
+                { name: "intro-connections.png", path: "/img/intro/intro-connections.png" },
+                { name: "intro-profile.png", path: "/img/intro/intro-profile.png" },
+                
+                // Onboarding images
+                { name: "career-growth.png", path: "/img/onboarding/career-growth.png" },
+                { name: "finding-the-right-career.png", path: "/img/onboarding/finding-the-right-career.png" },
+                { name: "getting-a-job.png", path: "/img/onboarding/getting-a-job.png" },
+                { name: "leadership-development.png", path: "/img/onboarding/leadership-development.png" },
+                { name: "networking-opportunities.png", path: "/img/onboarding/networking-opportunities.png" },
+                { name: "personal-growth.png", path: "/img/onboarding/personal-growth.png" },
+                
+                // Assessment images (all the numbered images)
+                { name: "assessment-1.png", path: "/img/assessment/1737073103251x172902281481551870.png" },
+                { name: "assessment-2.png", path: "/img/assessment/1737073115774x613797929973448700.png" },
+                { name: "assessment-3.png", path: "/img/assessment/1737073145427x700685284803346400.png" },
+                { name: "assessment-4.png", path: "/img/assessment/1737073157096x776507020994412500.png" },
+                { name: "assessment-5.png", path: "/img/assessment/1737073185345x482787881745121300.png" },
+                { name: "assessment-6.png", path: "/img/assessment/1737073199960x562508693030043650.png" },
+                { name: "assessment-7.png", path: "/img/assessment/1737073219127x274753412849467400.png" },
+                { name: "assessment-8.png", path: "/img/assessment/1737073228950x776109012957265900.png" },
+                { name: "assessment-9.png", path: "/img/assessment/1737073244848x337970816021430300.png" },
+                { name: "assessment-10.png", path: "/img/assessment/1737073257738x951553735686881300.png" },
+                { name: "assessment-11.png", path: "/img/assessment/1737073276576x970070120695070700.png" },
+                { name: "assessment-12.png", path: "/img/assessment/1737073286644x155782848464289800.png" },
+                { name: "assessment-13.png", path: "/img/assessment/1737073325420x395772772218568700.png" },
+                { name: "assessment-14.png", path: "/img/assessment/1737073334734x364099672101355500.png" },
+                { name: "assessment-15.png", path: "/img/assessment/1737073352706x332837390304935940.png" },
+                { name: "assessment-16.png", path: "/img/assessment/1737073360818x559104714837852200.png" },
+                { name: "assessment-17.png", path: "/img/assessment/1737073380037x460219962055720960.png" },
+                { name: "assessment-18.png", path: "/img/assessment/1737073388324x137990978149285890.png" },
+                { name: "assessment-19.png", path: "/img/assessment/1737073403200x790903030341173200.png" },
+                { name: "assessment-20.png", path: "/img/assessment/1737073413172x136524186378567680.png" },
+                { name: "assessment-21.png", path: "/img/assessment/1737073430470x143620217451577340.png" },
+                { name: "assessment-22.png", path: "/img/assessment/1737073438002x357933086537154560.png" },
+                { name: "assessment-23.png", path: "/img/assessment/1737073455002x254970852455481340.png" },
+                { name: "assessment-24.png", path: "/img/assessment/1737073463656x485530083098361860.png" },
+                { name: "assessment-25.png", path: "/img/assessment/1737073513752x807670121866199000.png" },
+                { name: "assessment-26.png", path: "/img/assessment/1737073521588x691329728926449700.png" },
+                { name: "assessment-27.png", path: "/img/assessment/1737073534602x932118834809143300.png" },
+                { name: "assessment-28.png", path: "/img/assessment/1737073553458x532046035564101600.png" },
+                { name: "assessment-29.png", path: "/img/assessment/1737073572017x977006328469258200.png" },
+                { name: "assessment-30.png", path: "/img/assessment/1737073580424x164060162485911550.png" },
+                { name: "assessment-31.png", path: "/img/assessment/1737073593669x506636291092774900.png" },
+                { name: "assessment-32.png", path: "/img/assessment/1737073606326x138136713487712260.png" },
+                { name: "assessment-33.png", path: "/img/assessment/1737073620244x761600220017459200.png" },
+                { name: "assessment-34.png", path: "/img/assessment/1737073625869x662131296860373000.png" },
+                { name: "assessment-35.png", path: "/img/assessment/1737073637833x259216453040078850.png" },
+                { name: "assessment-36.png", path: "/img/assessment/1737073648204x549712032707903500.png" },
+                { name: "assessment-37.png", path: "/img/assessment/1737073694877x710244893043982300.png" },
+                { name: "assessment-38.png", path: "/img/assessment/1737073708665x808520554165305300.png" },
+                { name: "assessment-39.png", path: "/img/assessment/1737073723111x275346479634186240.png" },
+                { name: "assessment-40.png", path: "/img/assessment/1737073729344x580294875353186300.png" },
+                { name: "assessment-41.png", path: "/img/assessment/1737073743110x381465187950526460.png" },
+                { name: "assessment-42.png", path: "/img/assessment/1737073750092x553261188064477200.png" },
+                { name: "assessment-43.png", path: "/img/assessment/1737073763985x184446150030393340.png" },
+                { name: "assessment-44.png", path: "/img/assessment/1737073773430x544484296143142900.png" },
+                { name: "assessment-45.png", path: "/img/assessment/1737073785879x916255055020032000.png" },
+                { name: "assessment-46.png", path: "/img/assessment/1737073792368x288248526004551700.png" },
+                { name: "assessment-47.png", path: "/img/assessment/1737073808463x538973694971084800.png" },
+                { name: "assessment-48.png", path: "/img/assessment/1737073820127x661266696548909000.png" },
+                { name: "assessment-49.png", path: "/img/assessment/1737073837587x242411440770646000.png" },
+                { name: "assessment-50.png", path: "/img/assessment/1737073845176x831091857542348800.png" },
+                { name: "assessment-51.png", path: "/img/assessment/1737073872180x832122080371671000.png" },
+                { name: "assessment-52.png", path: "/img/assessment/1737073880162x831294481101750300.png" },
+                { name: "assessment-53.png", path: "/img/assessment/1737073897887x568048395451367400.png" },
+                { name: "assessment-54.png", path: "/img/assessment/1737073907411x982383147230691300.png" },
+                { name: "assessment-55.png", path: "/img/assessment/1737073920325x506301852938666000.png" },
+                { name: "assessment-56.png", path: "/img/assessment/1737073928761x487901223840383000.png" },
+                { name: "assessment-57.png", path: "/img/assessment/1737073946296x221336882923438100.png" },
+                { name: "assessment-58.png", path: "/img/assessment/1737073954368x904092157911236600.png" },
+                { name: "assessment-59.png", path: "/img/assessment/1737073971935x380292910184923140.png" },
+                { name: "assessment-60.png", path: "/img/assessment/1737073980945x516493849019547650.png" },
+                { name: "assessment-61.png", path: "/img/assessment/1737073997241x447049289283928060.png" },
+                { name: "assessment-62.png", path: "/img/assessment/1737074004882x698828942365425700.png" },
+                { name: "assessment-63.png", path: "/img/assessment/1737074025047x171361812832059400.png" },
+                { name: "assessment-64.png", path: "/img/assessment/1737074033328x573167398071828500.png" },
+                { name: "assessment-65.png", path: "/img/assessment/1737074053332x631017088713752600.png" },
+                { name: "assessment-66.png", path: "/img/assessment/1737074061509x372696027024326660.png" },
+                { name: "assessment-67.png", path: "/img/assessment/1737074079285x528874552774623200.png" },
+                { name: "assessment-68.png", path: "/img/assessment/1737074090092x546430270947459100.png" },
+                { name: "assessment-69.png", path: "/img/assessment/1737074109653x636555905770192900.png" },
+                { name: "assessment-70.png", path: "/img/assessment/1737074118759x900708562306859000.png" },
+                { name: "assessment-71.png", path: "/img/assessment/1737074148429x319939190386589700.png" },
+                { name: "assessment-72.png", path: "/img/assessment/1737074156756x150612309136375800.png" },
+                { name: "assessment-73.png", path: "/img/assessment/1737074172700x928738393004703700.png" },
+                { name: "assessment-74.png", path: "/img/assessment/1737074180699x711794184609333200.png" },
+                { name: "assessment-75.png", path: "/img/assessment/1737074193926x470423531755143200.png" },
+                { name: "assessment-76.png", path: "/img/assessment/1737074202060x730003261199482900.png" },
+                { name: "assessment-77.png", path: "/img/assessment/1737074231535x718316187461615600.png" },
+                { name: "assessment-78.png", path: "/img/assessment/1737074238447x394520976237264900.png" },
+                { name: "assessment-79.png", path: "/img/assessment/1737074253189x424121296352706560.png" },
+                { name: "assessment-80.png", path: "/img/assessment/1737074260706x877394102258761700.png" },
+                { name: "assessment-81.png", path: "/img/assessment/1737074278638x135093427621855230.png" },
+                { name: "assessment-82.png", path: "/img/assessment/1737074285226x528853024232177660.png" },
+                { name: "assessment-83.png", path: "/img/assessment/1737074297424x770277121707475000.png" },
+                { name: "assessment-84.png", path: "/img/assessment/1737074305727x493057622765731800.png" },
+                { name: "assessment-85.png", path: "/img/assessment/1737074318110x628240280708448300.png" },
+                { name: "assessment-86.png", path: "/img/assessment/1737074324797x155628070924451840.png" },
+                { name: "assessment-87.png", path: "/img/assessment/1737074338099x332376476383707140.png" },
+                { name: "assessment-88.png", path: "/img/assessment/1737074357335x629258047334907900.png" },
+                { name: "assessment-89.png", path: "/img/assessment/1737074379012x670608686568702000.png" },
+                { name: "assessment-90.png", path: "/img/assessment/1737074385496x275713184879345660.png" },
+                
+                // Steps images - Assessment
+                { name: "assessment-celebration.png", path: "/img/steps/assessment/celebration.png" },
+                
+                // Steps images - Career Paths
+                { name: "career-paths-celebration.png", path: "/img/steps/careerPaths/celebration.png" },
+                
+                // Steps images - Career Statement
+                { name: "career-statement-celebration.png", path: "/img/steps/careerStatement/celebration.png" },
+                { name: "career-statement-q1.png", path: "/img/steps/careerStatement/question/1.png" },
+                
+                // Steps images - Dream Job
+                { name: "dream-job-celebration-alt.png", path: "/img/steps/dreamJob/celebration-alt.png" },
+                { name: "dream-job-celebration.png", path: "/img/steps/dreamJob/celebration.png" },
+                
+                // Steps images - Financial Needs
+                { name: "financial-needs-celebration.png", path: "/img/steps/financialNeeds/celebration.png" },
+                { name: "financial-needs-q1.png", path: "/img/steps/financialNeeds/question/1.png" },
+                { name: "financial-needs-q2.png", path: "/img/steps/financialNeeds/question/2.png" },
+                { name: "financial-needs-q3.png", path: "/img/steps/financialNeeds/question/3.png" },
+                { name: "financial-needs-q4.png", path: "/img/steps/financialNeeds/question/4.png" },
+                { name: "financial-needs-q5.png", path: "/img/steps/financialNeeds/question/5.png" },
+                { name: "financial-needs-q6.png", path: "/img/steps/financialNeeds/question/6.png" },
+                { name: "financial-needs-q7.png", path: "/img/steps/financialNeeds/question/7.png" },
+                { name: "financial-needs-q8.png", path: "/img/steps/financialNeeds/question/8.png" },
+                
+                // Steps images - Inspirations
+                { name: "inspirations-celebration.png", path: "/img/steps/inspirations/celebration.png" },
+                { name: "inspirations-q1.png", path: "/img/steps/inspirations/question/1.png" },
+                { name: "inspirations-q2.png", path: "/img/steps/inspirations/question/2.png" },
+                { name: "inspirations-q3.png", path: "/img/steps/inspirations/question/3.png" },
+                { name: "inspirations-q4.png", path: "/img/steps/inspirations/question/4.png" },
+                { name: "inspirations-q5.png", path: "/img/steps/inspirations/question/5.png" },
+                { name: "inspirations-q6.png", path: "/img/steps/inspirations/question/6.png" },
+                
+                // Steps images - Living Environment
+                { name: "living-environment-celebration.png", path: "/img/steps/livingEnvironment/celebration.png" },
+                { name: "living-environment-q1.png", path: "/img/steps/livingEnvironment/question/1.png" },
+                { name: "living-environment-q2.png", path: "/img/steps/livingEnvironment/question/2.png" },
+                { name: "living-environment-q3.png", path: "/img/steps/livingEnvironment/question/3.png" },
+                { name: "living-environment-q4.png", path: "/img/steps/livingEnvironment/question/4.png" },
+                { name: "living-environment-q5.png", path: "/img/steps/livingEnvironment/question/5.png" },
+                { name: "living-environment-q6.png", path: "/img/steps/livingEnvironment/question/6.png" },
+                
+                // Steps images - Strengths
+                { name: "strengths-celebration.png", path: "/img/steps/strengths/celebration.png" },
+                { name: "strengths-q1.png", path: "/img/steps/strengths/question/1.png" },
+                { name: "strengths-q2.png", path: "/img/steps/strengths/question/2.png" },
+                { name: "strengths-q3.png", path: "/img/steps/strengths/question/3.png" },
+                { name: "strengths-q4.png", path: "/img/steps/strengths/question/4.png" },
+                { name: "strengths-q5.png", path: "/img/steps/strengths/question/5.png" },
+                { name: "strengths-q6.png", path: "/img/steps/strengths/question/6.png" },
+                
+                // Steps images - Values
+                { name: "values-celebration.png", path: "/img/steps/values/celebration.png" },
+                { name: "values-q1.png", path: "/img/steps/values/question/1.png" },
+                { name: "values-q2.png", path: "/img/steps/values/question/2.png" },
+                { name: "values-q3.png", path: "/img/steps/values/question/3.png" },
+                { name: "values-q4.png", path: "/img/steps/values/question/4.png" },
+                { name: "values-q5.png", path: "/img/steps/values/question/5.png" },
+                { name: "values-q6.png", path: "/img/steps/values/question/6.png" },
+                
+                // Steps images - Work Environment
+                { name: "work-environment-celebration.png", path: "/img/steps/workEnvironment/celebration.png" },
+                { name: "work-environment-q1.png", path: "/img/steps/workEnvironment/question/1.png" },
+                { name: "work-environment-q2.png", path: "/img/steps/workEnvironment/question/2.png" },
+                { name: "work-environment-q3.png", path: "/img/steps/workEnvironment/question/3.png" },
+                { name: "work-environment-q4.png", path: "/img/steps/workEnvironment/question/4.png" },
+                { name: "work-environment-q5.png", path: "/img/steps/workEnvironment/question/5.png" },
+                { name: "work-environment-q6.png", path: "/img/steps/workEnvironment/question/6.png" },
+              ].map((image, index) => (
+                <div key={index} style={{
+                  border: "1px solid #E9DDD3",
+                  borderRadius: "8px",
+                  padding: "12px",
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "8px",
+                }}>
+                  <div style={{
+                    width: "100%",
+                    height: "120px",
+                    background: "#f5f5f5",
+                    borderRadius: "4px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    overflow: "hidden",
+                  }}>
+                    <img
+                      src={image.path}
+                      alt={image.name}
+                      style={{
+                        maxWidth: "100%",
+                        maxHeight: "100%",
+                        objectFit: "contain",
+                      }}
+                      onError={(e) => {
+                        e.currentTarget.style.display = "none";
+                        const nextElement = e.currentTarget.nextElementSibling as HTMLElement;
+                        if (nextElement) {
+                          nextElement.style.display = "flex";
+                        }
+                      }}
+                    />
+                    <div style={{
+                      display: "none",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "#999",
+                      fontSize: "12px",
+                    }}>
+                      Image not found
+                    </div>
+                  </div>
+                  
+                  <input
+                    type="text"
+                    defaultValue={image.name}
+                    style={{
+                      padding: "6px 8px",
+                      border: "1px solid #E9DDD3",
+                      borderRadius: "4px",
+                      fontSize: "12px",
+                    }}
+                    placeholder="Image name"
+                  />
+                  
+                  <div style={{
+                    display: "flex",
+                    gap: "4px",
+                  }}>
+                    <button
+                      style={{
+                        flex: 1,
+                        padding: "4px 8px",
+                        border: "1px solid #E9DDD3",
+                        borderRadius: "4px",
+                        fontSize: "11px",
+                        background: "white",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Copy Path
+                    </button>
+                    <button
+                      style={{
+                        padding: "4px 8px",
+                        border: "1px solid #F16B68",
+                        borderRadius: "4px",
+                        fontSize: "11px",
+                        background: "white",
+                        color: "#F16B68",
+                        cursor: "pointer",
+                      }}
+                    >
+                      Delete
+                    </button>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
