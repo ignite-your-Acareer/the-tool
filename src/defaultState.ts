@@ -172,7 +172,7 @@ const defaultState = {
       "id": "n-15",
       "type": "card",
       "position": {
-        "x": 2880,
+        "x": 3360,
         "y": 120
       },
       "data": {
@@ -184,12 +184,24 @@ const defaultState = {
       "id": "n-16",
       "type": "card",
       "position": {
-        "x": 3360,
+        "x": 3840,
         "y": 120
       },
       "data": {
         "componentId": "comp-1755475332549",
         "messageId": "msg-16"
+      }
+    },
+    {
+      "id": "n-17",
+      "type": "card",
+      "position": {
+        "x": 2880,
+        "y": 120
+      },
+      "data": {
+        "componentId": "comp-1755484138142",
+        "messageId": "msg-17"
       }
     }
   ],
@@ -261,16 +273,21 @@ const defaultState = {
       "selected": false
     },
     {
-      "source": "n-5",
-      "target": "n-15",
-      "id": "xy-edge__n-5-n-15",
-      "selected": false
-    },
-    {
       "id": "e-n-15-n-16",
       "source": "n-15",
       "target": "n-16",
       "selected": false
+    },
+    {
+      "source": "n-5",
+      "target": "n-17",
+      "id": "xy-edge__n-5-n-17",
+      "selected": false
+    },
+    {
+      "source": "n-17",
+      "target": "n-15",
+      "id": "xy-edge__n-17-n-15"
     }
   ],
   components: {
@@ -570,8 +587,8 @@ const defaultState = {
     },
     "comp-1755475318882": {
       "id": "comp-1755475318882",
-      "name": "New Component 15",
-      "slug": "",
+      "name": "Strengths Pick List",
+      "slug": "01.01.07",
       "uiToolType": "multiSelect",
       "content": {
         "multiSelect": {
@@ -600,7 +617,7 @@ const defaultState = {
       },
       "aiGenerated": true,
       "createdAt": "2025-08-18T00:01:58.882Z",
-      "updatedAt": "2025-08-18T00:03:27.703Z"
+      "updatedAt": "2025-08-18T02:29:59.532Z"
     },
     "comp-1755475332549": {
       "id": "comp-1755475332549",
@@ -616,6 +633,26 @@ const defaultState = {
       "aiGenerated": true,
       "createdAt": "2025-08-18T00:02:12.549Z",
       "updatedAt": "2025-08-18T00:04:06.918Z"
+    },
+    "comp-1755484138142": {
+      "id": "comp-1755484138142",
+      "name": "Strengths Q6",
+      "slug": "01.01.06",
+      "uiToolType": "question",
+      "content": {
+        "question": {
+          "text": "What do you get so involved with that you lose track of time?",
+          "options": [],
+          "suggestions": [
+            "Prototyping",
+            "etc"
+          ],
+          "image": "/img/steps/strengths/question/6.png"
+        }
+      },
+      "aiGenerated": false,
+      "createdAt": "2025-08-18T02:28:58.142Z",
+      "updatedAt": "2025-08-18T02:30:54.495Z"
     }
   },
   messages: [
@@ -830,6 +867,21 @@ const defaultState = {
       "type": "text" as const
     },
     {
+      "id": "17",
+      "sender": "ai" as const,
+      "content": "What do you get so involved with that you lose track of time?",
+      "messageId": "msg-17",
+      "componentId": "comp-1755484138142",
+      "uiToolType": "question",
+      "suggestions": [
+        "Prototyping",
+        "etc"
+      ],
+      "image": "/img/steps/strengths/question/6.png",
+      "timestamp": "01:14 PM",
+      "type": "text" as const
+    },
+    {
       "id": "15",
       "sender": "ai" as const,
       "content": "Based on your answers and your personality quiz, here's a set of strengths that should suit you. Please select what you think are your top 3 strengths.",
@@ -892,7 +944,7 @@ const defaultState = {
     }
   ],
   orphanMessageIds: [],
-  lastSaved: "2025-08-18T00:04:19.650Z"
+  lastSaved: "2025-08-18T02:31:01.232Z"
 };
 
 export default defaultState; 

@@ -79,6 +79,57 @@ export default function FlowCanvas() {
   const [textAddOn, setTextAddOn] = useState(false);
   const [aiGenerated, setAiGenerated] = useState(false);
 
+  // Calculate zoom limits based on node positions and sizes
+  const calculateZoomLimits = useCallback(() => {
+    if (nodes.length === 0) {
+      return { minZoom: 0.1, maxZoom: 2 };
+    }
+
+    // Node dimensions (approximate based on typical card size)
+    const nodeWidth = 200;
+    const nodeHeight = 120;
+    const nodePadding = 20;
+
+    // Calculate bounds of all nodes
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    
+    nodes.forEach(node => {
+      const nodeLeft = node.position.x;
+      const nodeRight = node.position.x + nodeWidth;
+      const nodeTop = node.position.y;
+      const nodeBottom = node.position.y + nodeHeight;
+      
+      minX = Math.min(minX, nodeLeft);
+      maxX = Math.max(maxX, nodeRight);
+      minY = Math.min(minY, nodeTop);
+      maxY = Math.max(maxY, nodeBottom);
+    });
+
+    // Add padding to bounds
+    const boundsWidth = maxX - minX + nodePadding * 2;
+    const boundsHeight = maxY - minY + nodePadding * 2;
+
+    // Calculate max zoom out to fit all nodes
+    // Assuming viewport is approximately 1200x800 (typical canvas size)
+    const viewportWidth = 1200;
+    const viewportHeight = 800;
+    
+    const zoomX = viewportWidth / boundsWidth;
+    const zoomY = viewportHeight / boundsHeight;
+    const maxZoomOut = Math.min(zoomX, zoomY, 1); // Don't zoom out more than 1x
+
+    // Calculate min zoom in (zoom until only one node is visible)
+    // This means the node should fill most of the viewport
+    const minZoomIn = Math.max(viewportWidth / (nodeWidth * 1.5), viewportHeight / (nodeHeight * 1.5));
+
+    return {
+      minZoom: Math.max(0.1, maxZoomOut), // Max zoom out (fit all nodes)
+      maxZoom: Math.min(5, minZoomIn)     // Min zoom in (single node visible)
+    };
+  }, [nodes]);
+
+  const zoomLimits = calculateZoomLimits();
+
   
   // UI Tool Type options - single source of truth
   const uiToolTypeOptions = [
@@ -998,6 +1049,8 @@ export default function FlowCanvas() {
         fitView
         snapToGrid={true}
         snapGrid={[480, 60]}
+        minZoom={zoomLimits.minZoom}
+        maxZoom={zoomLimits.maxZoom}
         className={searchQuery ? "searching" : ""}
         onPaneClick={() => {
           // Don't clear selection when in test mode or when exiting test mode
