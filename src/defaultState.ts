@@ -1,5 +1,5 @@
 const defaultState = {
-  nodes: [
+  "nodes": [
     {
       "id": "n-1",
       "type": "card",
@@ -301,7 +301,7 @@ const defaultState = {
       }
     }
   ],
-  edges: [
+  "edges": [
     {
       "id": "e-n-1-n-2",
       "source": "n-1",
@@ -435,7 +435,7 @@ const defaultState = {
       "selected": false
     }
   ],
-  components: {
+  "components": {
     "comp-1": {
       "id": "comp-1",
       "name": "Strengths Q1",
@@ -837,145 +837,165 @@ const defaultState = {
     },
     "comp-1755485319818": {
       "id": "comp-1755485319818",
-      "name": "New Component 19",
-      "slug": "",
-      "uiToolType": "message",
+      "name": "Inspirations Q2",
+      "slug": "01.02.02",
+      "uiToolType": "question",
       "content": {
-        "message": {
-          "text": "Excellent work so far! Now let's focus on your goals. Where do you see yourself professionally in the next 2-3 years?",
-          "richText": true
-        },
-        "banner": {
-          "text": "New Banner",
-          "type": "default"
+        "question": {
+          "text": "What industries genuinely inspire you?",
+          "options": [],
+          "suggestions": [
+            "Technology",
+            "etc"
+          ],
+          "image": "/img/steps/inspirations/question/2.png"
         }
       },
+      "aiGenerated": false,
       "createdAt": "2025-08-18T02:48:39.818Z",
-      "updatedAt": "2025-08-18T02:48:39.818Z"
+      "updatedAt": "2025-08-18T02:52:37.747Z"
     },
     "comp-1755485320322": {
       "id": "comp-1755485320322",
-      "name": "New Component 20",
-      "slug": "",
-      "uiToolType": "message",
+      "name": "Inspirations Q3",
+      "slug": "01.02.03",
+      "uiToolType": "question",
       "content": {
-        "message": {
-          "text": "What motivates you to do your best work? Is it recognition, helping others, solving complex problems, or something else?",
-          "richText": true
-        },
-        "banner": {
-          "text": "New Banner",
-          "type": "default"
+        "question": {
+          "text": "What types of companies align with your vision and values for the world?",
+          "options": [],
+          "suggestions": [
+            "Social Impact",
+            "etc"
+          ],
+          "image": "/img/steps/inspirations/question/3.png"
         }
       },
+      "aiGenerated": false,
       "createdAt": "2025-08-18T02:48:40.322Z",
-      "updatedAt": "2025-08-18T02:48:40.322Z"
+      "updatedAt": "2025-08-18T02:53:49.886Z"
     },
     "comp-1755485320779": {
       "id": "comp-1755485320779",
-      "name": "New Component 21",
-      "slug": "",
-      "uiToolType": "message",
+      "name": "Inspirations Q4",
+      "slug": "01.02.04",
+      "uiToolType": "question",
       "content": {
-        "message": {
-          "text": "Let's explore your learning style. How do you prefer to acquire new skills - through hands-on experience, formal training, or mentoring?",
-          "richText": true
-        },
-        "banner": {
-          "text": "New Banner",
-          "type": "default"
+        "question": {
+          "text": "Who are the people that inspire you?",
+          "options": [],
+          "suggestions": [
+            "Innovators",
+            "etc"
+          ],
+          "image": "/img/steps/inspirations/question/4.png"
         }
       },
+      "aiGenerated": false,
       "createdAt": "2025-08-18T02:48:40.779Z",
-      "updatedAt": "2025-08-18T02:48:40.779Z"
+      "updatedAt": "2025-08-18T02:54:37.876Z"
     },
     "comp-1755485322530": {
       "id": "comp-1755485322530",
-      "name": "New Component 22",
-      "slug": "",
-      "uiToolType": "message",
+      "name": "Inspirations Q5",
+      "slug": "01.02.05",
+      "uiToolType": "question",
       "content": {
-        "message": {
-          "text": "Perfect! Now let's wrap up with your values. What's most important to you in a work environment - collaboration, autonomy, innovation, or stability?",
-          "richText": true
-        },
-        "banner": {
-          "text": "New Banner",
-          "type": "default"
+        "question": {
+          "text": "What topics of conversation engage you so much that time flies by?",
+          "options": [],
+          "suggestions": [
+            "Philosophy",
+            "etc"
+          ],
+          "image": "/img/steps/inspirations/question/5.png"
         }
       },
+      "aiGenerated": false,
       "createdAt": "2025-08-18T02:48:42.530Z",
-      "updatedAt": "2025-08-18T02:48:42.530Z"
+      "updatedAt": "2025-08-18T02:55:50.692Z"
     },
     "comp-1755485329155": {
       "id": "comp-1755485329155",
-      "name": "New Component 23",
-      "slug": "",
-      "uiToolType": "message",
+      "name": "Inspirations Q6",
+      "slug": "01.02.06",
+      "uiToolType": "question",
       "content": {
-        "message": {
-          "text": "What tasks are easy for you but hard for others? Think about the skills that come naturally to you and how they might be valuable in your career.",
-          "richText": true
-        },
-        "banner": {
-          "text": "New Banner",
-          "type": "default"
+        "question": {
+          "text": "If you didn't need money, how would you spend your time?",
+          "options": [],
+          "suggestions": [
+            "Research & Discovery"
+          ],
+          "image": "/img/steps/inspirations/question/6.png"
         }
       },
+      "aiGenerated": false,
       "createdAt": "2025-08-18T02:48:49.155Z",
-      "updatedAt": "2025-08-18T02:48:49.155Z"
+      "updatedAt": "2025-08-18T02:56:47.509Z"
     },
     "comp-1755485329707": {
       "id": "comp-1755485329707",
-      "name": "New Component 24",
-      "slug": "",
-      "uiToolType": "message",
+      "name": "Inspirations Pick List",
+      "slug": "01.02.07",
+      "uiToolType": "multiSelect",
       "content": {
-        "message": {
-          "text": "Awesome - now that we've got a feel for your personality, let's dig into your strengths. You'll see a few sample answers to guide you.",
-          "richText": true
-        },
-        "banner": {
-          "text": "New Banner",
-          "type": "default"
+        "multiSelect": {
+          "text": "Based on what you've shared, here's a set of inspirations curated just for you. Read them all and then select your top 3.",
+          "options": [
+            {
+              "text": "Inspiration 1"
+            },
+            {
+              "text": "Inspiration 2"
+            },
+            {
+              "text": "Inspiration 3"
+            },
+            {
+              "text": "Inspiration 4"
+            },
+            {
+              "text": "Inspiration 5"
+            },
+            {
+              "text": "Inspiration 6"
+            }
+          ]
         }
       },
+      "aiGenerated": true,
       "createdAt": "2025-08-18T02:48:49.707Z",
-      "updatedAt": "2025-08-18T02:48:49.707Z"
+      "updatedAt": "2025-08-18T02:58:13.110Z"
     },
     "comp-1755485330140": {
       "id": "comp-1755485330140",
-      "name": "New Component 25",
-      "slug": "",
+      "name": "Inspirations Free Chat",
+      "slug": "01.02.08",
       "uiToolType": "message",
       "content": {
         "message": {
-          "text": "Tell me about a time when you felt most confident at work. What were you doing, and what made you feel so capable in that moment?",
+          "text": "[Free Chat placeholder]",
           "richText": true
-        },
-        "banner": {
-          "text": "New Banner",
-          "type": "default"
         }
       },
+      "aiGenerated": true,
       "createdAt": "2025-08-18T02:48:50.140Z",
-      "updatedAt": "2025-08-18T02:48:50.140Z"
+      "updatedAt": "2025-08-18T02:59:04.215Z"
     }
   },
-  messages: [
+  "messages": [
     {
       "id": "6",
-      "sender": "ai" as const,
+      "sender": "ai",
       "content": "Welcome to Ignite! What would you like to be called?\n\n(You can click your first name, full name, or type a nickname.)",
       "messageId": "msg-6",
       "componentId": "comp-1755470701901",
-      "uiToolType": "message",
-      "timestamp": "01:14 PM",
-      "type": "text" as const
+      "uiToolType": "message"
     },
     {
       "id": "7",
-      "sender": "ai" as const,
+      "sender": "ai",
       "content": "Hey {name}, we'll ask a few quick questions to start building your Personal Profile:\n\nHow are you thinking about your professional future right now?",
       "messageId": "msg-7",
       "componentId": "comp-1755470761542",
@@ -994,13 +1014,11 @@ const defaultState = {
           "text": "I've got career experience."
         }
       ],
-      "maxSelection": 1,
-      "timestamp": "01:14 PM",
-      "type": "text" as const
+      "maxSelection": 1
     },
     {
       "id": "8",
-      "sender": "ai" as const,
+      "sender": "ai",
       "content": "What sounds most useful to you right now?",
       "messageId": "msg-8",
       "componentId": "comp-1755471082977",
@@ -1022,13 +1040,11 @@ const defaultState = {
           "text": "Help finding values-matched employer"
         }
       ],
-      "maxSelection": 1,
-      "timestamp": "01:14 PM",
-      "type": "text" as const
+      "maxSelection": 1
     },
     {
       "id": "9",
-      "sender": "ai" as const,
+      "sender": "ai",
       "content": "What are your top 3 goals that Ignite might help you with?",
       "messageId": "msg-9",
       "componentId": "comp-1755471271684",
@@ -1059,13 +1075,11 @@ const defaultState = {
           "image": "/img/onboarding/personal-growth.png"
         }
       ],
-      "maxSelection": 1,
-      "timestamp": "01:14 PM",
-      "type": "text" as const
+      "maxSelection": 1
     },
     {
       "id": "10",
-      "sender": "ai" as const,
+      "sender": "ai",
       "content": "[Placeholder for form tool that exists in code but hasn't been added to this prototype yet.]",
       "messageId": "msg-10",
       "componentId": "comp-1755471536987",
@@ -1075,14 +1089,11 @@ const defaultState = {
           "text": ""
         }
       ],
-      "maxSelection": 1,
-      "bannerText": "School forms",
-      "timestamp": "01:14 PM",
-      "type": "text" as const
+      "maxSelection": 1
     },
     {
       "id": "11",
-      "sender": "ai" as const,
+      "sender": "ai",
       "content": "Perfect! Now that we've got the basics, let's get you started on your journey to success with the Clarity track.\n\nOnce you've completed the Clarity track, you'll get your finished Personal Profile - showing exactly who you are and where you want to go. You can check its progress anytime by tapping on your avatar in the top right.\n\nSee where you're at in the Clarity track with the menu on the top left.",
       "messageId": "msg-11",
       "componentId": "comp-1755471715008",
@@ -1092,13 +1103,11 @@ const defaultState = {
           "text": "Let's go!"
         }
       ],
-      "maxSelection": 1,
-      "timestamp": "01:14 PM",
-      "type": "text" as const
+      "maxSelection": 1
     },
     {
       "id": "12",
-      "sender": "ai" as const,
+      "sender": "ai",
       "content": "First up, the personality quiz. It'll take less than 10 minutes, and you'll learn your personality type across the top five personality assessments.",
       "messageId": "msg-12",
       "componentId": "comp-1755471835094",
@@ -1108,13 +1117,11 @@ const defaultState = {
           "text": "Launch Personality Quiz"
         }
       ],
-      "maxSelection": 1,
-      "timestamp": "01:14 PM",
-      "type": "text" as const
+      "maxSelection": 1
     },
     {
       "id": "1",
-      "sender": "ai" as const,
+      "sender": "ai",
       "content": "What tasks are easy for you but hard for others?",
       "messageId": "msg-1",
       "componentId": "comp-1",
@@ -1123,15 +1130,11 @@ const defaultState = {
         "Writing",
         "etc"
       ],
-      "image": "/img/steps/strengths/question/1.png",
-      "bannerText": "Strengths",
-      "textContent": "Awesome - now that we've got a feel for your personality, let's dig into your strengths.\n\nYou'll see a few sample answers to guide you. Feel free to click one that fits, but writing in detail in your own words is the best.",
-      "timestamp": "01:14 PM",
-      "type": "text" as const
+      "image": "/img/steps/strengths/question/1.png"
     },
     {
       "id": "2",
-      "sender": "ai" as const,
+      "sender": "ai",
       "content": "What type of tasks are you doing when you feel the most energized and productive?",
       "messageId": "msg-2",
       "componentId": "comp-2",
@@ -1140,13 +1143,11 @@ const defaultState = {
         "Repetitive Tasks",
         "etc"
       ],
-      "image": "/img/steps/strengths/question/2.png",
-      "timestamp": "01:14 PM",
-      "type": "text" as const
+      "image": "/img/steps/strengths/question/2.png"
     },
     {
       "id": "3",
-      "sender": "ai" as const,
+      "sender": "ai",
       "content": "What skill have people always complimented you on?",
       "messageId": "msg-3",
       "componentId": "comp-1755459042228",
@@ -1155,13 +1156,11 @@ const defaultState = {
         "Public Speaking",
         "etc"
       ],
-      "image": "/img/steps/strengths/question/3.png",
-      "timestamp": "01:14 PM",
-      "type": "text" as const
+      "image": "/img/steps/strengths/question/3.png"
     },
     {
       "id": "4",
-      "sender": "ai" as const,
+      "sender": "ai",
       "content": "What would your closest friends and family say are your natural talents?",
       "messageId": "msg-4",
       "componentId": "comp-1755459253440",
@@ -1170,13 +1169,11 @@ const defaultState = {
         "Reliability",
         "etc"
       ],
-      "image": "/img/steps/strengths/question/4.png",
-      "timestamp": "01:14 PM",
-      "type": "text" as const
+      "image": "/img/steps/strengths/question/4.png"
     },
     {
       "id": "5",
-      "sender": "ai" as const,
+      "sender": "ai",
       "content": "What do you get so involved with that you lose track of time?",
       "messageId": "msg-5",
       "componentId": "comp-1755460172767",
@@ -1185,13 +1182,11 @@ const defaultState = {
         "Reading",
         "etc"
       ],
-      "image": "/img/steps/strengths/question/5.png",
-      "timestamp": "01:14 PM",
-      "type": "text" as const
+      "image": "/img/steps/strengths/question/5.png"
     },
     {
       "id": "17",
-      "sender": "ai" as const,
+      "sender": "ai",
       "content": "What do you get so involved with that you lose track of time?",
       "messageId": "msg-17",
       "componentId": "comp-1755484138142",
@@ -1200,13 +1195,11 @@ const defaultState = {
         "Prototyping",
         "etc"
       ],
-      "image": "/img/steps/strengths/question/6.png",
-      "timestamp": "01:14 PM",
-      "type": "text" as const
+      "image": "/img/steps/strengths/question/6.png"
     },
     {
       "id": "15",
-      "sender": "ai" as const,
+      "sender": "ai",
       "content": "Based on your answers and your personality quiz, here's a set of strengths that should suit you. Please select what you think are your top 3 strengths.",
       "messageId": "msg-15",
       "componentId": "comp-1755475318882",
@@ -1231,23 +1224,19 @@ const defaultState = {
           "text": "Strength 6"
         }
       ],
-      "maxSelection": 1,
-      "timestamp": "01:14 PM",
-      "type": "text" as const
+      "maxSelection": 1
     },
     {
       "id": "16",
-      "sender": "ai" as const,
+      "sender": "ai",
       "content": "[Free Chat placeholder]",
       "messageId": "msg-16",
       "componentId": "comp-1755475332549",
-      "uiToolType": "message",
-      "timestamp": "01:14 PM",
-      "type": "text" as const
+      "uiToolType": "message"
     },
     {
       "id": "18",
-      "sender": "ai" as const,
+      "sender": "ai",
       "content": "If you could wave a magic wand and fix one problem in the world, what would it be?",
       "messageId": "msg-18",
       "componentId": "comp-1755485319362",
@@ -1256,112 +1245,128 @@ const defaultState = {
         "World Hunger",
         "etc"
       ],
-      "image": "/img/steps/inspirations/question/1.png",
-      "bannerText": "Inspirations",
-      "textContent": "When your work inspires you, everything clicks — energy, creativity, and motivation skyrocket. It's great for you and for employers.\n\nLet's shape a clear picture of what really drives you.",
-      "timestamp": "01:14 PM",
-      "type": "text" as const
+      "image": "/img/steps/inspirations/question/1.png"
     },
     {
       "id": "19",
-      "sender": "ai" as const,
-      "content": "Excellent work so far! Now let's focus on your goals. Where do you see yourself professionally in the next 2-3 years?",
+      "sender": "ai",
+      "content": "What industries genuinely inspire you?",
       "messageId": "msg-19",
       "componentId": "comp-1755485319818",
-      "uiToolType": "message",
-      "bannerText": "New Banner",
-      "timestamp": "01:14 PM",
-      "type": "text" as const
+      "uiToolType": "question",
+      "suggestions": [
+        "Technology",
+        "etc"
+      ],
+      "image": "/img/steps/inspirations/question/2.png"
     },
     {
       "id": "20",
-      "sender": "ai" as const,
-      "content": "What motivates you to do your best work? Is it recognition, helping others, solving complex problems, or something else?",
+      "sender": "ai",
+      "content": "What types of companies align with your vision and values for the world?",
       "messageId": "msg-20",
       "componentId": "comp-1755485320322",
-      "uiToolType": "message",
-      "bannerText": "New Banner",
-      "timestamp": "01:14 PM",
-      "type": "text" as const
+      "uiToolType": "question",
+      "suggestions": [
+        "Social Impact",
+        "etc"
+      ],
+      "image": "/img/steps/inspirations/question/3.png"
     },
     {
       "id": "21",
-      "sender": "ai" as const,
-      "content": "Let's explore your learning style. How do you prefer to acquire new skills - through hands-on experience, formal training, or mentoring?",
+      "sender": "ai",
+      "content": "Who are the people that inspire you?",
       "messageId": "msg-21",
       "componentId": "comp-1755485320779",
-      "uiToolType": "message",
-      "bannerText": "New Banner",
-      "timestamp": "01:14 PM",
-      "type": "text" as const
+      "uiToolType": "question",
+      "suggestions": [
+        "Innovators",
+        "etc"
+      ],
+      "image": "/img/steps/inspirations/question/4.png"
     },
     {
       "id": "22",
-      "sender": "ai" as const,
-      "content": "Perfect! Now let's wrap up with your values. What's most important to you in a work environment - collaboration, autonomy, innovation, or stability?",
+      "sender": "ai",
+      "content": "What topics of conversation engage you so much that time flies by?",
       "messageId": "msg-22",
       "componentId": "comp-1755485322530",
-      "uiToolType": "message",
-      "bannerText": "New Banner",
-      "timestamp": "01:14 PM",
-      "type": "text" as const
+      "uiToolType": "question",
+      "suggestions": [
+        "Philosophy",
+        "etc"
+      ],
+      "image": "/img/steps/inspirations/question/5.png"
     },
     {
       "id": "23",
-      "sender": "ai" as const,
-      "content": "What tasks are easy for you but hard for others? Think about the skills that come naturally to you and how they might be valuable in your career.",
+      "sender": "ai",
+      "content": "If you didn't need money, how would you spend your time?",
       "messageId": "msg-23",
       "componentId": "comp-1755485329155",
-      "uiToolType": "message",
-      "bannerText": "New Banner",
-      "timestamp": "01:14 PM",
-      "type": "text" as const
+      "uiToolType": "question",
+      "suggestions": [
+        "Research & Discovery"
+      ],
+      "image": "/img/steps/inspirations/question/6.png"
     },
     {
       "id": "24",
-      "sender": "ai" as const,
-      "content": "Awesome - now that we've got a feel for your personality, let's dig into your strengths. You'll see a few sample answers to guide you.",
+      "sender": "ai",
+      "content": "Based on what you've shared, here's a set of inspirations curated just for you. Read them all and then select your top 3.",
       "messageId": "msg-24",
       "componentId": "comp-1755485329707",
-      "uiToolType": "message",
-      "bannerText": "New Banner",
-      "timestamp": "01:14 PM",
-      "type": "text" as const
+      "uiToolType": "multiSelect",
+      "multiSelectOptions": [
+        {
+          "text": "Inspiration 1"
+        },
+        {
+          "text": "Inspiration 2"
+        },
+        {
+          "text": "Inspiration 3"
+        },
+        {
+          "text": "Inspiration 4"
+        },
+        {
+          "text": "Inspiration 5"
+        },
+        {
+          "text": "Inspiration 6"
+        }
+      ],
+      "maxSelection": 1
     },
     {
       "id": "25",
-      "sender": "ai" as const,
-      "content": "Tell me about a time when you felt most confident at work. What were you doing, and what made you feel so capable in that moment?",
+      "sender": "ai",
+      "content": "[Free Chat placeholder]",
       "messageId": "msg-25",
       "componentId": "comp-1755485330140",
-      "uiToolType": "message",
-      "bannerText": "New Banner",
-      "timestamp": "01:14 PM",
-      "type": "text" as const
+      "uiToolType": "message"
     },
     {
       "id": "13",
-      "sender": "ai" as const,
+      "sender": "ai",
       "content": "[placeholder for Previous School Form, still needs routing]",
       "messageId": "msg-13",
       "componentId": "comp-1755472046014",
-      "uiToolType": "message",
-      "timestamp": "01:14 PM",
-      "type": "text" as const
+      "uiToolType": "message"
     },
     {
       "id": "14",
-      "sender": "ai" as const,
+      "sender": "ai",
       "content": "[placeholder for Planned School Form, still needs routing]",
       "messageId": "msg-14",
       "componentId": "comp-1755472089703",
-      "uiToolType": "message",
-      "timestamp": "01:14 PM",
-      "type": "text" as const
+      "uiToolType": "message"
     }
   ],
-  orphanMessageIds: [],
-  lastSaved: "2025-08-18T02:51:04.854Z"
+  "orphanMessageIds": [],
+  "lastSaved": "2025-08-18T03:00:56.651Z"
 };
 
 export default defaultState; 
