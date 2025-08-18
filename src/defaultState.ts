@@ -299,6 +299,126 @@ const defaultState = {
         "componentId": "comp-1755485330140",
         "messageId": "msg-25"
       }
+    },
+    {
+      "id": "n-26",
+      "type": "card",
+      "position": {
+        "x": 480,
+        "y": 600
+      },
+      "data": {
+        "componentId": "comp-1755495690993",
+        "messageId": "msg-26"
+      }
+    },
+    {
+      "id": "n-27",
+      "type": "card",
+      "position": {
+        "x": 960,
+        "y": 600
+      },
+      "data": {
+        "componentId": "comp-1755495692517",
+        "messageId": "msg-27"
+      }
+    },
+    {
+      "id": "n-28",
+      "type": "card",
+      "position": {
+        "x": 1440,
+        "y": 600
+      },
+      "data": {
+        "componentId": "comp-1755495695897",
+        "messageId": "msg-28"
+      }
+    },
+    {
+      "id": "n-29",
+      "type": "card",
+      "position": {
+        "x": 480,
+        "y": 840
+      },
+      "data": {
+        "componentId": "comp-1755496096211",
+        "messageId": "msg-29"
+      }
+    },
+    {
+      "id": "n-30",
+      "type": "card",
+      "position": {
+        "x": 960,
+        "y": 840
+      },
+      "data": {
+        "componentId": "comp-1755496096515",
+        "messageId": "msg-30"
+      }
+    },
+    {
+      "id": "n-31",
+      "type": "card",
+      "position": {
+        "x": 1440,
+        "y": 840
+      },
+      "data": {
+        "componentId": "comp-1755496096779",
+        "messageId": "msg-31"
+      }
+    },
+    {
+      "id": "n-32",
+      "type": "card",
+      "position": {
+        "x": 480,
+        "y": 1080
+      },
+      "data": {
+        "componentId": "comp-1755496433565",
+        "messageId": "msg-32"
+      }
+    },
+    {
+      "id": "n-33",
+      "type": "card",
+      "position": {
+        "x": 960,
+        "y": 1080
+      },
+      "data": {
+        "componentId": "comp-1755496433789",
+        "messageId": "msg-33"
+      }
+    },
+    {
+      "id": "n-34",
+      "type": "card",
+      "position": {
+        "x": 1440,
+        "y": 1080
+      },
+      "data": {
+        "componentId": "comp-1755496434045",
+        "messageId": "msg-34"
+      }
+    },
+    {
+      "id": "n-35",
+      "type": "card",
+      "position": {
+        "x": 480,
+        "y": 1320
+      },
+      "data": {
+        "componentId": "comp-1755496728185",
+        "messageId": "msg-35"
+      }
     }
   ],
   "edges": [
@@ -432,6 +552,66 @@ const defaultState = {
       "id": "e-n-24-n-25",
       "source": "n-24",
       "target": "n-25",
+      "selected": false
+    },
+    {
+      "id": "e-n-25-n-26",
+      "source": "n-25",
+      "target": "n-26",
+      "selected": false
+    },
+    {
+      "id": "e-n-26-n-27",
+      "source": "n-26",
+      "target": "n-27",
+      "selected": false
+    },
+    {
+      "id": "e-n-27-n-28",
+      "source": "n-27",
+      "target": "n-28",
+      "selected": false
+    },
+    {
+      "id": "e-n-28-n-29",
+      "source": "n-28",
+      "target": "n-29",
+      "selected": false
+    },
+    {
+      "id": "e-n-29-n-30",
+      "source": "n-29",
+      "target": "n-30",
+      "selected": false
+    },
+    {
+      "id": "e-n-30-n-31",
+      "source": "n-30",
+      "target": "n-31",
+      "selected": false
+    },
+    {
+      "id": "e-n-31-n-32",
+      "source": "n-31",
+      "target": "n-32",
+      "selected": false
+    },
+    {
+      "id": "e-n-32-n-33",
+      "source": "n-32",
+      "target": "n-33",
+      "selected": false
+    },
+    {
+      "id": "e-n-33-n-34",
+      "source": "n-33",
+      "target": "n-34",
+      "selected": false
+    },
+    {
+      "id": "e-n-34-n-35",
+      "source": "n-34",
+      "target": "n-35",
       "selected": false
     }
   ],
@@ -982,6 +1162,303 @@ const defaultState = {
       "aiGenerated": true,
       "createdAt": "2025-08-18T02:48:50.140Z",
       "updatedAt": "2025-08-18T02:59:04.215Z"
+    },
+    "comp-1755495690993": {
+      "id": "comp-1755495690993",
+      "name": "Work Environment Q1",
+      "slug": "01.03.01",
+      "uiToolType": "question",
+      "content": {
+        "question": {
+          "text": "What type of work setting energizes you most?",
+          "options": [],
+          "suggestions": [
+            "Collaborative Spaces",
+            "etc"
+          ],
+          "image": "/img/steps/workEnvironment/question/1.png"
+        },
+        "banner": {
+          "text": "Work Environment",
+          "type": "default"
+        },
+        "text": {
+          "text": "Now that we know your strengths and inspirations, let's find the kind of professional environment where you'll truly thrive.\n\nThe right setting can make all the difference in your growth and happiness at work.\n\nHere are a few quick questions to pin down what works best for you.",
+          "type": "default"
+        }
+      },
+      "aiGenerated": false,
+      "createdAt": "2025-08-18T05:41:30.993Z",
+      "updatedAt": "2025-08-18T05:44:18.180Z"
+    },
+    "comp-1755495692517": {
+      "id": "comp-1755495692517",
+      "name": "Work Environment Q2",
+      "slug": "01.03.02",
+      "uiToolType": "question",
+      "content": {
+        "question": {
+          "text": "How much flexibility do you prefer in your work?",
+          "options": [],
+          "suggestions": [
+            "Highly Flexible",
+            "Moderately Flexible",
+            "Fixed Schedules & Locations"
+          ],
+          "image": "/img/steps/workEnvironment/question/2.png"
+        }
+      },
+      "aiGenerated": false,
+      "createdAt": "2025-08-18T05:41:32.517Z",
+      "updatedAt": "2025-08-18T05:46:28.679Z"
+    },
+    "comp-1755495695897": {
+      "id": "comp-1755495695897",
+      "name": "Work Environment Q3",
+      "slug": "01.03.03",
+      "uiToolType": "question",
+      "content": {
+        "question": {
+          "text": "What kind of work culture feels most inspiring?",
+          "options": [],
+          "suggestions": [
+            "Innovative",
+            "Formal",
+            "etc"
+          ],
+          "image": "/img/steps/workEnvironment/question/3.png"
+        }
+      },
+      "aiGenerated": false,
+      "createdAt": "2025-08-18T05:41:35.897Z",
+      "updatedAt": "2025-08-18T05:47:41.254Z"
+    },
+    "comp-1755496096211": {
+      "id": "comp-1755496096211",
+      "name": "Living Environment Q1",
+      "slug": "01.04.01",
+      "uiToolType": "question",
+      "content": {
+        "question": {
+          "text": "Which type of location suits you best?",
+          "options": [],
+          "suggestions": [
+            "Bustling City",
+            "Peaceful Suburb",
+            "Scenic Area",
+            "etc"
+          ],
+          "image": "/img/steps/livingEnvironment/question/1.png"
+        },
+        "banner": {
+          "text": "Living Environment",
+          "type": "default"
+        },
+        "text": {
+          "text": "What you do matters, but where you do it also has a big impact on your happiness.\n\nAs you answer these questions, imagine an ideal living environment where you might do your best work.",
+          "type": "default"
+        }
+      },
+      "aiGenerated": false,
+      "createdAt": "2025-08-18T05:48:16.211Z",
+      "updatedAt": "2025-08-18T05:50:32.420Z"
+    },
+    "comp-1755496096515": {
+      "id": "comp-1755496096515",
+      "name": "Living Environment Q2",
+      "slug": "01.04.02",
+      "uiToolType": "question",
+      "content": {
+        "question": {
+          "text": "What type of climate do you thrive in?",
+          "options": [],
+          "suggestions": [
+            "Warm & Sunny",
+            "All 4 Seasons",
+            "Cool & Temperate"
+          ],
+          "image": "/img/steps/livingEnvironment/question/2.png"
+        }
+      },
+      "aiGenerated": false,
+      "createdAt": "2025-08-18T05:48:16.515Z",
+      "updatedAt": "2025-08-18T05:52:15.694Z"
+    },
+    "comp-1755496096779": {
+      "id": "comp-1755496096779",
+      "name": "Living Environment Q3",
+      "slug": "01.04.03",
+      "uiToolType": "question",
+      "content": {
+        "question": {
+          "text": "What kind of scene would you like where you live?",
+          "options": [],
+          "suggestions": [
+            "Vibrant arts & culture",
+            "Community oriented",
+            "etc"
+          ],
+          "image": "/img/steps/livingEnvironment/question/3.png"
+        }
+      },
+      "aiGenerated": false,
+      "createdAt": "2025-08-18T05:48:16.779Z",
+      "updatedAt": "2025-08-18T05:53:34.106Z"
+    },
+    "comp-1755496433565": {
+      "id": "comp-1755496433565",
+      "name": "Financial Needs Q1",
+      "slug": "01.05.01",
+      "uiToolType": "question",
+      "content": {
+        "question": {
+          "text": "How would you describe where you live now?",
+          "options": [],
+          "suggestions": [
+            "Major City",
+            "etc"
+          ],
+          "image": "/img/steps/financialNeeds/question/1.png"
+        },
+        "banner": {
+          "text": "Financial Needs",
+          "type": "default"
+        },
+        "text": {
+          "text": "Being clear about your financial needs will help guide your career search. Your ideal career will align your financial goals with your values and lifestyle preferences.\n\nConsider your current costs get an idea of how much you will need to make to maintain your lifestyle. It's okay to estimate!",
+          "type": "default"
+        }
+      },
+      "aiGenerated": false,
+      "createdAt": "2025-08-18T05:53:53.565Z",
+      "updatedAt": "2025-08-18T05:56:03.390Z"
+    },
+    "comp-1755496433789": {
+      "id": "comp-1755496433789",
+      "name": "Financial Needs Q2",
+      "slug": "01.05.02",
+      "uiToolType": "question",
+      "content": {
+        "question": {
+          "text": "What's your current monthly housing cost?",
+          "options": [],
+          "suggestions": [
+            "$0-$500",
+            "etc"
+          ],
+          "image": "/img/steps/financialNeeds/question/2.png"
+        }
+      },
+      "aiGenerated": false,
+      "createdAt": "2025-08-18T05:53:53.789Z",
+      "updatedAt": "2025-08-18T05:57:17.653Z"
+    },
+    "comp-1755496434045": {
+      "id": "comp-1755496434045",
+      "name": "Financial Needs Q3",
+      "slug": "01.05.03",
+      "uiToolType": "question",
+      "content": {
+        "question": {
+          "text": "How much do you spend monthly on transportation? Consider public transit, rideshares, car payments, gas, and insurance.",
+          "options": [],
+          "suggestions": [
+            "$0-$50",
+            "etc"
+          ],
+          "image": "/img/steps/financialNeeds/question/3.png"
+        }
+      },
+      "aiGenerated": false,
+      "createdAt": "2025-08-18T05:53:54.045Z",
+      "updatedAt": "2025-08-18T05:58:32.639Z"
+    },
+    "comp-1755496728185": {
+      "id": "comp-1755496728185",
+      "name": "Values Pick List 1",
+      "slug": "01.06.01",
+      "uiToolType": "multiSelect",
+      "content": {
+        "multiSelect": {
+          "text": "Now that we know your ideal environments, let's discover what truly drives you — your values.\n\nThese are core principles that will guide your choices and shape your career journey.",
+          "options": [
+            {
+              "text": "Value 1"
+            },
+            {
+              "text": "Value 2"
+            },
+            {
+              "text": "Value 3     "
+            },
+            {
+              "text": "Value 4"
+            },
+            {
+              "text": "Value 5"
+            },
+            {
+              "text": "Value 6"
+            },
+            {
+              "text": "Value 7"
+            },
+            {
+              "text": "Value 8"
+            },
+            {
+              "text": "Value 9"
+            },
+            {
+              "text": "Value 10"
+            }
+          ],
+          "maxSelection": 8
+        },
+        "banner": {
+          "text": "Values",
+          "type": "default"
+        }
+      },
+      "aiGenerated": false,
+      "createdAt": "2025-08-18T05:58:48.185Z",
+      "updatedAt": "2025-08-18T06:02:32.187Z"
+    },
+    "comp-1755496728392": {
+      "id": "comp-1755496728392",
+      "name": "New Component 36",
+      "slug": "",
+      "uiToolType": "message",
+      "content": {
+        "message": {
+          "text": "Tell me about a time when you felt most confident at work. What were you doing, and what made you feel so capable in that moment?",
+          "richText": true
+        },
+        "banner": {
+          "text": "New Banner",
+          "type": "default"
+        }
+      },
+      "createdAt": "2025-08-18T05:58:48.392Z",
+      "updatedAt": "2025-08-18T05:58:48.392Z"
+    },
+    "comp-1755496728581": {
+      "id": "comp-1755496728581",
+      "name": "New Component 37",
+      "slug": "",
+      "uiToolType": "message",
+      "content": {
+        "message": {
+          "text": "Let's explore your communication style. How do you prefer to give and receive feedback? Are you more direct or diplomatic?",
+          "richText": true
+        },
+        "banner": {
+          "text": "New Banner",
+          "type": "default"
+        }
+      },
+      "createdAt": "2025-08-18T05:58:48.581Z",
+      "updatedAt": "2025-08-18T05:58:48.581Z"
     }
   },
   "messages": [
@@ -1349,6 +1826,170 @@ const defaultState = {
       "uiToolType": "message"
     },
     {
+      "id": "26",
+      "sender": "ai",
+      "content": "What type of work setting energizes you most?",
+      "messageId": "msg-26",
+      "componentId": "comp-1755495690993",
+      "uiToolType": "question",
+      "suggestions": [
+        "Collaborative Spaces",
+        "etc"
+      ],
+      "image": "/img/steps/workEnvironment/question/1.png"
+    },
+    {
+      "id": "27",
+      "sender": "ai",
+      "content": "How much flexibility do you prefer in your work?",
+      "messageId": "msg-27",
+      "componentId": "comp-1755495692517",
+      "uiToolType": "question",
+      "suggestions": [
+        "Highly Flexible",
+        "Moderately Flexible",
+        "Fixed Schedules & Locations"
+      ],
+      "image": "/img/steps/workEnvironment/question/2.png"
+    },
+    {
+      "id": "28",
+      "sender": "ai",
+      "content": "What kind of work culture feels most inspiring?",
+      "messageId": "msg-28",
+      "componentId": "comp-1755495695897",
+      "uiToolType": "question",
+      "suggestions": [
+        "Innovative",
+        "Formal",
+        "etc"
+      ],
+      "image": "/img/steps/workEnvironment/question/3.png"
+    },
+    {
+      "id": "29",
+      "sender": "ai",
+      "content": "Which type of location suits you best?",
+      "messageId": "msg-29",
+      "componentId": "comp-1755496096211",
+      "uiToolType": "question",
+      "suggestions": [
+        "Bustling City",
+        "Peaceful Suburb",
+        "Scenic Area",
+        "etc"
+      ],
+      "image": "/img/steps/livingEnvironment/question/1.png"
+    },
+    {
+      "id": "30",
+      "sender": "ai",
+      "content": "What type of climate do you thrive in?",
+      "messageId": "msg-30",
+      "componentId": "comp-1755496096515",
+      "uiToolType": "question",
+      "suggestions": [
+        "Warm & Sunny",
+        "All 4 Seasons",
+        "Cool & Temperate"
+      ],
+      "image": "/img/steps/livingEnvironment/question/2.png"
+    },
+    {
+      "id": "31",
+      "sender": "ai",
+      "content": "What kind of scene would you like where you live?",
+      "messageId": "msg-31",
+      "componentId": "comp-1755496096779",
+      "uiToolType": "question",
+      "suggestions": [
+        "Vibrant arts & culture",
+        "Community oriented",
+        "etc"
+      ],
+      "image": "/img/steps/livingEnvironment/question/3.png"
+    },
+    {
+      "id": "32",
+      "sender": "ai",
+      "content": "How would you describe where you live now?",
+      "messageId": "msg-32",
+      "componentId": "comp-1755496433565",
+      "uiToolType": "question",
+      "suggestions": [
+        "Major City",
+        "etc"
+      ],
+      "image": "/img/steps/financialNeeds/question/1.png"
+    },
+    {
+      "id": "33",
+      "sender": "ai",
+      "content": "What's your current monthly housing cost?",
+      "messageId": "msg-33",
+      "componentId": "comp-1755496433789",
+      "uiToolType": "question",
+      "suggestions": [
+        "$0-$500",
+        "etc"
+      ],
+      "image": "/img/steps/financialNeeds/question/2.png"
+    },
+    {
+      "id": "34",
+      "sender": "ai",
+      "content": "How much do you spend monthly on transportation? Consider public transit, rideshares, car payments, gas, and insurance.",
+      "messageId": "msg-34",
+      "componentId": "comp-1755496434045",
+      "uiToolType": "question",
+      "suggestions": [
+        "$0-$50",
+        "etc"
+      ],
+      "image": "/img/steps/financialNeeds/question/3.png"
+    },
+    {
+      "id": "35",
+      "sender": "ai",
+      "content": "Now that we know your ideal environments, let's discover what truly drives you — your values.\n\nThese are core principles that will guide your choices and shape your career journey.",
+      "messageId": "msg-35",
+      "componentId": "comp-1755496728185",
+      "uiToolType": "multiSelect",
+      "multiSelectOptions": [
+        {
+          "text": "Value 1"
+        },
+        {
+          "text": "Value 2"
+        },
+        {
+          "text": "Value 3     "
+        },
+        {
+          "text": "Value 4"
+        },
+        {
+          "text": "Value 5"
+        },
+        {
+          "text": "Value 6"
+        },
+        {
+          "text": "Value 7"
+        },
+        {
+          "text": "Value 8"
+        },
+        {
+          "text": "Value 9"
+        },
+        {
+          "text": "Value 10"
+        }
+      ],
+      "maxSelection": 8
+    },
+    {
       "id": "13",
       "sender": "ai",
       "content": "[placeholder for Previous School Form, still needs routing]",
@@ -1366,7 +2007,7 @@ const defaultState = {
     }
   ],
   "orphanMessageIds": [],
-  "lastSaved": "2025-08-18T03:00:56.651Z"
+  "lastSaved": "2025-08-18T06:03:12.484Z"
 };
 
 export default defaultState; 
