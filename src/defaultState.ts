@@ -991,7 +991,9 @@ const defaultState = {
       "content": "Welcome to Ignite! What would you like to be called?\n\n(You can click your first name, full name, or type a nickname.)",
       "messageId": "msg-6",
       "componentId": "comp-1755470701901",
-      "uiToolType": "message"
+      "uiToolType": "message",
+      "timestamp": "01:14 PM",
+      "type": "text"
     },
     {
       "id": "7",
@@ -1014,7 +1016,9 @@ const defaultState = {
           "text": "I've got career experience."
         }
       ],
-      "maxSelection": 1
+      "maxSelection": 1,
+      "timestamp": "01:14 PM",
+      "type": "text"
     },
     {
       "id": "8",
@@ -1040,7 +1044,9 @@ const defaultState = {
           "text": "Help finding values-matched employer"
         }
       ],
-      "maxSelection": 1
+      "maxSelection": 1,
+      "timestamp": "01:14 PM",
+      "type": "text"
     },
     {
       "id": "9",
@@ -1075,7 +1081,9 @@ const defaultState = {
           "image": "/img/onboarding/personal-growth.png"
         }
       ],
-      "maxSelection": 1
+      "maxSelection": 1,
+      "timestamp": "01:14 PM",
+      "type": "text"
     },
     {
       "id": "10",
@@ -1089,7 +1097,9 @@ const defaultState = {
           "text": ""
         }
       ],
-      "maxSelection": 1
+      "maxSelection": 1,
+      "timestamp": "01:14 PM",
+      "type": "text"
     },
     {
       "id": "11",
@@ -1103,7 +1113,9 @@ const defaultState = {
           "text": "Let's go!"
         }
       ],
-      "maxSelection": 1
+      "maxSelection": 1,
+      "timestamp": "01:14 PM",
+      "type": "text"
     },
     {
       "id": "12",
@@ -1117,7 +1129,9 @@ const defaultState = {
           "text": "Launch Personality Quiz"
         }
       ],
-      "maxSelection": 1
+      "maxSelection": 1,
+      "timestamp": "01:14 PM",
+      "type": "text"
     },
     {
       "id": "1",
@@ -1130,7 +1144,9 @@ const defaultState = {
         "Writing",
         "etc"
       ],
-      "image": "/img/steps/strengths/question/1.png"
+      "image": "/img/steps/strengths/question/1.png",
+      "timestamp": "01:14 PM",
+      "type": "text"
     },
     {
       "id": "2",
@@ -1143,7 +1159,9 @@ const defaultState = {
         "Repetitive Tasks",
         "etc"
       ],
-      "image": "/img/steps/strengths/question/2.png"
+      "image": "/img/steps/strengths/question/2.png",
+      "timestamp": "01:14 PM",
+      "type": "text"
     },
     {
       "id": "3",
@@ -1156,7 +1174,9 @@ const defaultState = {
         "Public Speaking",
         "etc"
       ],
-      "image": "/img/steps/strengths/question/3.png"
+      "image": "/img/steps/strengths/question/3.png",
+      "timestamp": "01:14 PM",
+      "type": "text"
     },
     {
       "id": "4",
@@ -1169,7 +1189,9 @@ const defaultState = {
         "Reliability",
         "etc"
       ],
-      "image": "/img/steps/strengths/question/4.png"
+      "image": "/img/steps/strengths/question/4.png",
+      "timestamp": "01:14 PM",
+      "type": "text"
     },
     {
       "id": "5",
@@ -1182,7 +1204,9 @@ const defaultState = {
         "Reading",
         "etc"
       ],
-      "image": "/img/steps/strengths/question/5.png"
+      "image": "/img/steps/strengths/question/5.png",
+      "timestamp": "01:14 PM",
+      "type": "text"
     },
     {
       "id": "17",
@@ -1195,7 +1219,9 @@ const defaultState = {
         "Prototyping",
         "etc"
       ],
-      "image": "/img/steps/strengths/question/6.png"
+      "image": "/img/steps/strengths/question/6.png",
+      "timestamp": "01:14 PM",
+      "type": "text"
     },
     {
       "id": "15",
@@ -1224,7 +1250,9 @@ const defaultState = {
           "text": "Strength 6"
         }
       ],
-      "maxSelection": 1
+      "maxSelection": 1,
+      "timestamp": "01:14 PM",
+      "type": "text"
     },
     {
       "id": "16",
@@ -1232,7 +1260,9 @@ const defaultState = {
       "content": "[Free Chat placeholder]",
       "messageId": "msg-16",
       "componentId": "comp-1755475332549",
-      "uiToolType": "message"
+      "uiToolType": "message",
+      "timestamp": "01:14 PM",
+      "type": "text"
     },
     {
       "id": "18",
@@ -1245,7 +1275,9 @@ const defaultState = {
         "World Hunger",
         "etc"
       ],
-      "image": "/img/steps/inspirations/question/1.png"
+      "image": "/img/steps/inspirations/question/1.png",
+      "timestamp": "01:14 PM",
+      "type": "text"
     },
     {
       "id": "19",
@@ -1258,7 +1290,9 @@ const defaultState = {
         "Technology",
         "etc"
       ],
-      "image": "/img/steps/inspirations/question/2.png"
+      "image": "/img/steps/inspirations/question/2.png",
+      "timestamp": "01:14 PM",
+      "type": "text"
     },
     {
       "id": "20",
@@ -1271,7 +1305,9 @@ const defaultState = {
         "Social Impact",
         "etc"
       ],
-      "image": "/img/steps/inspirations/question/3.png"
+      "image": "/img/steps/inspirations/question/3.png",
+      "timestamp": "01:14 PM",
+      "type": "text"
     },
     {
       "id": "21",
@@ -1284,7 +1320,9 @@ const defaultState = {
         "Innovators",
         "etc"
       ],
-      "image": "/img/steps/inspirations/question/4.png"
+      "image": "/img/steps/inspirations/question/4.png",
+      "timestamp": "01:14 PM",
+      "type": "text"
     },
     {
       "id": "22",
@@ -1297,7 +1335,9 @@ const defaultState = {
         "Philosophy",
         "etc"
       ],
-      "image": "/img/steps/inspirations/question/5.png"
+      "image": "/img/steps/inspirations/question/5.png",
+      "timestamp": "01:14 PM",
+      "type": "text"
     },
     {
       "id": "23",
@@ -1309,7 +1349,9 @@ const defaultState = {
       "suggestions": [
         "Research & Discovery"
       ],
-      "image": "/img/steps/inspirations/question/6.png"
+      "image": "/img/steps/inspirations/question/6.png",
+      "timestamp": "01:14 PM",
+      "type": "text"
     },
     {
       "id": "24",
@@ -1338,7 +1380,9 @@ const defaultState = {
           "text": "Inspiration 6"
         }
       ],
-      "maxSelection": 1
+      "maxSelection": 1,
+      "timestamp": "01:14 PM",
+      "type": "text"
     },
     {
       "id": "25",
@@ -1346,7 +1390,9 @@ const defaultState = {
       "content": "[Free Chat placeholder]",
       "messageId": "msg-25",
       "componentId": "comp-1755485330140",
-      "uiToolType": "message"
+      "uiToolType": "message",
+      "timestamp": "01:14 PM",
+      "type": "text"
     },
     {
       "id": "13",
@@ -1354,7 +1400,9 @@ const defaultState = {
       "content": "[placeholder for Previous School Form, still needs routing]",
       "messageId": "msg-13",
       "componentId": "comp-1755472046014",
-      "uiToolType": "message"
+      "uiToolType": "message",
+      "timestamp": "01:14 PM",
+      "type": "text"
     },
     {
       "id": "14",
@@ -1362,7 +1410,9 @@ const defaultState = {
       "content": "[placeholder for Planned School Form, still needs routing]",
       "messageId": "msg-14",
       "componentId": "comp-1755472089703",
-      "uiToolType": "message"
+      "uiToolType": "message",
+      "timestamp": "01:14 PM",
+      "type": "text"
     }
   ],
   "orphanMessageIds": [],
