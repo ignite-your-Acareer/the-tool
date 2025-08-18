@@ -203,6 +203,102 @@ const defaultState = {
         "componentId": "comp-1755484138142",
         "messageId": "msg-17"
       }
+    },
+    {
+      "id": "n-18",
+      "type": "card",
+      "position": {
+        "x": 480,
+        "y": 360
+      },
+      "data": {
+        "componentId": "comp-1755485319362",
+        "messageId": "msg-18"
+      }
+    },
+    {
+      "id": "n-19",
+      "type": "card",
+      "position": {
+        "x": 960,
+        "y": 360
+      },
+      "data": {
+        "componentId": "comp-1755485319818",
+        "messageId": "msg-19"
+      }
+    },
+    {
+      "id": "n-20",
+      "type": "card",
+      "position": {
+        "x": 1440,
+        "y": 360
+      },
+      "data": {
+        "componentId": "comp-1755485320322",
+        "messageId": "msg-20"
+      }
+    },
+    {
+      "id": "n-21",
+      "type": "card",
+      "position": {
+        "x": 1920,
+        "y": 360
+      },
+      "data": {
+        "componentId": "comp-1755485320779",
+        "messageId": "msg-21"
+      }
+    },
+    {
+      "id": "n-22",
+      "type": "card",
+      "position": {
+        "x": 2400,
+        "y": 360
+      },
+      "data": {
+        "componentId": "comp-1755485322530",
+        "messageId": "msg-22"
+      }
+    },
+    {
+      "id": "n-23",
+      "type": "card",
+      "position": {
+        "x": 2880,
+        "y": 360
+      },
+      "data": {
+        "componentId": "comp-1755485329155",
+        "messageId": "msg-23"
+      }
+    },
+    {
+      "id": "n-24",
+      "type": "card",
+      "position": {
+        "x": 3360,
+        "y": 360
+      },
+      "data": {
+        "componentId": "comp-1755485329707",
+        "messageId": "msg-24"
+      }
+    },
+    {
+      "id": "n-25",
+      "type": "card",
+      "position": {
+        "x": 3840,
+        "y": 360
+      },
+      "data": {
+        "componentId": "comp-1755485330140",
+        "messageId": "msg-25"
+      }
     }
   ],
   edges: [
@@ -287,7 +383,56 @@ const defaultState = {
     {
       "source": "n-17",
       "target": "n-15",
-      "id": "xy-edge__n-17-n-15"
+      "id": "xy-edge__n-17-n-15",
+      "selected": false
+    },
+    {
+      "id": "e-n-17-n-18",
+      "source": "n-17",
+      "target": "n-18",
+      "selected": false
+    },
+    {
+      "id": "e-n-18-n-19",
+      "source": "n-18",
+      "target": "n-19",
+      "selected": false
+    },
+    {
+      "id": "e-n-19-n-20",
+      "source": "n-19",
+      "target": "n-20",
+      "selected": false
+    },
+    {
+      "id": "e-n-20-n-21",
+      "source": "n-20",
+      "target": "n-21",
+      "selected": false
+    },
+    {
+      "id": "e-n-21-n-22",
+      "source": "n-21",
+      "target": "n-22",
+      "selected": false
+    },
+    {
+      "id": "e-n-22-n-23",
+      "source": "n-22",
+      "target": "n-23",
+      "selected": false
+    },
+    {
+      "id": "e-n-23-n-24",
+      "source": "n-23",
+      "target": "n-24",
+      "selected": false
+    },
+    {
+      "id": "e-n-24-n-25",
+      "source": "n-24",
+      "target": "n-25",
+      "selected": false
     }
   ],
   components: {
@@ -413,7 +558,7 @@ const defaultState = {
       "uiToolType": "multiSelect",
       "content": {
         "multiSelect": {
-          "text": "Hey {{name}}, we'll ask a few quick questions to start building your Personal Profile:\n\nHow are you thinking about your professional future right now?",
+          "text": "Hey {name}, we'll ask a few quick questions to start building your Personal Profile:\n\nHow are you thinking about your professional future right now?",
           "options": [
             {
               "text": "I'm not certain about my professional future."
@@ -430,8 +575,9 @@ const defaultState = {
           ]
         }
       },
+      "aiGenerated": false,
       "createdAt": "2025-08-17T22:46:01.542Z",
-      "updatedAt": "2025-08-17T23:07:18.415Z"
+      "updatedAt": "2025-08-18T02:48:27.545Z"
     },
     "comp-1755471082977": {
       "id": "comp-1755471082977",
@@ -507,55 +653,62 @@ const defaultState = {
       "id": "comp-1755471536987",
       "name": "School Forms - Current",
       "slug": "00.05.01",
-      "uiToolType": "message",
+      "uiToolType": "multiSelect",
       "content": {
-        "message": {
+        "multiSelect": {
           "text": "[Placeholder for form tool that exists in code but hasn't been added to this prototype yet.]",
-          "richText": true
+          "options": [
+            {
+              "text": ""
+            }
+          ]
         },
         "banner": {
           "text": "School forms",
           "type": "default"
         }
       },
+      "aiGenerated": false,
       "createdAt": "2025-08-17T22:58:56.987Z",
-      "updatedAt": "2025-08-17T23:03:51.648Z"
+      "updatedAt": "2025-08-18T02:47:43.907Z"
     },
     "comp-1755471715008": {
       "id": "comp-1755471715008",
       "name": "Show Tracks Drawer",
       "slug": "00.06.01",
-      "uiToolType": "message",
+      "uiToolType": "multiSelect",
       "content": {
-        "message": {
-          "text": "[Placeholder for show tracks drawer tool that exists in code but hasn't been added to this prototype yet.]",
-          "richText": true
-        },
-        "banner": {
-          "text": "Show tracks drawer",
-          "type": "default"
+        "multiSelect": {
+          "text": "Perfect! Now that we've got the basics, let's get you started on your journey to success with the Clarity track.\n\nOnce you've completed the Clarity track, you'll get your finished Personal Profile - showing exactly who you are and where you want to go. You can check its progress anytime by tapping on your avatar in the top right.\n\nSee where you're at in the Clarity track with the menu on the top left.",
+          "options": [
+            {
+              "text": "Let's go!"
+            }
+          ]
         }
       },
+      "aiGenerated": false,
       "createdAt": "2025-08-17T23:01:55.008Z",
-      "updatedAt": "2025-08-17T23:06:16.173Z"
+      "updatedAt": "2025-08-18T02:42:01.452Z"
     },
     "comp-1755471835094": {
       "id": "comp-1755471835094",
       "name": "Show Assessment",
       "slug": "00.07.01",
-      "uiToolType": "message",
+      "uiToolType": "multiSelect",
       "content": {
-        "message": {
-          "text": "[Placeholder for show assessment tool that exists in code but hasn't been added to this prototype yet.]",
-          "richText": true
-        },
-        "banner": {
-          "text": "Show assessment tool",
-          "type": "default"
+        "multiSelect": {
+          "text": "First up, the personality quiz. It'll take less than 10 minutes, and you'll learn your personality type across the top five personality assessments.",
+          "options": [
+            {
+              "text": "Launch Personality Quiz"
+            }
+          ]
         }
       },
+      "aiGenerated": false,
       "createdAt": "2025-08-17T23:03:55.094Z",
-      "updatedAt": "2025-08-17T23:05:51.901Z"
+      "updatedAt": "2025-08-18T02:42:52.660Z"
     },
     "comp-1755472046014": {
       "id": "comp-1755472046014",
@@ -653,6 +806,160 @@ const defaultState = {
       "aiGenerated": false,
       "createdAt": "2025-08-18T02:28:58.142Z",
       "updatedAt": "2025-08-18T02:30:54.495Z"
+    },
+    "comp-1755485319362": {
+      "id": "comp-1755485319362",
+      "name": "Inspirations Q1",
+      "slug": "01.02.01",
+      "uiToolType": "question",
+      "content": {
+        "question": {
+          "text": "If you could wave a magic wand and fix one problem in the world, what would it be?",
+          "options": [],
+          "suggestions": [
+            "World Hunger",
+            "etc"
+          ],
+          "image": "/img/steps/inspirations/question/1.png"
+        },
+        "banner": {
+          "text": "Inspirations",
+          "type": "default"
+        },
+        "text": {
+          "text": "When your work inspires you, everything clicks — energy, creativity, and motivation skyrocket. It's great for you and for employers.\n\nLet's shape a clear picture of what really drives you.",
+          "type": "default"
+        }
+      },
+      "aiGenerated": false,
+      "createdAt": "2025-08-18T02:48:39.362Z",
+      "updatedAt": "2025-08-18T02:50:46.132Z"
+    },
+    "comp-1755485319818": {
+      "id": "comp-1755485319818",
+      "name": "New Component 19",
+      "slug": "",
+      "uiToolType": "message",
+      "content": {
+        "message": {
+          "text": "Excellent work so far! Now let's focus on your goals. Where do you see yourself professionally in the next 2-3 years?",
+          "richText": true
+        },
+        "banner": {
+          "text": "New Banner",
+          "type": "default"
+        }
+      },
+      "createdAt": "2025-08-18T02:48:39.818Z",
+      "updatedAt": "2025-08-18T02:48:39.818Z"
+    },
+    "comp-1755485320322": {
+      "id": "comp-1755485320322",
+      "name": "New Component 20",
+      "slug": "",
+      "uiToolType": "message",
+      "content": {
+        "message": {
+          "text": "What motivates you to do your best work? Is it recognition, helping others, solving complex problems, or something else?",
+          "richText": true
+        },
+        "banner": {
+          "text": "New Banner",
+          "type": "default"
+        }
+      },
+      "createdAt": "2025-08-18T02:48:40.322Z",
+      "updatedAt": "2025-08-18T02:48:40.322Z"
+    },
+    "comp-1755485320779": {
+      "id": "comp-1755485320779",
+      "name": "New Component 21",
+      "slug": "",
+      "uiToolType": "message",
+      "content": {
+        "message": {
+          "text": "Let's explore your learning style. How do you prefer to acquire new skills - through hands-on experience, formal training, or mentoring?",
+          "richText": true
+        },
+        "banner": {
+          "text": "New Banner",
+          "type": "default"
+        }
+      },
+      "createdAt": "2025-08-18T02:48:40.779Z",
+      "updatedAt": "2025-08-18T02:48:40.779Z"
+    },
+    "comp-1755485322530": {
+      "id": "comp-1755485322530",
+      "name": "New Component 22",
+      "slug": "",
+      "uiToolType": "message",
+      "content": {
+        "message": {
+          "text": "Perfect! Now let's wrap up with your values. What's most important to you in a work environment - collaboration, autonomy, innovation, or stability?",
+          "richText": true
+        },
+        "banner": {
+          "text": "New Banner",
+          "type": "default"
+        }
+      },
+      "createdAt": "2025-08-18T02:48:42.530Z",
+      "updatedAt": "2025-08-18T02:48:42.530Z"
+    },
+    "comp-1755485329155": {
+      "id": "comp-1755485329155",
+      "name": "New Component 23",
+      "slug": "",
+      "uiToolType": "message",
+      "content": {
+        "message": {
+          "text": "What tasks are easy for you but hard for others? Think about the skills that come naturally to you and how they might be valuable in your career.",
+          "richText": true
+        },
+        "banner": {
+          "text": "New Banner",
+          "type": "default"
+        }
+      },
+      "createdAt": "2025-08-18T02:48:49.155Z",
+      "updatedAt": "2025-08-18T02:48:49.155Z"
+    },
+    "comp-1755485329707": {
+      "id": "comp-1755485329707",
+      "name": "New Component 24",
+      "slug": "",
+      "uiToolType": "message",
+      "content": {
+        "message": {
+          "text": "Awesome - now that we've got a feel for your personality, let's dig into your strengths. You'll see a few sample answers to guide you.",
+          "richText": true
+        },
+        "banner": {
+          "text": "New Banner",
+          "type": "default"
+        }
+      },
+      "createdAt": "2025-08-18T02:48:49.707Z",
+      "updatedAt": "2025-08-18T02:48:49.707Z"
+    },
+    "comp-1755485330140": {
+      "id": "comp-1755485330140",
+      "name": "New Component 25",
+      "slug": "",
+      "uiToolType": "message",
+      "content": {
+        "message": {
+          "text": "Tell me about a time when you felt most confident at work. What were you doing, and what made you feel so capable in that moment?",
+          "richText": true
+        },
+        "banner": {
+          "text": "New Banner",
+          "type": "default"
+        }
+      },
+      "createdAt": "2025-08-18T02:48:50.140Z",
+      "updatedAt": "2025-08-18T02:48:50.140Z"
     }
   },
   messages: [
@@ -669,7 +976,7 @@ const defaultState = {
     {
       "id": "7",
       "sender": "ai" as const,
-      "content": "Hey {{name}}, we'll ask a few quick questions to start building your Personal Profile:\n\nHow are you thinking about your professional future right now?",
+      "content": "Hey {name}, we'll ask a few quick questions to start building your Personal Profile:\n\nHow are you thinking about your professional future right now?",
       "messageId": "msg-7",
       "componentId": "comp-1755470761542",
       "uiToolType": "multiSelect",
@@ -762,7 +1069,13 @@ const defaultState = {
       "content": "[Placeholder for form tool that exists in code but hasn't been added to this prototype yet.]",
       "messageId": "msg-10",
       "componentId": "comp-1755471536987",
-      "uiToolType": "message",
+      "uiToolType": "multiSelect",
+      "multiSelectOptions": [
+        {
+          "text": ""
+        }
+      ],
+      "maxSelection": 1,
       "bannerText": "School forms",
       "timestamp": "01:14 PM",
       "type": "text" as const
@@ -770,22 +1083,32 @@ const defaultState = {
     {
       "id": "11",
       "sender": "ai" as const,
-      "content": "[Placeholder for show tracks drawer tool that exists in code but hasn't been added to this prototype yet.]",
+      "content": "Perfect! Now that we've got the basics, let's get you started on your journey to success with the Clarity track.\n\nOnce you've completed the Clarity track, you'll get your finished Personal Profile - showing exactly who you are and where you want to go. You can check its progress anytime by tapping on your avatar in the top right.\n\nSee where you're at in the Clarity track with the menu on the top left.",
       "messageId": "msg-11",
       "componentId": "comp-1755471715008",
-      "uiToolType": "message",
-      "bannerText": "Show tracks drawer",
+      "uiToolType": "multiSelect",
+      "multiSelectOptions": [
+        {
+          "text": "Let's go!"
+        }
+      ],
+      "maxSelection": 1,
       "timestamp": "01:14 PM",
       "type": "text" as const
     },
     {
       "id": "12",
       "sender": "ai" as const,
-      "content": "[Placeholder for show assessment tool that exists in code but hasn't been added to this prototype yet.]",
+      "content": "First up, the personality quiz. It'll take less than 10 minutes, and you'll learn your personality type across the top five personality assessments.",
       "messageId": "msg-12",
       "componentId": "comp-1755471835094",
-      "uiToolType": "message",
-      "bannerText": "Show assessment tool",
+      "uiToolType": "multiSelect",
+      "multiSelectOptions": [
+        {
+          "text": "Launch Personality Quiz"
+        }
+      ],
+      "maxSelection": 1,
       "timestamp": "01:14 PM",
       "type": "text" as const
     },
@@ -923,6 +1246,100 @@ const defaultState = {
       "type": "text" as const
     },
     {
+      "id": "18",
+      "sender": "ai" as const,
+      "content": "If you could wave a magic wand and fix one problem in the world, what would it be?",
+      "messageId": "msg-18",
+      "componentId": "comp-1755485319362",
+      "uiToolType": "question",
+      "suggestions": [
+        "World Hunger",
+        "etc"
+      ],
+      "image": "/img/steps/inspirations/question/1.png",
+      "bannerText": "Inspirations",
+      "textContent": "When your work inspires you, everything clicks — energy, creativity, and motivation skyrocket. It's great for you and for employers.\n\nLet's shape a clear picture of what really drives you.",
+      "timestamp": "01:14 PM",
+      "type": "text" as const
+    },
+    {
+      "id": "19",
+      "sender": "ai" as const,
+      "content": "Excellent work so far! Now let's focus on your goals. Where do you see yourself professionally in the next 2-3 years?",
+      "messageId": "msg-19",
+      "componentId": "comp-1755485319818",
+      "uiToolType": "message",
+      "bannerText": "New Banner",
+      "timestamp": "01:14 PM",
+      "type": "text" as const
+    },
+    {
+      "id": "20",
+      "sender": "ai" as const,
+      "content": "What motivates you to do your best work? Is it recognition, helping others, solving complex problems, or something else?",
+      "messageId": "msg-20",
+      "componentId": "comp-1755485320322",
+      "uiToolType": "message",
+      "bannerText": "New Banner",
+      "timestamp": "01:14 PM",
+      "type": "text" as const
+    },
+    {
+      "id": "21",
+      "sender": "ai" as const,
+      "content": "Let's explore your learning style. How do you prefer to acquire new skills - through hands-on experience, formal training, or mentoring?",
+      "messageId": "msg-21",
+      "componentId": "comp-1755485320779",
+      "uiToolType": "message",
+      "bannerText": "New Banner",
+      "timestamp": "01:14 PM",
+      "type": "text" as const
+    },
+    {
+      "id": "22",
+      "sender": "ai" as const,
+      "content": "Perfect! Now let's wrap up with your values. What's most important to you in a work environment - collaboration, autonomy, innovation, or stability?",
+      "messageId": "msg-22",
+      "componentId": "comp-1755485322530",
+      "uiToolType": "message",
+      "bannerText": "New Banner",
+      "timestamp": "01:14 PM",
+      "type": "text" as const
+    },
+    {
+      "id": "23",
+      "sender": "ai" as const,
+      "content": "What tasks are easy for you but hard for others? Think about the skills that come naturally to you and how they might be valuable in your career.",
+      "messageId": "msg-23",
+      "componentId": "comp-1755485329155",
+      "uiToolType": "message",
+      "bannerText": "New Banner",
+      "timestamp": "01:14 PM",
+      "type": "text" as const
+    },
+    {
+      "id": "24",
+      "sender": "ai" as const,
+      "content": "Awesome - now that we've got a feel for your personality, let's dig into your strengths. You'll see a few sample answers to guide you.",
+      "messageId": "msg-24",
+      "componentId": "comp-1755485329707",
+      "uiToolType": "message",
+      "bannerText": "New Banner",
+      "timestamp": "01:14 PM",
+      "type": "text" as const
+    },
+    {
+      "id": "25",
+      "sender": "ai" as const,
+      "content": "Tell me about a time when you felt most confident at work. What were you doing, and what made you feel so capable in that moment?",
+      "messageId": "msg-25",
+      "componentId": "comp-1755485330140",
+      "uiToolType": "message",
+      "bannerText": "New Banner",
+      "timestamp": "01:14 PM",
+      "type": "text" as const
+    },
+    {
       "id": "13",
       "sender": "ai" as const,
       "content": "[placeholder for Previous School Form, still needs routing]",
@@ -944,7 +1361,7 @@ const defaultState = {
     }
   ],
   orphanMessageIds: [],
-  lastSaved: "2025-08-18T02:31:01.232Z"
+  lastSaved: "2025-08-18T02:51:04.854Z"
 };
 
 export default defaultState; 
