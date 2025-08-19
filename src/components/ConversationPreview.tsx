@@ -654,9 +654,9 @@ export default function ConversationPreview() {
                       position: "absolute",
                       top: "8px",
                       right: "8px",
-                      background: "rgba(0, 0, 0, 0.1)",
-                      color: "#003250",
-                      border: "none",
+                      background: "#8EAF86",
+                      color: "#FFF7F1",
+                      border: "3px solid #8EAF86",
                       borderRadius: "50%",
                       width: "24px",
                       height: "24px",
@@ -666,14 +666,19 @@ export default function ConversationPreview() {
                       alignItems: "center",
                       justifyContent: "center",
                       zIndex: 10,
-                      transition: "background-color 0.2s ease",
+                      transition: "all 0.2s ease",
                       outline: "none",
+                      boxShadow: "0 0 0 2px rgba(142, 175, 134, 0.3)",
                     }}
                     onMouseEnter={(e) => {
-                      e.currentTarget.style.background = "rgba(0, 0, 0, 0.2)";
+                      e.currentTarget.style.background = "#7A9A72";
+                      e.currentTarget.style.borderColor = "#7A9A72";
+                      e.currentTarget.style.boxShadow = "0 0 0 2px rgba(122, 154, 114, 0.3)";
                     }}
                     onMouseLeave={(e) => {
-                      e.currentTarget.style.background = "rgba(0, 0, 0, 0.1)";
+                      e.currentTarget.style.background = "#8EAF86";
+                      e.currentTarget.style.borderColor = "#8EAF86";
+                      e.currentTarget.style.boxShadow = "0 0 0 2px rgba(142, 175, 134, 0.3)";
                     }}
                   >
                     ⋯
