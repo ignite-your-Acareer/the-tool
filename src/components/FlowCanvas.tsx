@@ -2291,6 +2291,7 @@ export default function FlowCanvas() {
                       
                       {/* Coming Soon window */}
                       <div style={{
+                        position: "relative",
                         display: "flex",
                         flexDirection: "column",
                         alignItems: "center",
@@ -2300,12 +2301,204 @@ export default function FlowCanvas() {
                         borderRadius: "8px",
                         border: "2px dashed #ccc",
                         margin: "20px 0",
-                        padding: "40px 20px"
+                        padding: "40px 20px",
+                        overflow: "hidden"
+                      }}>
+                        {/* Grayed-out background interface */}
+                        <div style={{
+                          position: "absolute",
+                          top: "0",
+                          left: "0",
+                          right: "0",
+                          bottom: "0",
+                          background: "rgba(240, 240, 240, 0.8)",
+                          zIndex: 1,
+                          padding: "20px",
+                          opacity: 0.3
+                        }}>
+                          {/* Name and Slug fields */}
+                          <div style={{ marginBottom: "20px" }}>
+                            <div style={{ marginBottom: "8px" }}>
+                              <label style={{ fontSize: "12px", color: "#666", fontWeight: "500" }}>Name</label>
+                              <input 
+                                type="text" 
+                                value="00.00 general directions" 
+                                readOnly
+                                style={{
+                                  width: "100%",
+                                  padding: "6px 8px",
+                                  border: "1px solid #ddd",
+                                  borderRadius: "4px",
+                                  fontSize: "12px",
+                                  background: "#f5f5f5",
+                                  color: "#999"
+                                }}
+                              />
+                            </div>
+                            <div>
+                              <label style={{ fontSize: "12px", color: "#666", fontWeight: "500" }}>Slug</label>
+                              <input 
+                                type="text" 
+                                value="general-directions-f28e" 
+                                readOnly
+                                style={{
+                                  width: "100%",
+                                  padding: "6px 8px",
+                                  border: "1px solid #ddd",
+                                  borderRadius: "4px",
+                                  fontSize: "12px",
+                                  background: "#f5f5f5",
+                                  color: "#999"
+                                }}
+                              />
+                            </div>
+                          </div>
+
+                          {/* Prompt section */}
+                          <div style={{ marginBottom: "20px" }}>
+                            <div style={{ fontSize: "12px", color: "#666", fontWeight: "500", marginBottom: "8px" }}>Prompt</div>
+                            <div style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
+                              <button style={{
+                                padding: "4px 8px",
+                                border: "1px solid #ddd",
+                                borderRadius: "4px",
+                                fontSize: "10px",
+                                background: "#f0f0f0",
+                                color: "#999",
+                                cursor: "default"
+                              }}>GPT-4o ▼</button>
+                              <button style={{
+                                padding: "4px 8px",
+                                border: "1px solid #ddd",
+                                borderRadius: "4px",
+                                fontSize: "10px",
+                                background: "#f0f0f0",
+                                color: "#999",
+                                cursor: "default"
+                              }}>Params ⚙️ ▼</button>
+                            </div>
+                            <div style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
+                              <button style={{
+                                padding: "4px 8px",
+                                border: "1px solid #ddd",
+                                borderRadius: "4px",
+                                fontSize: "10px",
+                                background: "#f0f0f0",
+                                color: "#999",
+                                cursor: "default"
+                              }}>System ▼</button>
+                            </div>
+                            <div style={{
+                              border: "1px solid #ddd",
+                              borderRadius: "4px",
+                              background: "#f8f8f8",
+                              height: "120px",
+                              position: "relative",
+                              overflow: "hidden"
+                            }}>
+                              <div style={{
+                                padding: "8px",
+                                fontSize: "10px",
+                                color: "#999",
+                                lineHeight: "1.3",
+                                height: "100%",
+                                overflowY: "auto"
+                              }}>
+                                <div style={{ fontWeight: "bold" }}>You are an AI Career Coach that summarizes who the user is, the career direction they are heading towards, and why it is a good fit...</div>
+                                <br />
+                                <div style={{ fontWeight: "bold" }}>::CAREER FILTER DEFINITION AND CONTEXT::</div>
+                                <div>• About me information (education background including degrees and areas of study as well as work experience)</div>
+                                <div>• personality assessment results (Enneagram, DISC, Big Five, Myers-Briggs, and Holland Code)</div>
+                                <div>• Strengths</div>
+                                <div>• Inspirations</div>
+                                <div>• Values</div>
+                                <div>• Ideal Work Environment</div>
+                                <div>• Ideal Living Environment</div>
+                                <div>• Financial Needs</div>
+                                <br />
+                                <div style={{ fontWeight: "bold" }}>::INSTRUCTIONS FOR AI CAREER COACH INTERACTIONS::</div>
+                                <div>Your priorities should be:</div>
+                                <div>• Build rapport and trust...</div>
+                                <div>• Provide personalized guidance...</div>
+                                <div>• Help with goal setting...</div>
+                                <div>• Offer practical advice...</div>
+                                <div>• Support career transitions...</div>
+                                <div>• Encourage continuous learning...</div>
+                                <div>• Address challenges and obstacles...</div>
+                                <div>• Celebrate achievements...</div>
+                              </div>
+                              {/* Scrollbar */}
+                              <div style={{
+                                position: "absolute",
+                                right: "2px",
+                                top: "8px",
+                                bottom: "8px",
+                                width: "6px",
+                                background: "#e0e0e0",
+                                borderRadius: "3px"
+                              }}>
+                                <div style={{
+                                  position: "absolute",
+                                  top: "20px",
+                                  left: "0",
+                                  right: "0",
+                                  height: "30px",
+                                  background: "#ccc",
+                                  borderRadius: "3px"
+                                }}></div>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Action buttons */}
+                          <div style={{ display: "flex", gap: "8px" }}>
+                            <button style={{
+                              padding: "4px 8px",
+                              border: "1px solid #ddd",
+                              borderRadius: "4px",
+                              fontSize: "10px",
+                              background: "#f0f0f0",
+                              color: "#999",
+                              cursor: "default"
+                            }}>+ Message</button>
+                            <button style={{
+                              padding: "4px 8px",
+                              border: "1px solid #ddd",
+                              borderRadius: "4px",
+                              fontSize: "10px",
+                              background: "#f0f0f0",
+                              color: "#999",
+                              cursor: "default"
+                            }}>Tools ⚙️</button>
+                            <button style={{
+                              padding: "4px 8px",
+                              border: "1px solid #ddd",
+                              borderRadius: "4px",
+                              fontSize: "10px",
+                              background: "#f0f0f0",
+                              color: "#999",
+                              cursor: "default"
+                            }}>T Text output ▼</button>
+                          </div>
+                        </div>
+
+                        {/* Foreground content */}
+                        <div style={{ 
+                          position: "relative", 
+                          zIndex: 2,
+                          display: "flex",
+                          flexDirection: "column",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          height: "100%",
+                          transform: "translateY(-93px)"
                       }}>
                         <div style={{
                           fontSize: "48px",
                           color: "#999",
-                          marginBottom: "20px"
+                            marginBottom: "-2px",
+                            textAlign: "center",
+                            width: "100%"
                         }}>
                           ⭐
                         </div>
@@ -2320,12 +2513,13 @@ export default function FlowCanvas() {
                         </div>
                         <div style={{
                           fontSize: "16px",
-                          color: "#999",
+                            color: "#555",
                           textAlign: "center",
                           maxWidth: "300px",
                           lineHeight: "1.5"
                         }}>
-                          Coming Soon! This feature will allow AI to generate content for your components.
+                            Coming Soon: Braintrust-style prompt engineering interface
+                          </div>
                         </div>
                       </div>
                     </>
