@@ -82,7 +82,7 @@ export default function FlowCanvas() {
   // Navigation bar state
   const [selectedBranch, setSelectedBranch] = useState("main");
   const [selectedTrack, setSelectedTrack] = useState("clarity");
-  const [selectedSegment, setSelectedSegment] = useState("student");
+  const [selectedSegment, setSelectedSegment] = useState("all-ai-generated");
   const [selectedUser, setSelectedUser] = useState("user1");
   const [showImagesPopup, setShowImagesPopup] = useState(false);
 
@@ -1199,6 +1199,7 @@ export default function FlowCanvas() {
               outline: "none",
             }}
           >
+            <option value="all-ai-generated">All AI-Generated</option>
             <option value="student">Student</option>
             <option value="graduate">Graduate</option>
             <option value="mid-career">Mid Career</option>
