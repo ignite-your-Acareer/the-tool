@@ -536,14 +536,14 @@ export default function ConversationPreview() {
                       <input 
                         type="text" 
                         className="form-input" 
-                        placeholder={`Enter ${field.title.toLowerCase()}...`}
+                        placeholder="Type your answer here..."
                         disabled
                       />
                     )}
                     {field.type === "longText" && (
                       <textarea 
                         className="form-textarea" 
-                        placeholder={`Enter ${field.title.toLowerCase()}...`}
+                        placeholder="Type your answer here..."
                         disabled
                       />
                     )}

@@ -45,6 +45,10 @@ type ComponentData = {
       title?: string;
       sendButtonText?: string;
     };
+    aiPrompt?: {
+      text?: string;
+      llm?: string;
+    };
     freeChat?: { text: string; };
     accordion?: { title: string; content: string; };
     banner?: { text: string; type: string; };
@@ -1628,6 +1632,7 @@ export default function FlowCanvas() {
                       // Initialize all add-on states based on existing component data
                       setBannerAddOn(!!component.content.banner?.text);
                       setTextAddOn(!!(component.content as any).text?.text);
+                      setBranchRoutingAddOn(!!(component.content as any).branchRouting && Object.keys((component.content as any).branchRouting).length > 0);
                       setAiGenerated(!!component.aiGenerated);
                     }
                   }
@@ -2367,238 +2372,135 @@ export default function FlowCanvas() {
                         </>
                       )}
                       
-                      {/* Coming Soon window */}
+                      {/* AI-Generated Prompt Input */}
                       <div style={{
-                        position: "relative",
-                        display: "flex",
-                        flexDirection: "column",
-                        alignItems: "center",
-                        justifyContent: "center",
                         minHeight: "300px",
                         backgroundColor: "#f8f8f8",
                         borderRadius: "8px",
                         border: "2px dashed #ccc",
                         margin: "20px 0",
-                        padding: "40px 20px",
-                        overflow: "hidden"
+                        padding: "20px",
+                        display: "flex",
+                        flexDirection: "column"
                       }}>
-                        {/* Grayed-out background interface */}
-                        <div style={{
-                          position: "absolute",
-                          top: "0",
-                          left: "0",
-                          right: "0",
-                          bottom: "0",
-                          background: "rgba(240, 240, 240, 0.8)",
-                          zIndex: 1,
-                          padding: "20px",
-                          opacity: 0.3
-                        }}>
-                          {/* Name and Slug fields */}
-                          <div style={{ marginBottom: "20px" }}>
-                            <div style={{ marginBottom: "8px" }}>
-                              <label style={{ fontSize: "12px", color: "#666", fontWeight: "500" }}>Name</label>
-                              <input 
-                                type="text" 
-                                value="00.00 general directions" 
-                                readOnly
-                                style={{
-                                  width: "100%",
-                                  padding: "6px 8px",
-                                  border: "1px solid #ddd",
-                                  borderRadius: "4px",
-                                  fontSize: "12px",
-                                  background: "#f5f5f5",
-                                  color: "#999"
-                                }}
-                              />
-                            </div>
-                            <div>
-                              <label style={{ fontSize: "12px", color: "#666", fontWeight: "500" }}>Slug</label>
-                              <input 
-                                type="text" 
-                                value="general-directions-f28e" 
-                                readOnly
-                                style={{
-                                  width: "100%",
-                                  padding: "6px 8px",
-                                  border: "1px solid #ddd",
-                                  borderRadius: "4px",
-                                  fontSize: "12px",
-                                  background: "#f5f5f5",
-                                  color: "#999"
-                                }}
-                              />
-                            </div>
-                          </div>
-
-                          {/* Prompt section */}
-                          <div style={{ marginBottom: "20px" }}>
-                            <div style={{ fontSize: "12px", color: "#666", fontWeight: "500", marginBottom: "8px" }}>Prompt</div>
-                            <div style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
-                              <button style={{
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "8px" }}>
+                          <label style={{ fontWeight: "700" }}>Prompt:</label>
+                          <div style={{ position: "relative" }}>
+                            <select
+                              value={component?.content.aiPrompt?.llm || "gpt-4o"}
+                              onChange={(e) => {
+                                if (node) {
+                                  const component = components.get(node.data.componentId);
+                                  if (component) {
+                                    const updatedComponent = {
+                                      ...component,
+                                      content: {
+                                        ...component.content,
+                                        aiPrompt: {
+                                          ...component.content.aiPrompt,
+                                          llm: e.target.value
+                                        }
+                                      },
+                                      updatedAt: new Date()
+                                    };
+                                    setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                    
+                                    // Dispatch event to update preview
+                                    const event = new CustomEvent("updateComponentData", {
+                                      detail: { 
+                                        messageId: editingMessageId, 
+                                        componentData: updatedComponent 
+                                      },
+                                    });
+                                    window.dispatchEvent(event);
+                                  }
+                                }
+                              }}
+                              style={{
                                 padding: "4px 8px",
-                                border: "1px solid #ddd",
+                                border: "1px solid #E9DDD3",
                                 borderRadius: "4px",
-                                fontSize: "10px",
-                                background: "#f0f0f0",
-                                color: "#999",
-                                cursor: "default"
-                              }}>GPT-4o ▼</button>
-                              <button style={{
-                                padding: "4px 8px",
-                                border: "1px solid #ddd",
-                                borderRadius: "4px",
-                                fontSize: "10px",
-                                background: "#f0f0f0",
-                                color: "#999",
-                                cursor: "default"
-                              }}>Params ⚙️ ▼</button>
-                            </div>
-                            <div style={{ display: "flex", gap: "8px", marginBottom: "8px" }}>
-                              <button style={{
-                                padding: "4px 8px",
-                                border: "1px solid #ddd",
-                                borderRadius: "4px",
-                                fontSize: "10px",
-                                background: "#f0f0f0",
-                                color: "#999",
-                                cursor: "default"
-                              }}>System ▼</button>
-                            </div>
-                            <div style={{
-                              border: "1px solid #ddd",
-                              borderRadius: "4px",
-                              background: "#f8f8f8",
-                              height: "120px",
-                              position: "relative",
-                              overflow: "hidden"
-                            }}>
-                              <div style={{
-                                padding: "8px",
-                                fontSize: "10px",
-                                color: "#999",
-                                lineHeight: "1.3",
-                                height: "100%",
-                                overflowY: "auto"
-                              }}>
-                                <div style={{ fontWeight: "bold" }}>You are an AI Career Coach that summarizes who the user is, the career direction they are heading towards, and why it is a good fit...</div>
-                                <br />
-                                <div style={{ fontWeight: "bold" }}>::CAREER FILTER DEFINITION AND CONTEXT::</div>
-                                <div>• About me information (education background including degrees and areas of study as well as work experience)</div>
-                                <div>• personality assessment results (Enneagram, DISC, Big Five, Myers-Briggs, and Holland Code)</div>
-                                <div>• Strengths</div>
-                                <div>• Inspirations</div>
-                                <div>• Values</div>
-                                <div>• Ideal Work Environment</div>
-                                <div>• Ideal Living Environment</div>
-                                <div>• Financial Needs</div>
-                                <br />
-                                <div style={{ fontWeight: "bold" }}>::INSTRUCTIONS FOR AI CAREER COACH INTERACTIONS::</div>
-                                <div>Your priorities should be:</div>
-                                <div>• Build rapport and trust...</div>
-                                <div>• Provide personalized guidance...</div>
-                                <div>• Help with goal setting...</div>
-                                <div>• Offer practical advice...</div>
-                                <div>• Support career transitions...</div>
-                                <div>• Encourage continuous learning...</div>
-                                <div>• Address challenges and obstacles...</div>
-                                <div>• Celebrate achievements...</div>
-                              </div>
-                              {/* Scrollbar */}
-                              <div style={{
-                                position: "absolute",
-                                right: "2px",
-                                top: "8px",
-                                bottom: "8px",
-                                width: "6px",
-                                background: "#e0e0e0",
-                                borderRadius: "3px"
-                              }}>
-                                <div style={{
-                                  position: "absolute",
-                                  top: "20px",
-                                  left: "0",
-                                  right: "0",
-                                  height: "30px",
-                                  background: "#ccc",
-                                  borderRadius: "3px"
-                                }}></div>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Action buttons */}
-                          <div style={{ display: "flex", gap: "8px" }}>
-                            <button style={{
-                              padding: "4px 8px",
-                              border: "1px solid #ddd",
-                              borderRadius: "4px",
-                              fontSize: "10px",
-                              background: "#f0f0f0",
-                              color: "#999",
-                              cursor: "default"
-                            }}>+ Message</button>
-                            <button style={{
-                              padding: "4px 8px",
-                              border: "1px solid #ddd",
-                              borderRadius: "4px",
-                              fontSize: "10px",
-                              background: "#f0f0f0",
-                              color: "#999",
-                              cursor: "default"
-                            }}>Tools ⚙️</button>
-                            <button style={{
-                              padding: "4px 8px",
-                              border: "1px solid #ddd",
-                              borderRadius: "4px",
-                              fontSize: "10px",
-                              background: "#f0f0f0",
-                              color: "#999",
-                              cursor: "default"
-                            }}>T Text output ▼</button>
+                                fontSize: "12px",
+                                fontFamily: "inherit",
+                                background: "white",
+                                outline: "none",
+                                cursor: "pointer"
+                              }}
+                              onFocus={(e) => {
+                                e.target.style.border = "2px solid #003250";
+                              }}
+                              onBlur={(e) => {
+                                e.target.style.border = "1px solid #E9DDD3";
+                              }}
+                            >
+                              <option value="gpt-4o">GPT-4o</option>
+                              <option value="gpt-4o-mini">GPT-4o Mini</option>
+                              <option value="gpt-4-turbo">GPT-4 Turbo</option>
+                              <option value="gpt-3.5-turbo">GPT-3.5 Turbo</option>
+                              <option value="claude-3-opus">Claude 3 Opus</option>
+                              <option value="claude-3-sonnet">Claude 3 Sonnet</option>
+                              <option value="claude-3-haiku">Claude 3 Haiku</option>
+                              <option value="gemini-pro">Gemini Pro</option>
+                              <option value="gemini-flash">Gemini Flash</option>
+                              <option value="llama-3.1-8b">Llama 3.1 8B</option>
+                              <option value="llama-3.1-70b">Llama 3.1 70B</option>
+                              <option value="mistral-large">Mistral Large</option>
+                              <option value="mistral-medium">Mistral Medium</option>
+                              <option value="mixtral-8x7b">Mixtral 8x7B</option>
+                            </select>
                           </div>
                         </div>
-
-                        {/* Foreground content */}
-                        <div style={{ 
-                          position: "relative", 
-                          zIndex: 2,
-                          display: "flex",
-                          flexDirection: "column",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          height: "100%",
-                          transform: "translateY(-93px)"
-                      }}>
-                        <div style={{
-                          fontSize: "48px",
-                          color: "#999",
-                            marginBottom: "-2px",
-                            textAlign: "center",
-                            width: "100%"
-                        }}>
-                          ⭐
-                        </div>
-                        <div style={{
-                          fontSize: "24px",
-                          fontWeight: "600",
-                          color: "#666",
-                          marginBottom: "12px",
-                          textAlign: "center"
-                        }}>
-                          AI-Generated Content
-                        </div>
-                        <div style={{
-                          fontSize: "16px",
-                            color: "#555",
-                          textAlign: "center",
-                          maxWidth: "300px",
-                          lineHeight: "1.5"
-                        }}>
-                            Coming Soon: Braintrust-style prompt engineering interface
-                          </div>
-                        </div>
+                        <textarea
+                          value={component?.content.aiPrompt?.text || ""}
+                          onChange={(e) => {
+                            if (node) {
+                              const component = components.get(node.data.componentId);
+                              if (component) {
+                                const updatedComponent = {
+                                  ...component,
+                                  content: {
+                                    ...component.content,
+                                    aiPrompt: {
+                                      text: e.target.value
+                                    }
+                                  },
+                                  updatedAt: new Date()
+                                };
+                                setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                
+                                // Dispatch event to update preview
+                                const event = new CustomEvent("updateComponentData", {
+                                  detail: { 
+                                    messageId: editingMessageId, 
+                                    componentData: updatedComponent 
+                                  },
+                                });
+                                window.dispatchEvent(event);
+                              }
+                            }
+                          }}
+                          placeholder="Enter your AI prompt here..."
+                          style={{
+                            width: "100%",
+                            flex: 1,
+                            minHeight: "250px",
+                            padding: "12px",
+                            border: "1px solid #E9DDD3",
+                            borderRadius: "8px",
+                            fontSize: "14px",
+                            fontFamily: "inherit",
+                            resize: "vertical",
+                            boxSizing: "border-box",
+                            background: "white",
+                            outline: "none"
+                          }}
+                          onFocus={(e) => {
+                            e.target.style.border = "2px solid #003250";
+                          }}
+                          onBlur={(e) => {
+                            e.target.style.border = "1px solid #E9DDD3";
+                          }}
+                        />
                       </div>
                     </>
                   );
@@ -2607,7 +2509,7 @@ export default function FlowCanvas() {
                 // Banner add-on field
                 const bannerField = bannerAddOn && (
                   <div style={{
-                    backgroundColor: "#F2E8E0",
+                    backgroundColor: aiGenerated ? "#F2E8E0" : "#F2E8E0",
                     padding: "16px",
                     marginBottom: "0px",
                     marginLeft: "-20px",
@@ -2675,7 +2577,7 @@ export default function FlowCanvas() {
                 // Text add-on field
                 const textField = textAddOn && (
                   <div style={{
-                    backgroundColor: "#F2E8E0",
+                    backgroundColor: aiGenerated ? "#F2E8E0" : "#F2E8E0",
                     padding: "16px",
                     marginBottom: "0px",
                     marginLeft: "-20px",

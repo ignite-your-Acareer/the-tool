@@ -831,23 +831,72 @@ const defaultState = {
     },
     "comp-1755471536987": {
       "id": "comp-1755471536987",
-      "name": "School Forms - Current",
+      "name": "School Details",
       "slug": "00.05.01",
-      "uiToolType": "multiSelect",
+      "uiToolType": "form",
       "content": {
-        "multiSelect": {
-          "text": "[Placeholder for form tool that exists in code but hasn't been added to this prototype yet.]",
-          "options": [
+        "form": {
+          "title": "School Details",
+          "fields": [
             {
-              "text": ""
+              "id": "field-1",
+              "type": "text",
+              "title": "What is the name of your school?"
+            },
+            {
+              "id": "field-2",
+              "type": "dropdown",
+              "title": "What type of program are you in?",
+              "options": [
+                "Undergraduate",
+                "Graduate",
+                "Certificate",
+                "Other"
+              ]
+            },
+            {
+              "id": "field-3",
+              "type": "text",
+              "title": "What are you studying? (Major(s), Minor(s), or Specialty)"
+            },
+            {
+              "id": "field-4",
+              "type": "text",
+              "title": "When do you expect to graduate?"
+            },
+            {
+              "id": "field-5",
+              "type": "dropdown",
+              "title": "Do you have any other schooling you want us to know about?",
+              "options": [
+                "yes - completed",
+                "yes - planned",
+                "no"
+              ]
             }
-          ]
+          ],
+          "sendButtonText": "Continue"
         },
         "banner": {
-          "text": "School forms",
+          "text": "School Details",
           "type": "default"
+        },
+        "branchRouting": {
+          "0": {
+            "optionText": "yes - completed",
+            "destinationSlug": "graduated form: 00.04.02"
+          },
+          "1": {
+            "optionText": "yes - planned",
+            "destinationSlug": "gap year form: 00.04.03"
+          },
+          "2": {
+            "optionText": "no",
+            "destinationSlug": "employment form: 00.05.01"
+          }
         }
       },
+      "branchRoutingAddOn": true,
       "aiGenerated": false,
       "createdAt": "2025-08-17T22:58:56.987Z",
       "updatedAt": "2025-08-18T02:47:43.907Z"
@@ -1557,16 +1606,50 @@ const defaultState = {
     {
       "id": "10",
       "sender": "ai",
-      "content": "[Placeholder for form tool that exists in code but hasn't been added to this prototype yet.]",
+      "content": "School Details",
       "messageId": "msg-10",
       "componentId": "comp-1755471536987",
-      "uiToolType": "multiSelect",
-      "multiSelectOptions": [
+      "uiToolType": "form",
+      "formTitle": "School Details",
+      "formFields": [
         {
-          "text": ""
+          "id": "field-1",
+          "type": "text",
+          "title": "What is the name of your school?"
+        },
+        {
+          "id": "field-2",
+          "type": "dropdown",
+          "title": "What type of program are you in?",
+          "options": [
+            "Undergraduate",
+            "Graduate",
+            "Certificate",
+            "Other"
+          ]
+        },
+        {
+          "id": "field-3",
+          "type": "text",
+          "title": "What are you studying? (Major(s), Minor(s), or Specialty)"
+        },
+        {
+          "id": "field-4",
+          "type": "text",
+          "title": "When do you expect to graduate?"
+        },
+        {
+          "id": "field-5",
+          "type": "dropdown",
+          "title": "Do you have any other schooling you want us to know about?",
+          "options": [
+            "yes - completed",
+            "yes - planned",
+            "no"
+          ]
         }
       ],
-      "maxSelection": 1
+      "formSendButtonText": "Continue"
     },
     {
       "id": "11",
