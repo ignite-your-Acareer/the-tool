@@ -147,10 +147,20 @@ export default function ConversationPreview() {
       const processedMessages = defaultState.messages.map(message => {
         const component = (defaultState.components as any)[message.componentId];
         let updatedMessage: Message = { 
-          ...message,
+          id: message.id,
           sender: message.sender as "user" | "ai",
+          content: message.content,
           timestamp: "01:14 PM", // Default timestamp
-          type: "text" as MessageType // Default type
+          messageId: message.messageId,
+          componentId: message.componentId,
+          type: "text" as MessageType, // Default type
+          uiToolType: message.uiToolType,
+          suggestions: message.suggestions,
+          image: message.image,
+          multiSelectOptions: message.multiSelectOptions,
+          maxSelection: message.maxSelection,
+          formTitle: message.formTitle,
+          formSendButtonText: message.formSendButtonText
         };
         
         if (component && component.content.banner?.text) {
@@ -159,6 +169,17 @@ export default function ConversationPreview() {
         
         if (component && (component.content as any).text?.text) {
           updatedMessage.textContent = (component.content as any).text.text;
+        }
+        
+        // Handle form fields with proper type casting
+        if (message.formFields) {
+          updatedMessage.formFields = message.formFields.map((field: any): FormField => ({
+            id: field.id,
+            type: field.type as "currency" | "text" | "longText" | "dropdown" | "radio" | "checkbox",
+            title: field.title,
+            options: field.options,
+            required: field.required
+          }));
         }
         
         return updatedMessage;
@@ -353,7 +374,13 @@ export default function ConversationPreview() {
                   ? componentData.content.multiSelect?.maxSelection || 1
                   : undefined,
                 formFields: componentData.uiToolType === "form"
-                  ? componentData.content.form?.fields || []
+                  ? (componentData.content.form?.fields || []).map((field: any) => ({
+                      id: field.id,
+                      type: field.type as "currency" | "text" | "longText" | "dropdown" | "radio" | "checkbox",
+                      title: field.title,
+                      options: field.options,
+                      required: field.required
+                    }))
                   : undefined,
                 formTitle: componentData.uiToolType === "form"
                   ? componentData.content.form?.title || undefined
