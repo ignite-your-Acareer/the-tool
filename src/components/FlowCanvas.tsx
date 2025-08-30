@@ -77,6 +77,7 @@ export default function FlowCanvas() {
   const [uiToolTypeDropdownOpen, setUiToolTypeDropdownOpen] = useState(false);
   const [bannerAddOn, setBannerAddOn] = useState(false);
   const [textAddOn, setTextAddOn] = useState(false);
+  const [branchRoutingAddOn, setBranchRoutingAddOn] = useState(false);
   const [aiGenerated, setAiGenerated] = useState(false);
 
   // Navigation bar state
@@ -2002,11 +2003,16 @@ export default function FlowCanvas() {
             <div style={{ 
               position: "sticky", 
               top: "120px", 
-              backgroundColor: "#FFF7F1", 
+              backgroundColor: "#F2E8E0", 
+              border: "1px solid #E9DDD3",
               zIndex: 3, 
-              marginBottom: "20px", 
-              paddingTop: "12px", 
-              paddingBottom: "12px", 
+              marginBottom: "0px", 
+              paddingTop: "20px", 
+              paddingBottom: "20px", 
+              paddingLeft: "20px",
+              paddingRight: "20px",
+              marginLeft: "-20px",
+              marginRight: "-20px",
               display: "flex",
               alignItems: "center",
               gap: "16px"
@@ -2119,6 +2125,25 @@ export default function FlowCanvas() {
                     }}
                   />
                   Text
+                </label>
+                <label style={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "6px",
+                  fontSize: "14px",
+                  color: "#003250",
+                  cursor: "pointer"
+                }}>
+                  <input
+                    type="checkbox"
+                    checked={branchRoutingAddOn}
+                    onChange={(e) => setBranchRoutingAddOn(e.target.checked)}
+                    style={{
+                      accentColor: "#003250",
+                      transform: "scale(1.1)"
+                    }}
+                  />
+                  Branch Routing Logic
                 </label>
                 <label style={{
                   display: "flex",
@@ -2528,7 +2553,15 @@ export default function FlowCanvas() {
                 
                 // Banner add-on field
                 const bannerField = bannerAddOn && (
-                  <>
+                  <div style={{
+                    backgroundColor: "#F2E8E0",
+                    padding: "16px",
+                    marginBottom: "0px",
+                    marginLeft: "-20px",
+                    marginRight: "-20px",
+                    paddingLeft: "20px",
+                    paddingRight: "20px"
+                  }}>
                     <label>Banner Title:</label>
                                           <input
                         type="text"
@@ -2583,12 +2616,20 @@ export default function FlowCanvas() {
                           e.target.style.border = "1px solid #E9DDD3";
                         }}
                       />
-                  </>
+                  </div>
                 );
 
                 // Text add-on field
                 const textField = textAddOn && (
-                  <>
+                  <div style={{
+                    backgroundColor: "#F2E8E0",
+                    padding: "16px",
+                    marginBottom: "0px",
+                    marginLeft: "-20px",
+                    marginRight: "-20px",
+                    paddingLeft: "20px",
+                    paddingRight: "20px"
+                  }}>
                     <label>Text Content:</label>
                     <textarea
                       value={(component?.content as any)?.text?.text || ""}
@@ -2642,7 +2683,7 @@ export default function FlowCanvas() {
                         e.target.style.border = "1px solid #E9DDD3";
                       }}
                     />
-                  </>
+                  </div>
                 );
                 
                 if (uiToolType === "question") {
@@ -2653,8 +2694,8 @@ export default function FlowCanvas() {
                       {(bannerAddOn || textAddOn) && (
                         <div style={{
                           borderBottom: "1px solid #E9DDD3",
-                          marginBottom: "20px",
-                          paddingBottom: "16px"
+                          marginBottom: "0px",
+                          paddingBottom: "4px"
                         }} />
                       )}
                       <label>Question Text:</label>
@@ -3583,6 +3624,96 @@ export default function FlowCanvas() {
                           + Add Option
                         </button>
                       </div>
+                      
+                      {/* Branch Routing Logic Section - only show when checked */}
+                      {branchRoutingAddOn && (
+                        <div style={{
+                          backgroundColor: "#F2E8E0",
+                          border: "1px solid #E9DDD3",
+                          padding: "16px",
+                          marginTop: "16px",
+                          marginLeft: "-20px",
+                          marginRight: "-20px"
+                        }}>
+                          <div style={{
+                            fontSize: "14px",
+                            color: "#003250",
+                            fontWeight: "500",
+                            marginBottom: "16px"
+                          }}>
+                            Branch Routing Logic
+                          </div>
+                          
+                          {component?.content.multiSelect?.options?.map((option: MultiSelectOption, index: number) => (
+                            <div key={index} style={{
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "12px",
+                              marginBottom: "12px"
+                            }}>
+                              <span style={{
+                                fontSize: "14px",
+                                color: "#003250",
+                                minWidth: "120px"
+                              }}>
+                                When user chooses "{option.text}" →
+                              </span>
+                              <input
+                                type="text"
+                                placeholder="Enter component slug..."
+                                value={(component?.content as any)?.branchRouting?.[index]?.destinationSlug || ""}
+                                onChange={(e) => {
+                                  if (node) {
+                                    const component = components.get(node.data.componentId);
+                                    if (component) {
+                                      const updatedComponent = {
+                                        ...component,
+                                        content: {
+                                          ...component.content,
+                                          branchRouting: {
+                                            ...(component.content as any).branchRouting,
+                                            [index]: {
+                                              optionText: option.text,
+                                              destinationSlug: e.target.value
+                                            }
+                                          }
+                                        },
+                                        updatedAt: new Date()
+                                      };
+                                      setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                      
+                                      // Dispatch event to update component data
+                                      const event = new CustomEvent("updateComponentData", {
+                                        detail: { 
+                                          messageId: editingMessageId, 
+                                          componentData: updatedComponent 
+                                        },
+                                      });
+                                      window.dispatchEvent(event);
+                                    }
+                                  }
+                                }}
+                                style={{
+                                  flex: 1,
+                                  padding: "8px 12px",
+                                  border: "1px solid #E9DDD3",
+                                  borderRadius: "8px",
+                                  fontSize: "14px",
+                                  fontFamily: "inherit",
+                                  background: "white",
+                                  outline: "none"
+                                }}
+                                onFocus={(e) => {
+                                  e.target.style.border = "2px solid #003250";
+                                }}
+                                onBlur={(e) => {
+                                  e.target.style.border = "1px solid #E9DDD3";
+                                }}
+                              />
+                            </div>
+                          ))}
+                        </div>
+                      )}
                     </>
                   );
                 } else {
@@ -3655,6 +3786,9 @@ export default function FlowCanvas() {
                 }
               })()}
             </div>
+            
+
+            
             <div className="edit-window-footer">
               <button
                 className="save-btn"
