@@ -412,6 +412,7 @@ export default function ConversationPreview() {
     window.addEventListener("updateMessageContent", handleUpdateMessageContent as EventListener);
     window.addEventListener("updateComponentData", handleUpdateComponentData as EventListener);
     window.addEventListener("getCurrentMessages", handleGetCurrentMessages as EventListener);
+    window.addEventListener("clearAllMessages", () => setMessages([]));
     window.addEventListener("showExitTestWarning", () => setShowExitTestWarning(true));
 
     return () => {
@@ -428,6 +429,7 @@ export default function ConversationPreview() {
       window.removeEventListener("updateMessageContent", handleUpdateMessageContent as EventListener);
       window.removeEventListener("updateComponentData", handleUpdateComponentData as EventListener);
       window.removeEventListener("getCurrentMessages", handleGetCurrentMessages as EventListener);
+      window.removeEventListener("clearAllMessages", () => setMessages([]));
       window.removeEventListener("showExitTestWarning", () => setShowExitTestWarning(true));
     };
   }, [messages, showSelectComponentPopup, startTestMode]);

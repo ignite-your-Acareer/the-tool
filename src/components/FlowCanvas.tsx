@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+  import { useCallback, useEffect, useState } from "react";
 import {
   ReactFlow,
   Background,
@@ -1465,6 +1465,53 @@ export default function FlowCanvas() {
           }}
         >
           Copy State
+        </button>
+      </div>
+
+      {/* Clear Canvas Button - Bottom Left, next to Copy State */}
+      <div style={{
+        position: "absolute",
+        bottom: "13px",
+        left: "140px", // Positioned to the right of Copy State button
+        zIndex: 10,
+      }}>
+        <button 
+          className="clear-canvas-btn"
+          onClick={() => {
+            if (confirm('Are you sure you want to clear the entire canvas? This action cannot be undone.')) {
+              // Clear all nodes, edges, and components
+              setNodes([]);
+              setEdges([]);
+              setComponents(new Map());
+              
+              // Clear messages in conversation preview
+              const event = new CustomEvent("clearAllMessages");
+              window.dispatchEvent(event);
+              
+              alert('Canvas cleared successfully!');
+            }
+          }}
+          style={{
+            background: "#FA8072", // Salmon color
+            color: "white", // White text
+            border: "none",
+            borderRadius: "6px", // Same as Copy State button
+            padding: "9px 15px", // Same as Copy State button
+            fontSize: "10.5px", // Same as Copy State button
+            fontWeight: "500",
+            cursor: "pointer",
+            boxShadow: "0 1.5px 6px rgba(0, 0, 0, 0.1)", // Same shadow
+            outline: "none",
+            opacity: "0.8", // Same opacity
+          }}
+          onFocus={(e) => {
+            e.target.style.boxShadow = "0 0 0 1.5px rgba(250, 128, 114, 0.3)"; // Salmon focus
+          }}
+          onBlur={(e) => {
+            e.target.style.boxShadow = "0 1.5px 6px rgba(0, 0, 0, 0.1)";
+          }}
+        >
+          Clear Canvas
         </button>
       </div>
 
