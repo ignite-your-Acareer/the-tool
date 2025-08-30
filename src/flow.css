@@ -166,6 +166,28 @@
   margin-bottom: 20px;
 }
 
+/* Full-width sticky header background */
+.sticky-header-full-bg {
+  position: relative;
+  margin-bottom: 0 !important;
+}
+
+.sticky-header-full-bg::before {
+  content: '';
+  position: absolute;
+  top: -23px;
+  left: -24px;
+  right: -24px;
+  bottom: 0;
+  background: inherit;
+  z-index: -1;
+}
+
+/* Second sticky header needs to extend upward to cover gap */
+.sticky-header-second::before {
+  top: -20px;
+}
+
 .edit-window-content {
   margin-bottom: 20px;
 }

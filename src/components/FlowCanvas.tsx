@@ -1676,8 +1676,8 @@ export default function FlowCanvas() {
       {/* Edit Window */}
       {editingMessageId && (
         <div className="edit-window-overlay">
-          <div className="edit-window" style={{ maxWidth: "600px", alignSelf: "flex-start", marginTop: "151px" }}>
-                        <div className="edit-window-header" style={{ position: "sticky", top: "0", backgroundColor: "#FFF7F1", zIndex: 5, marginTop: "-3px", paddingTop: "3px" }}>
+          <div className="edit-window" style={{ maxWidth: "600px", alignSelf: "flex-start", marginTop: "151px", backgroundColor: "#FFF7F1" }}>
+                        <div className="edit-window-header sticky-header-full-bg" style={{ position: "sticky", top: "0", backgroundColor: "#FFF7F1", zIndex: 5, marginTop: "-3px", paddingTop: "3px" }}>
               {/* X button positioned at top right of entire edit window */}
               <button
                 className="close-edit-btn"
@@ -1711,7 +1711,7 @@ export default function FlowCanvas() {
               {/* Top line: Component Name + Slug (full width) */}
               <div style={{ display: "flex", gap: "12px", marginBottom: "-28px", minWidth: 0, alignItems: "flex-end", width: "100%" }}>
                 <div style={{ flex: "2 1 0", minWidth: 0 }}>
-                  <label style={{ display: "block", marginBottom: "8px", color: "#003250", fontWeight: "500", fontSize: "14px" }}>Component Name:</label>
+                  <label style={{ display: "block", marginBottom: "8px", color: "#003250", fontWeight: "700", fontSize: "14px" }}>Component Name:</label>
                   <input
                     type="text"
                     value={(() => {
@@ -1766,7 +1766,7 @@ export default function FlowCanvas() {
                 </div>
                 
                 <div style={{ flex: "1 1 0", minWidth: 0 }}>
-                  <label style={{ display: "block", marginBottom: "8px", color: "#003250", fontWeight: "500", fontSize: "14px" }}>Slug:</label>
+                  <label style={{ display: "block", marginBottom: "8px", color: "#003250", fontWeight: "700", fontSize: "14px" }}>Slug:</label>
                   <input
                     type="text"
                     value={(() => {
@@ -1823,10 +1823,10 @@ export default function FlowCanvas() {
               </div>
               
             {/* Primary UI Tool Type dropdown - separate from header */}
-            <div style={{ position: "sticky", top: "69px", backgroundColor: "#FFF7F1", zIndex: 4, marginBottom: "27px", minWidth: 0, paddingTop: "8px", paddingBottom: "11px", borderBottom: "1px solid #E9DDD3" }}>
+                          <div className="sticky-header-full-bg sticky-header-second" style={{ position: "sticky", top: "69px", backgroundColor: "#FFF7F1", zIndex: 4, marginBottom: "27px", minWidth: 0, paddingTop: "8px", paddingBottom: "19px", borderBottom: "1px solid #E9DDD3" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                 <div style={{ flex: "1" }}>
-                  <label style={{ display: "block", marginBottom: "8px", color: "#003250", fontWeight: "500", fontSize: "14px" }}>Primary UI Tool Type:</label>
+                  <label style={{ display: "block", marginBottom: "8px", color: "#003250", fontWeight: "700", fontSize: "14px" }}>Primary UI Tool Type:</label>
                   <div className="ui-tool-type-dropdown-container" style={{ position: "relative" }}>
                 <div
                   onClick={() => setUiToolTypeDropdownOpen(!uiToolTypeDropdownOpen)}
@@ -2007,7 +2007,7 @@ export default function FlowCanvas() {
               border: "1px solid #E9DDD3",
               zIndex: 3, 
               marginBottom: "0px", 
-              paddingTop: "20px", 
+              paddingTop: "40px", 
               paddingBottom: "20px", 
               paddingLeft: "20px",
               paddingRight: "20px",
@@ -2020,7 +2020,7 @@ export default function FlowCanvas() {
               <span style={{
                 fontSize: "14px",
                 color: "#003250",
-                fontWeight: "500",
+                fontWeight: "700",
                 whiteSpace: "nowrap"
               }}>
                 Add Ons:
@@ -2184,7 +2184,7 @@ export default function FlowCanvas() {
               </div>
             </div>
             
-            <div className="edit-window-content" style={{ width: "100%" }}>
+            <div className="edit-window-content" style={{ width: "100%", paddingTop: (bannerAddOn || textAddOn) ? "0px" : "20px" }}>
               
               {(() => {
                   const node = nodes.find(n => n.data.messageId === editingMessageId);
@@ -2199,7 +2199,7 @@ export default function FlowCanvas() {
                       {/* Show banner and text fields above the Coming Soon window if they're checked */}
                       {bannerAddOn && (
                         <>
-                          <label>Banner Title:</label>
+                          <label style={{ fontWeight: "700" }}>Banner Title:</label>
                           <input
                             type="text"
                             value={component?.content.banner?.text || ""}
@@ -2258,7 +2258,7 @@ export default function FlowCanvas() {
                       
                       {textAddOn && (
                         <>
-                          <label>Text Content:</label>
+                          <label style={{ fontWeight: "700" }}>Text Content:</label>
                           <textarea
                             value={(component?.content as any)?.text?.text || ""}
                             onChange={(e) => {
@@ -2298,7 +2298,7 @@ export default function FlowCanvas() {
                               borderRadius: "8px",
                               fontSize: "14px",
                               fontFamily: "inherit",
-                              marginBottom: "16px",
+                              marginBottom: "6px",
                               resize: "vertical",
                               boxSizing: "border-box",
                               transform: "translate(-2px, -3px)",
@@ -2562,7 +2562,7 @@ export default function FlowCanvas() {
                     paddingLeft: "20px",
                     paddingRight: "20px"
                   }}>
-                    <label>Banner Title:</label>
+                    <label style={{ fontWeight: "700" }}>Banner Title:</label>
                                           <input
                         type="text"
                         value={component?.content.banner?.text || ""}
@@ -2630,7 +2630,7 @@ export default function FlowCanvas() {
                     paddingLeft: "20px",
                     paddingRight: "20px"
                   }}>
-                    <label>Text Content:</label>
+                    <label style={{ fontWeight: "700" }}>Text Content:</label>
                     <textarea
                       value={(component?.content as any)?.text?.text || ""}
                       onChange={(e) => {
@@ -2670,7 +2670,7 @@ export default function FlowCanvas() {
                         borderRadius: "8px",
                         fontSize: "14px",
                         fontFamily: "inherit",
-                        marginBottom: "16px",
+                        marginBottom: "6px",
                         resize: "vertical",
                         boxSizing: "border-box",
                         transform: "translate(-2px, -3px)",
@@ -2698,7 +2698,7 @@ export default function FlowCanvas() {
                           paddingBottom: "4px"
                         }} />
                       )}
-                      <label>Question Text:</label>
+                      <label style={{ fontWeight: "700" }}>Question Text:</label>
                       <textarea
                         value={component?.content.question?.text || ""}
                         onChange={(e) => {
@@ -2752,7 +2752,7 @@ export default function FlowCanvas() {
                         }}
                       />
                       
-                      <label>Image:</label>
+                      <label style={{ fontWeight: "700" }}>Image:</label>
                       <div style={{ display: "flex", gap: "12px", alignItems: "flex-start", marginBottom: "16px" }}>
                         <div className="image-dropdown-container" style={{ flex: 1, position: "relative" }}>
                           <div
@@ -2935,7 +2935,7 @@ export default function FlowCanvas() {
                         </div>
                       </div>
                       
-                      <label>Suggested Responses:</label>
+                      <label style={{ fontWeight: "700" }}>Suggested Responses:</label>
                       <div style={{ marginBottom: "16px" }}>
                         {(component?.content.question?.suggestions || [""]).map((suggestion, index) => (
                           <div key={index} style={{ display: "flex", gap: "8px", marginBottom: "8px", alignItems: "center" }}>
@@ -3153,7 +3153,7 @@ export default function FlowCanvas() {
                           paddingBottom: "16px"
                         }} />
                       )}
-                      <label>Question Text:</label>
+                      <label style={{ fontWeight: "700" }}>Question Text:</label>
                       <textarea
                         value={component?.content.multiSelect?.text || ""}
                         onChange={(e) => {
@@ -3207,7 +3207,7 @@ export default function FlowCanvas() {
                         }}
                       />
                       
-                      <label>Max Selection:</label>
+                      <label style={{ fontWeight: "700" }}>Max Selection:</label>
                       <input
                         type="number"
                         min="1"
@@ -3254,7 +3254,7 @@ export default function FlowCanvas() {
                         }}
                       />
                       
-                      <label>Options:</label>
+                      <label style={{ fontWeight: "700" }}>Options:</label>
                       <div style={{ marginBottom: "16px" }}>
                         {(component?.content.multiSelect?.options || [{ text: "" }]).map((option, index) => (
                           <div key={index} style={{ display: "flex", gap: "8px", marginBottom: "8px", alignItems: "flex-start" }}>
@@ -3638,7 +3638,7 @@ export default function FlowCanvas() {
                           <div style={{
                             fontSize: "14px",
                             color: "#003250",
-                            fontWeight: "500",
+                            fontWeight: "700",
                             marginBottom: "16px"
                           }}>
                             Branch Routing Logic
@@ -3728,7 +3728,7 @@ export default function FlowCanvas() {
                           paddingBottom: "16px"
                         }} />
                       )}
-                      <label>Message Content:</label>
+                      <label style={{ fontWeight: "700" }}>Message Content:</label>
                       <textarea
                         value={component?.content.message?.text || ""}
                         onChange={(e) => {
