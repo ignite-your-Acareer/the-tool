@@ -854,4 +854,122 @@ button:focus {
   outline: none !important;
 }
 
+/* Form Styles */
+.message-form {
+  width: 100%;
+}
+
+.form-container {
+  background: #FFF7F1;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  border: 1px solid #E9DDD3;
+}
+
+.form-title {
+  margin: 0 0 20px 0;
+  color: #003250;
+  font-size: 18px;
+  font-weight: 600;
+  text-align: left;
+}
+
+.form-field {
+  margin-bottom: 16px;
+}
+
+.form-field-label {
+  display: block;
+  font-weight: 600;
+  color: #003250;
+  margin-bottom: 8px;
+  font-size: 14px;
+}
+
+.form-input,
+.form-textarea,
+.form-select {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid #E9DDD3;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  background: white;
+  color: #666;
+  box-sizing: border-box;
+}
+
+.form-input:focus,
+.form-textarea:focus,
+.form-select:focus {
+  outline: none;
+  border-color: #003250;
+}
+
+.form-textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.form-radio-group,
+.form-checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-radio-option,
+.form-checkbox-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 0;
+}
+
+.form-radio-option input[type="radio"],
+.form-checkbox-option input[type="checkbox"] {
+  margin: 0;
+  cursor: pointer;
+}
+
+.radio-label,
+.checkbox-label {
+  font-size: 14px;
+  color: #003250;
+  cursor: pointer;
+}
+
+.form-submit-button {
+  width: 100%;
+  background: #F16B68;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 16px;
+  transition: background-color 0.2s;
+}
+
+.form-submit-button:hover {
+  background: #e55a57;
+}
+
+.form-submit-button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.form-placeholder {
+  text-align: center;
+  color: #666;
+  font-style: italic;
+  padding: 20px;
+}
+
 

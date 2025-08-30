@@ -24,6 +24,14 @@ type MultiSelectOption = {
   icon?: string;
 };
 
+type FormField = {
+  id: string;
+  type: "currency" | "text" | "longText" | "dropdown" | "radio" | "checkbox";
+  title: string;
+  options?: string[];
+  required?: boolean;
+};
+
 type ComponentData = {
   id: string;                    // Unique component ID
   name: string;                  // Display name (required)
@@ -32,7 +40,11 @@ type ComponentData = {
   content: {
     message?: { text: string; richText?: boolean; };
     question?: { text?: string; options?: string[]; image?: string; suggestions?: string[]; };
-    form?: { fields: Record<string, unknown>[]; };
+    form?: { 
+      fields: FormField[];
+      title?: string;
+      sendButtonText?: string;
+    };
     freeChat?: { text: string; };
     accordion?: { title: string; content: string; };
     banner?: { text: string; type: string; };
@@ -160,8 +172,8 @@ export default function FlowCanvas() {
     { value: "message", label: "Message" },
     { value: "question", label: "Question" },
     { value: "multiSelect", label: "Multi Select" },
+    { value: "form", label: "Form" },
     { value: "freeChat", label: "Free Chat", disabled: true },
-    { value: "form", label: "Form", disabled: true },
     { value: "accordion", label: "Accordion", disabled: true },
     { value: "intro", label: "Intro Dialog", disabled: true },
     { value: "showTracksDrawer", label: "Show Tracks Drawer", disabled: true },
@@ -947,7 +959,8 @@ export default function FlowCanvas() {
               content = component.content.message?.text || "New Message";
               break;
             case "form":
-              content = "Form Component";
+              const formFields = component.content.form?.fields || [];
+              content = formFields.length > 0 ? `${formFields.length} field${formFields.length === 1 ? '' : 's'}` : "Form Component";
               break;
             case "freeChat":
               content = component.content.freeChat?.text || "Free Chat";
@@ -1002,6 +1015,31 @@ export default function FlowCanvas() {
                 ⭐
               </span>
             )}
+            {/* Check if component has branch routing logic */}
+            {(() => {
+              // Check for branch routing in form content
+              const hasFormBranchRouting = component.content.form && 
+                (component.content as any).branchRouting && 
+                Object.keys((component.content as any).branchRouting).length > 0;
+              
+              // Check for branch routing in multiSelect content
+              const hasMultiSelectBranchRouting = component.content.multiSelect && 
+                (component.content as any).branchRouting && 
+                Object.keys((component.content as any).branchRouting).length > 0;
+              
+              return hasFormBranchRouting || hasMultiSelectBranchRouting;
+                         })() && (
+               <span style={{
+                 fontSize: "12px",
+                 color: "#FA8072",
+                 marginLeft: "4px",
+                 transform: "scale(1.5)",
+                 display: "inline-block",
+                 lineHeight: "1"
+               }}>
+                 ⎇
+               </span>
+             )}
           </div>
         )}
         
@@ -1885,11 +1923,26 @@ export default function FlowCanvas() {
                             const component = components.get(node.data.componentId);
                             if (component) {
                               const newUiToolType = option.value as UIToolType;
-                              const updatedComponent = {
+                              let updatedComponent = {
                                 ...component,
                                 uiToolType: newUiToolType,
                                 updatedAt: new Date()
                               };
+                              
+                              // Initialize form content if switching to form type
+                              if (newUiToolType === "form" && !component.content.form) {
+                                updatedComponent = {
+                                  ...updatedComponent,
+                                  content: {
+                                    ...component.content,
+                                    form: {
+                                      fields: [],
+                                      title: "",
+                                      sendButtonText: "Continue"
+                                    }
+                                  }
+                                };
+                              }
                               setComponents(prev => new Map(prev).set(component.id, updatedComponent));
                               
                               // Dispatch component data update first
@@ -3139,6 +3192,696 @@ export default function FlowCanvas() {
                           + Add Suggestion
                         </button>
                       </div>
+                    </>
+                  );
+                } else if (uiToolType === "form") {
+                  return (
+                    <>
+                      {bannerField}
+                      {textField}
+                      {(bannerAddOn || textAddOn) && (
+                        <div style={{
+                          borderBottom: "1px solid #E9DDD3",
+                          marginBottom: "20px",
+                          paddingBottom: "16px"
+                        }} />
+                      )}
+                      
+                      <label style={{ fontWeight: "700" }}>Form Title:</label>
+                      <input
+                        type="text"
+                        value={component?.content.form?.title || ""}
+                        onChange={(e) => {
+                          if (node) {
+                            const component = components.get(node.data.componentId);
+                            if (component) {
+                              const updatedComponent = {
+                                ...component,
+                                content: {
+                                  ...component.content,
+                                  form: {
+                                    ...component.content.form,
+                                    fields: component.content.form?.fields || [],
+                                    title: e.target.value
+                                  }
+                                },
+                                updatedAt: new Date()
+                              };
+                              setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                              
+                              // Dispatch event to update preview
+                              const event = new CustomEvent("updateComponentData", {
+                                detail: { 
+                                  messageId: editingMessageId, 
+                                  componentData: updatedComponent 
+                                },
+                              });
+                              window.dispatchEvent(event);
+                            }
+                          }
+                        }}
+                        placeholder="Enter form title..."
+                        style={{
+                          width: "100%",
+                          padding: "8px 12px",
+                          border: "1px solid #E9DDD3",
+                          borderRadius: "8px",
+                          fontSize: "14px",
+                          fontFamily: "inherit",
+                          marginBottom: "16px",
+                          height: "33px",
+                          boxSizing: "border-box",
+                          transform: "translate(-2px, -3px)",
+                          background: "white",
+                          outline: "none"
+                        }}
+                        onFocus={(e) => {
+                          e.target.style.border = "2px solid #003250";
+                        }}
+                        onBlur={(e) => {
+                          e.target.style.border = "1px solid #E9DDD3";
+                        }}
+                      />
+                      
+
+                      
+                      <label style={{ fontWeight: "700" }}>Form Fields:</label>
+                      <div style={{ marginBottom: "16px" }}>
+                        {(component?.content.form?.fields || []).map((field, index) => (
+                          <div key={field.id} style={{ 
+                            border: "1px solid #E9DDD3", 
+                            borderRadius: "8px", 
+                            padding: "16px", 
+                            marginBottom: "12px",
+                            backgroundColor: "#fafafa"
+                          }}>
+                            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "12px" }}>
+                              <span style={{ fontWeight: "600", color: "#003250" }}>Field {index + 1}</span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  if (node) {
+                                    const component = components.get(node.data.componentId);
+                                    if (component) {
+                                      const currentFields = component.content.form?.fields || [];
+                                      const newFields = currentFields.filter((_, i) => i !== index);
+                                      
+                                      const updatedComponent = {
+                                        ...component,
+                                        content: {
+                                          ...component.content,
+                                          form: {
+                                            ...component.content.form,
+                                            fields: newFields
+                                          }
+                                        },
+                                        updatedAt: new Date()
+                                      };
+                                      setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                      
+                                      // Dispatch event to update preview
+                                      const event = new CustomEvent("updateComponentData", {
+                                        detail: { 
+                                          messageId: editingMessageId, 
+                                          componentData: updatedComponent 
+                                        },
+                                      });
+                                      window.dispatchEvent(event);
+                                    }
+                                  }
+                                }}
+                                style={{
+                                  background: "#F16B68",
+                                  color: "white",
+                                  border: "none",
+                                  borderRadius: "4px",
+                                  width: "24px",
+                                  height: "24px",
+                                  fontSize: "12px",
+                                  cursor: "pointer",
+                                  display: "flex",
+                                  alignItems: "center",
+                                  justifyContent: "center",
+                                  outline: "none",
+                                }}
+                              >
+                                ×
+                              </button>
+                            </div>
+                            
+                            <div style={{ display: "flex", gap: "12px", marginBottom: "12px" }}>
+                              <div style={{ flex: 1 }}>
+                                <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: "600" }}>Field Type:</label>
+                                <select
+                                  value={field.type}
+                                  onChange={(e) => {
+                                    if (node) {
+                                      const component = components.get(node.data.componentId);
+                                      if (component) {
+                                        const currentFields = component.content.form?.fields || [];
+                                        const newFields = [...currentFields];
+                                        newFields[index] = { ...newFields[index], type: e.target.value as FormField['type'] };
+                                        
+                                        const updatedComponent = {
+                                          ...component,
+                                          content: {
+                                            ...component.content,
+                                            form: {
+                                              ...component.content.form,
+                                              fields: newFields
+                                            }
+                                          },
+                                          updatedAt: new Date()
+                                        };
+                                        setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                        
+                                        // Dispatch event to update preview
+                                        const event = new CustomEvent("updateComponentData", {
+                                          detail: { 
+                                            messageId: editingMessageId, 
+                                            componentData: updatedComponent 
+                                          },
+                                        });
+                                        window.dispatchEvent(event);
+                                      }
+                                    }
+                                  }}
+                                  style={{
+                                    width: "100%",
+                                    padding: "6px 8px",
+                                    border: "1px solid #E9DDD3",
+                                    borderRadius: "6px",
+                                    fontSize: "12px",
+                                    fontFamily: "inherit",
+                                    background: "white",
+                                    outline: "none"
+                                  }}
+                                >
+                                  <option value="text">Text</option>
+                                  <option value="longText">Long Text</option>
+                                  <option value="currency">Currency</option>
+                                  <option value="dropdown">Dropdown</option>
+                                  <option value="radio">Radio</option>
+                                  <option value="checkbox">Checkbox</option>
+                                </select>
+                              </div>
+                              
+                              <div style={{ flex: 2 }}>
+                                <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: "600" }}>Field Title:</label>
+                                <input
+                                  type="text"
+                                  value={field.title}
+                                  onChange={(e) => {
+                                    if (node) {
+                                      const component = components.get(node.data.componentId);
+                                      if (component) {
+                                        const currentFields = component.content.form?.fields || [];
+                                        const newFields = [...currentFields];
+                                        newFields[index] = { ...newFields[index], title: e.target.value };
+                                        
+                                        const updatedComponent = {
+                                          ...component,
+                                          content: {
+                                            ...component.content,
+                                            form: {
+                                              ...component.content.form,
+                                              fields: newFields
+                                            }
+                                          },
+                                          updatedAt: new Date()
+                                        };
+                                        setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                        
+                                        // Dispatch event to update preview
+                                        const event = new CustomEvent("updateComponentData", {
+                                          detail: { 
+                                            messageId: editingMessageId, 
+                                            componentData: updatedComponent 
+                                          },
+                                        });
+                                        window.dispatchEvent(event);
+                                      }
+                                    }
+                                  }}
+                                  placeholder="Enter field title..."
+                                  style={{
+                                    width: "100%",
+                                    padding: "6px 8px",
+                                    border: "1px solid #E9DDD3",
+                                    borderRadius: "6px",
+                                    fontSize: "12px",
+                                    fontFamily: "inherit",
+                                    background: "white",
+                                    outline: "none"
+                                  }}
+                                  onFocus={(e) => {
+                                    e.target.style.border = "2px solid #003250";
+                                  }}
+                                  onBlur={(e) => {
+                                    e.target.style.border = "1px solid #E9DDD3";
+                                  }}
+                                />
+                              </div>
+                            </div>
+                            
+                            {/* Options for dropdown, radio, checkbox */}
+                            {(field.type === "dropdown" || field.type === "radio" || field.type === "checkbox") && (
+                              <div>
+                                <label style={{ display: "block", marginBottom: "4px", fontSize: "12px", fontWeight: "600" }}>Options:</label>
+                                <div style={{ marginBottom: "8px" }}>
+                                  {(field.options || [""]).map((option, optionIndex) => (
+                                    <div key={optionIndex} style={{ display: "flex", gap: "8px", marginBottom: "4px", alignItems: "center" }}>
+                                      <input
+                                        type="text"
+                                        value={option}
+                                        onChange={(e) => {
+                                          if (node) {
+                                            const component = components.get(node.data.componentId);
+                                            if (component) {
+                                              const currentFields = component.content.form?.fields || [];
+                                              const newFields = [...currentFields];
+                                              const currentOptions = newFields[index].options || [""];
+                                              const newOptions = [...currentOptions];
+                                              newOptions[optionIndex] = e.target.value;
+                                              
+                                              // Remove empty options except the last one
+                                              const filteredOptions = newOptions.filter((opt, i) => 
+                                                opt.trim() !== "" || i === newOptions.length - 1
+                                              );
+                                              
+                                              newFields[index] = { ...newFields[index], options: filteredOptions };
+                                              
+                                              const updatedComponent = {
+                                                ...component,
+                                                content: {
+                                                  ...component.content,
+                                                  form: {
+                                                    ...component.content.form,
+                                                    fields: newFields
+                                                  }
+                                                },
+                                                updatedAt: new Date()
+                                              };
+                                              setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                              
+                                              // Dispatch event to update preview
+                                              const event = new CustomEvent("updateComponentData", {
+                                                detail: { 
+                                                  messageId: editingMessageId, 
+                                                  componentData: updatedComponent 
+                                                },
+                                              });
+                                              window.dispatchEvent(event);
+                                            }
+                                          }
+                                        }}
+                                        onKeyDown={(e) => {
+                                          if (e.key === 'Enter') {
+                                            e.preventDefault();
+                                            if (node) {
+                                              const component = components.get(node.data.componentId);
+                                              if (component) {
+                                                const currentFields = component.content.form?.fields || [];
+                                                const newFields = [...currentFields];
+                                                const currentOptions = newFields[index].options || [""];
+                                                const newOptions = [...currentOptions, ""];
+                                                
+                                                newFields[index] = { ...newFields[index], options: newOptions };
+                                                
+                                                const updatedComponent = {
+                                                  ...component,
+                                                  content: {
+                                                    ...component.content,
+                                                    form: {
+                                                      ...component.content.form,
+                                                      fields: newFields
+                                                    }
+                                                  },
+                                                  updatedAt: new Date()
+                                                };
+                                                setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                                
+                                                // Dispatch event to update preview
+                                                const event = new CustomEvent("updateComponentData", {
+                                                  detail: { 
+                                                    messageId: editingMessageId, 
+                                                    componentData: updatedComponent 
+                                                  },
+                                                });
+                                                window.dispatchEvent(event);
+                                              }
+                                            }
+                                          }
+                                        }}
+                                        placeholder={`Option ${optionIndex + 1}`}
+                                        style={{
+                                          flex: 1,
+                                          padding: "4px 6px",
+                                          border: "1px solid #E9DDD3",
+                                          borderRadius: "4px",
+                                          fontSize: "11px",
+                                          fontFamily: "inherit",
+                                          outline: "none"
+                                        }}
+                                        onFocus={(e) => {
+                                          e.target.style.border = "2px solid #003250";
+                                        }}
+                                        onBlur={(e) => {
+                                          e.target.style.border = "1px solid #E9DDD3";
+                                        }}
+                                      />
+                                      {(field.options?.length || 1) > 1 && (
+                                        <button
+                                          type="button"
+                                          onClick={() => {
+                                            if (node) {
+                                              const component = components.get(node.data.componentId);
+                                              if (component) {
+                                                const currentFields = component.content.form?.fields || [];
+                                                const newFields = [...currentFields];
+                                                const currentOptions = newFields[index].options || [""];
+                                                const newOptions = currentOptions.filter((_, i) => i !== optionIndex);
+                                                
+                                                // Ensure we always have at least one option field
+                                                if (newOptions.length === 0) {
+                                                  newOptions.push("");
+                                                }
+                                                
+                                                newFields[index] = { ...newFields[index], options: newOptions };
+                                                
+                                                const updatedComponent = {
+                                                  ...component,
+                                                  content: {
+                                                    ...component.content,
+                                                    form: {
+                                                      ...component.content.form,
+                                                      fields: newFields
+                                                    }
+                                                  },
+                                                  updatedAt: new Date()
+                                                };
+                                                setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                                
+                                                // Dispatch event to update preview
+                                                const event = new CustomEvent("updateComponentData", {
+                                                  detail: { 
+                                                    messageId: editingMessageId, 
+                                                    componentData: updatedComponent 
+                                                  },
+                                                });
+                                                window.dispatchEvent(event);
+                                              }
+                                            }
+                                          }}
+                                          style={{
+                                            background: "#F16B68",
+                                            color: "white",
+                                            border: "none",
+                                            borderRadius: "3px",
+                                            width: "20px",
+                                            height: "20px",
+                                            fontSize: "10px",
+                                            cursor: "pointer",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            outline: "none",
+                                          }}
+                                        >
+                                          ×
+                                        </button>
+                                      )}
+                                    </div>
+                                  ))}
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      if (node) {
+                                        const component = components.get(node.data.componentId);
+                                        if (component) {
+                                          const currentFields = component.content.form?.fields || [];
+                                          const newFields = [...currentFields];
+                                          const currentOptions = newFields[index].options || [""];
+                                          const newOptions = [...currentOptions, ""];
+                                          
+                                          newFields[index] = { ...newFields[index], options: newOptions };
+                                          
+                                          const updatedComponent = {
+                                            ...component,
+                                            content: {
+                                              ...component.content,
+                                              form: {
+                                                ...component.content.form,
+                                                fields: newFields
+                                              }
+                                            },
+                                            updatedAt: new Date()
+                                          };
+                                          setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                          
+                                          // Dispatch event to update preview
+                                          const event = new CustomEvent("updateComponentData", {
+                                            detail: { 
+                                              messageId: editingMessageId, 
+                                              componentData: updatedComponent 
+                                            },
+                                          });
+                                          window.dispatchEvent(event);
+                                        }
+                                      }
+                                    }}
+                                    style={{
+                                      background: "#8EAF86",
+                                      color: "white",
+                                      border: "none",
+                                      borderRadius: "4px",
+                                      padding: "3px 8px",
+                                      fontSize: "10px",
+                                      cursor: "pointer",
+                                      marginTop: "4px",
+                                      outline: "none",
+                                    }}
+                                  >
+                                    + Add Option
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                        <button
+                          type="button"
+                          onClick={() => {
+                            if (node) {
+                              const component = components.get(node.data.componentId);
+                              if (component) {
+                                const currentFields = component.content.form?.fields || [];
+                                const newField: FormField = {
+                                  id: `field_${Date.now()}`,
+                                  type: "text",
+                                  title: "",
+                                  required: false
+                                };
+                                const newFields = [...currentFields, newField];
+                                
+                                const updatedComponent = {
+                                  ...component,
+                                  content: {
+                                    ...component.content,
+                                    form: {
+                                      ...component.content.form,
+                                      fields: newFields
+                                    }
+                                  },
+                                  updatedAt: new Date()
+                                };
+                                setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                
+                                // Dispatch event to update preview
+                                const event = new CustomEvent("updateComponentData", {
+                                  detail: { 
+                                    messageId: editingMessageId, 
+                                    componentData: updatedComponent 
+                                  },
+                                });
+                                window.dispatchEvent(event);
+                              }
+                            }
+                          }}
+                          style={{
+                            background: "#8EAF86",
+                            color: "white",
+                            border: "none",
+                            borderRadius: "6px",
+                            padding: "6px 12px",
+                            fontSize: "12px",
+                            cursor: "pointer",
+                            marginTop: "4px",
+                            outline: "none",
+                          }}
+                        >
+                          + Add Field
+                        </button>
+                      </div>
+                      
+                      <label style={{ fontWeight: "700" }}>Send Button Text:</label>
+                      <input
+                        type="text"
+                        value={component?.content.form?.sendButtonText || "Continue"}
+                        onChange={(e) => {
+                          if (node) {
+                            const component = components.get(node.data.componentId);
+                            if (component) {
+                              const updatedComponent = {
+                                ...component,
+                                content: {
+                                  ...component.content,
+                                  form: {
+                                    ...component.content.form,
+                                    fields: component.content.form?.fields || [],
+                                    sendButtonText: e.target.value
+                                  }
+                                },
+                                updatedAt: new Date()
+                              };
+                              setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                              
+                              // Dispatch event to update preview
+                              const event = new CustomEvent("updateComponentData", {
+                                detail: { 
+                                  messageId: editingMessageId, 
+                                  componentData: updatedComponent 
+                                },
+                              });
+                              window.dispatchEvent(event);
+                            }
+                          }
+                        }}
+                        placeholder="Enter send button text..."
+                        style={{
+                          width: "100%",
+                          padding: "8px 12px",
+                          border: "1px solid #E9DDD3",
+                          borderRadius: "8px",
+                          fontSize: "14px",
+                          fontFamily: "inherit",
+                          marginBottom: "16px",
+                          height: "33px",
+                          boxSizing: "border-box",
+                          transform: "translate(-2px, -3px)",
+                          background: "white",
+                          outline: "none"
+                        }}
+                        onFocus={(e) => {
+                          e.target.style.border = "2px solid #003250";
+                        }}
+                        onBlur={(e) => {
+                          e.target.style.border = "1px solid #E9DDD3";
+                        }}
+                      />
+                      
+                      {/* Branch Routing Logic Section - only show when checked */}
+                      {branchRoutingAddOn && (
+                        <div style={{
+                          backgroundColor: "#F2E8E0",
+                          border: "1px solid #E9DDD3",
+                          padding: "16px",
+                          marginTop: "16px",
+                          marginLeft: "-20px",
+                          marginRight: "-20px"
+                        }}>
+                          <div style={{
+                            fontSize: "14px",
+                            color: "#003250",
+                            fontWeight: "700",
+                            marginBottom: "16px"
+                          }}>
+                            Branch Routing Logic
+                          </div>
+                          
+                                                     {/* Find the last dropdown field for routing options */}
+                           {(() => {
+                             const formFields = component?.content.form?.fields || [];
+                             const lastDropdownField = formFields.slice().reverse().find((field: FormField) => field.type === "dropdown");
+                             
+                             if (lastDropdownField && lastDropdownField.options) {
+                               return lastDropdownField.options.map((option: string, index: number) => (
+                                <div key={index} style={{
+                                  display: "flex",
+                                  alignItems: "center",
+                                  gap: "12px",
+                                  marginBottom: "12px"
+                                }}>
+                                  <span style={{
+                                    fontSize: "14px",
+                                    color: "#003250",
+                                    minWidth: "120px"
+                                  }}>
+                                    When user chooses "{option}" →
+                                  </span>
+                                  <input
+                                    type="text"
+                                    placeholder="Enter component slug..."
+                                    value={(component?.content as any)?.branchRouting?.[index]?.destinationSlug || ""}
+                                    onChange={(e) => {
+                                      if (node) {
+                                        const component = components.get(node.data.componentId);
+                                        if (component) {
+                                          const updatedComponent = {
+                                            ...component,
+                                            content: {
+                                              ...component.content,
+                                              branchRouting: {
+                                                ...(component.content as any).branchRouting,
+                                                [index]: {
+                                                  optionText: option,
+                                                  destinationSlug: e.target.value
+                                                }
+                                              }
+                                            },
+                                            updatedAt: new Date()
+                                          };
+                                          setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                          
+                                          // Dispatch event to update component data
+                                          const event = new CustomEvent("updateComponentData", {
+                                            detail: { 
+                                              messageId: editingMessageId, 
+                                              componentData: updatedComponent 
+                                            },
+                                          });
+                                          window.dispatchEvent(event);
+                                        }
+                                      }
+                                    }}
+                                    style={{
+                                      flex: 1,
+                                      padding: "8px 12px",
+                                      border: "1px solid #E9DDD3",
+                                      borderRadius: "8px",
+                                      fontSize: "14px",
+                                      fontFamily: "inherit",
+                                      background: "white",
+                                      outline: "none"
+                                    }}
+                                    onFocus={(e) => {
+                                      e.target.style.border = "2px solid #003250";
+                                    }}
+                                    onBlur={(e) => {
+                                      e.target.style.border = "1px solid #E9DDD3";
+                                    }}
+                                  />
+                                </div>
+                              ));
+                            }
+                            return (
+                              <div style={{ color: "#666", fontSize: "12px" }}>
+                                Add a dropdown field to enable branch routing logic.
+                              </div>
+                            );
+                          })()}
+                        </div>
+                      )}
                     </>
                   );
                 } else if (uiToolType === "multiSelect") {

@@ -4,6 +4,14 @@ import defaultState from "../defaultState";
 
 type MessageType = "text" | "card" | "pills";
 
+type FormField = {
+  id: string;
+  type: "currency" | "text" | "longText" | "dropdown" | "radio" | "checkbox";
+  title: string;
+  options?: string[];
+  required?: boolean;
+};
+
 type MultiSelectOption = {
   text: string;
   image?: string;
@@ -27,6 +35,9 @@ type Message = {
   maxSelection?: number;
   bannerText?: string; // Banner add-on text
   textContent?: string; // Text add-on content
+  formFields?: FormField[]; // Form fields
+  formTitle?: string; // Form title
+  formSendButtonText?: string; // Form send button text
   cardData?: {
     title: string;
     description: string;
@@ -323,10 +334,12 @@ export default function ConversationPreview() {
                   ? componentData.content.question?.text || "New question"
                   : componentData.uiToolType === "multiSelect"
                   ? componentData.content.multiSelect?.text || "New multi-select question"
+                  : componentData.uiToolType === "form"
+                  ? componentData.content.form?.title || `${componentData.content.form?.fields?.length || 0} field form`
                   : componentData.content.message?.text || "New component added",
                 uiToolType: componentData.uiToolType,
-                                  bannerText: componentData.content.banner?.text || undefined,
-                  textContent: (componentData.content as any).text?.text || undefined,
+                bannerText: componentData.content.banner?.text || undefined,
+                textContent: (componentData.content as any).text?.text || undefined,
                 suggestions: componentData.uiToolType === "question" 
                   ? componentData.content.question?.suggestions || []
                   : undefined,
@@ -338,6 +351,15 @@ export default function ConversationPreview() {
                   : undefined,
                 maxSelection: componentData.uiToolType === "multiSelect"
                   ? componentData.content.multiSelect?.maxSelection || 1
+                  : undefined,
+                formFields: componentData.uiToolType === "form"
+                  ? componentData.content.form?.fields || []
+                  : undefined,
+                formTitle: componentData.uiToolType === "form"
+                  ? componentData.content.form?.title || undefined
+                  : undefined,
+                formSendButtonText: componentData.uiToolType === "form"
+                  ? componentData.content.form?.sendButtonText || "Continue"
                   : undefined
               }
             : msg
@@ -490,6 +512,88 @@ export default function ConversationPreview() {
                 ))}
               </div>
             )}
+          </div>
+        </>
+      );
+    }
+    
+    // Check if this is a form type message
+    if (message.uiToolType === "form") {
+      return (
+        <>
+          {bannerContent}
+          {textContent}
+          <div className="message-form">
+            <div className="form-container">
+              {message.formTitle && message.formTitle.trim() !== "" && (
+                <h2 className="form-title">{message.formTitle}</h2>
+              )}
+              {message.formFields && message.formFields.length > 0 ? (
+                message.formFields.map((field, index) => (
+                  <div key={index} className="form-field">
+                    <label className="form-field-label">{field.title}</label>
+                    {field.type === "text" && (
+                      <input 
+                        type="text" 
+                        className="form-input" 
+                        placeholder={`Enter ${field.title.toLowerCase()}...`}
+                        disabled
+                      />
+                    )}
+                    {field.type === "longText" && (
+                      <textarea 
+                        className="form-textarea" 
+                        placeholder={`Enter ${field.title.toLowerCase()}...`}
+                        disabled
+                      />
+                    )}
+                    {field.type === "currency" && (
+                      <input 
+                        type="number" 
+                        className="form-input" 
+                        placeholder="0.00"
+                        disabled
+                      />
+                    )}
+                    {field.type === "dropdown" && field.options && (
+                      <select className="form-select" disabled>
+                        <option value="">Select an option</option>
+                        {field.options.map((option, optionIndex) => (
+                          <option key={optionIndex} value={option}>{option}</option>
+                        ))}
+                      </select>
+                    )}
+                    {field.type === "radio" && field.options && (
+                      <div className="form-radio-group">
+                        {field.options.map((option, optionIndex) => (
+                          <label key={optionIndex} className="form-radio-option">
+                            <input type="radio" name={`field-${index}`} disabled />
+                            <span className="radio-label">{option}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                    {field.type === "checkbox" && field.options && (
+                      <div className="form-checkbox-group">
+                        {field.options.map((option, optionIndex) => (
+                          <label key={optionIndex} className="form-checkbox-option">
+                            <input type="checkbox" disabled />
+                            <span className="checkbox-label">{option}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <div className="form-placeholder">
+                  <p>Form fields will appear here</p>
+                </div>
+              )}
+              <button className="form-submit-button">
+                {message.formSendButtonText || "Continue"}
+              </button>
+            </div>
           </div>
         </>
       );
