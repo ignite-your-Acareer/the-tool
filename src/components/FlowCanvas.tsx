@@ -1,4 +1,6 @@
-  import { useCallback, useEffect, useState } from "react";
+ 
+ 
+ import { useCallback, useEffect, useState } from "react";
 import {
   ReactFlow,
   Background,
@@ -94,6 +96,7 @@ export default function FlowCanvas() {
   const [bannerAddOn, setBannerAddOn] = useState(false);
   const [textAddOn, setTextAddOn] = useState(false);
   const [branchRoutingAddOn, setBranchRoutingAddOn] = useState(false);
+  const [moveOnButtonAddOn, setMoveOnButtonAddOn] = useState(false);
   const [aiGenerated, setAiGenerated] = useState(false);
 
   // Navigation bar state
@@ -1680,6 +1683,7 @@ export default function FlowCanvas() {
                       setBannerAddOn(!!component.content.banner?.text);
                       setTextAddOn(!!(component.content as any).text?.text);
                       setBranchRoutingAddOn(!!(component.content as any).branchRouting && Object.keys((component.content as any).branchRouting).length > 0);
+                      setMoveOnButtonAddOn(!!(component.content as any).moveOnButton?.text);
                       setAiGenerated(!!component.aiGenerated);
                     }
                   }
@@ -2255,14 +2259,15 @@ export default function FlowCanvas() {
                   alignItems: "center",
                   gap: "6px",
                   fontSize: "14px",
-                  color: "#999999",
-                  cursor: "not-allowed"
+                  color: "#003250",
+                  cursor: "pointer"
                 }}>
                   <input
                     type="checkbox"
-                    disabled
+                    checked={moveOnButtonAddOn}
+                    onChange={(e) => setMoveOnButtonAddOn(e.target.checked)}
                     style={{
-                      accentColor: "#999999",
+                      accentColor: "#003250",
                       transform: "scale(1.1)"
                     }}
                   />
@@ -2549,6 +2554,70 @@ export default function FlowCanvas() {
                           }}
                         />
                       </div>
+                      
+                      {/* Move On Button Section - only show when checked */}
+                      {moveOnButtonAddOn && (
+                        <div style={{
+                          backgroundColor: "#F2E8E0",
+                          border: "1px solid #E9DDD3",
+                          padding: "16px",
+                          marginTop: "16px",
+                          marginLeft: "-20px",
+                          marginRight: "-20px"
+                        }}>
+                          <label style={{ fontWeight: "700" }}>Move On Button Text:</label>
+                          <input
+                            type="text"
+                            value={(component?.content as any)?.moveOnButton?.text || ""}
+                            onChange={(e) => {
+                              if (node) {
+                                const component = components.get(node.data.componentId);
+                                if (component) {
+                                  const updatedComponent = {
+                                    ...component,
+                                    content: {
+                                      ...component.content,
+                                      moveOnButton: {
+                                        text: e.target.value
+                                      }
+                                    },
+                                    updatedAt: new Date()
+                                  };
+                                  setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                  
+                                  // Dispatch event to update component data
+                                  const event = new CustomEvent("updateComponentData", {
+                                    detail: { 
+                                      messageId: editingMessageId, 
+                                      componentData: updatedComponent 
+                                    },
+                                  });
+                                  window.dispatchEvent(event);
+                                }
+                              }
+                            }}
+                            placeholder="Enter button text (e.g., 'Continue', 'Next', 'Submit')..."
+                            style={{
+                              width: "100%",
+                              padding: "8px 12px",
+                              border: "1px solid #E9DDD3",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              fontFamily: "inherit",
+                              background: "white",
+                              outline: "none",
+                              marginTop: "8px",
+                              boxSizing: "border-box"
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.border = "2px solid #003250";
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.border = "1px solid #E9DDD3";
+                            }}
+                          />
+                        </div>
+                      )}
                     </>
                   );
                 }
@@ -3141,6 +3210,70 @@ export default function FlowCanvas() {
                           + Add Suggestion
                         </button>
                       </div>
+                      
+                      {/* Move On Button Section - only show when checked */}
+                      {moveOnButtonAddOn && (
+                        <div style={{
+                          backgroundColor: "#F2E8E0",
+                          border: "1px solid #E9DDD3",
+                          padding: "16px",
+                          marginTop: "16px",
+                          marginLeft: "-20px",
+                          marginRight: "-20px"
+                        }}>
+                          <label style={{ fontWeight: "700" }}>Move On Button Text:</label>
+                          <input
+                            type="text"
+                            value={(component?.content as any)?.moveOnButton?.text || ""}
+                            onChange={(e) => {
+                              if (node) {
+                                const component = components.get(node.data.componentId);
+                                if (component) {
+                                  const updatedComponent = {
+                                    ...component,
+                                    content: {
+                                      ...component.content,
+                                      moveOnButton: {
+                                        text: e.target.value
+                                      }
+                                    },
+                                    updatedAt: new Date()
+                                  };
+                                  setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                  
+                                  // Dispatch event to update component data
+                                  const event = new CustomEvent("updateComponentData", {
+                                    detail: { 
+                                      messageId: editingMessageId, 
+                                      componentData: updatedComponent 
+                                    },
+                                  });
+                                  window.dispatchEvent(event);
+                                }
+                              }
+                            }}
+                            placeholder="Enter button text (e.g., 'Continue', 'Next', 'Submit')..."
+                            style={{
+                              width: "100%",
+                              padding: "8px 12px",
+                              border: "1px solid #E9DDD3",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              fontFamily: "inherit",
+                              background: "white",
+                              outline: "none",
+                              marginTop: "8px",
+                              boxSizing: "border-box"
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.border = "2px solid #003250";
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.border = "1px solid #E9DDD3";
+                            }}
+                          />
+                        </div>
+                      )}
                     </>
                   );
                 } else if (uiToolType === "form") {
@@ -3831,6 +3964,70 @@ export default function FlowCanvas() {
                           })()}
                         </div>
                       )}
+                      
+                      {/* Move On Button Section - only show when checked */}
+                      {moveOnButtonAddOn && (
+                        <div style={{
+                          backgroundColor: "#F2E8E0",
+                          border: "1px solid #E9DDD3",
+                          padding: "16px",
+                          marginTop: "16px",
+                          marginLeft: "-20px",
+                          marginRight: "-20px"
+                        }}>
+                          <label style={{ fontWeight: "700" }}>Move On Button Text:</label>
+                          <input
+                            type="text"
+                            value={(component?.content as any)?.moveOnButton?.text || ""}
+                            onChange={(e) => {
+                              if (node) {
+                                const component = components.get(node.data.componentId);
+                                if (component) {
+                                  const updatedComponent = {
+                                    ...component,
+                                    content: {
+                                      ...component.content,
+                                      moveOnButton: {
+                                        text: e.target.value
+                                      }
+                                    },
+                                    updatedAt: new Date()
+                                  };
+                                  setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                  
+                                  // Dispatch event to update component data
+                                  const event = new CustomEvent("updateComponentData", {
+                                    detail: { 
+                                      messageId: editingMessageId, 
+                                      componentData: updatedComponent 
+                                    },
+                                  });
+                                  window.dispatchEvent(event);
+                                }
+                              }
+                            }}
+                            placeholder="Enter button text (e.g., 'Continue', 'Next', 'Submit')..."
+                            style={{
+                              width: "100%",
+                              padding: "8px 12px",
+                              border: "1px solid #E9DDD3",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              fontFamily: "inherit",
+                              background: "white",
+                              outline: "none",
+                              marginTop: "8px",
+                              boxSizing: "border-box"
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.border = "2px solid #003250";
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.border = "1px solid #E9DDD3";
+                            }}
+                          />
+                        </div>
+                      )}
                     </>
                   );
                 } else if (uiToolType === "multiSelect") {
@@ -4406,6 +4603,70 @@ export default function FlowCanvas() {
                           ))}
                         </div>
                       )}
+                      
+                      {/* Move On Button Section - only show when checked */}
+                      {moveOnButtonAddOn && (
+                        <div style={{
+                          backgroundColor: "#F2E8E0",
+                          border: "1px solid #E9DDD3",
+                          padding: "16px",
+                          marginTop: "16px",
+                          marginLeft: "-20px",
+                          marginRight: "-20px"
+                        }}>
+                          <label style={{ fontWeight: "700" }}>Move On Button Text:</label>
+                          <input
+                            type="text"
+                            value={(component?.content as any)?.moveOnButton?.text || ""}
+                            onChange={(e) => {
+                              if (node) {
+                                const component = components.get(node.data.componentId);
+                                if (component) {
+                                  const updatedComponent = {
+                                    ...component,
+                                    content: {
+                                      ...component.content,
+                                      moveOnButton: {
+                                        text: e.target.value
+                                      }
+                                    },
+                                    updatedAt: new Date()
+                                  };
+                                  setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                  
+                                  // Dispatch event to update component data
+                                  const event = new CustomEvent("updateComponentData", {
+                                    detail: { 
+                                      messageId: editingMessageId, 
+                                      componentData: updatedComponent 
+                                    },
+                                  });
+                                  window.dispatchEvent(event);
+                                }
+                              }
+                            }}
+                            placeholder="Enter button text (e.g., 'Continue', 'Next', 'Submit')..."
+                            style={{
+                              width: "100%",
+                              padding: "8px 12px",
+                              border: "1px solid #E9DDD3",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              fontFamily: "inherit",
+                              background: "white",
+                              outline: "none",
+                              marginTop: "8px",
+                              boxSizing: "border-box"
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.border = "2px solid #003250";
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.border = "1px solid #E9DDD3";
+                            }}
+                          />
+                        </div>
+                      )}
                     </>
                   );
                 } else {
@@ -4473,6 +4734,70 @@ export default function FlowCanvas() {
                           e.target.style.border = "1px solid #E9DDD3";
                         }}
                       />
+                      
+                      {/* Move On Button Section - only show when checked */}
+                      {moveOnButtonAddOn && (
+                        <div style={{
+                          backgroundColor: "#F2E8E0",
+                          border: "1px solid #E9DDD3",
+                          padding: "16px",
+                          marginTop: "16px",
+                          marginLeft: "-20px",
+                          marginRight: "-20px"
+                        }}>
+                          <label style={{ fontWeight: "700" }}>Move On Button Text:</label>
+                          <input
+                            type="text"
+                            value={(component?.content as any)?.moveOnButton?.text || ""}
+                            onChange={(e) => {
+                              if (node) {
+                                const component = components.get(node.data.componentId);
+                                if (component) {
+                                  const updatedComponent = {
+                                    ...component,
+                                    content: {
+                                      ...component.content,
+                                      moveOnButton: {
+                                        text: e.target.value
+                                      }
+                                    },
+                                    updatedAt: new Date()
+                                  };
+                                  setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                  
+                                  // Dispatch event to update component data
+                                  const event = new CustomEvent("updateComponentData", {
+                                    detail: { 
+                                      messageId: editingMessageId, 
+                                      componentData: updatedComponent 
+                                    },
+                                  });
+                                  window.dispatchEvent(event);
+                                }
+                              }
+                            }}
+                            placeholder="Enter button text (e.g., 'Continue', 'Next', 'Submit')..."
+                            style={{
+                              width: "100%",
+                              padding: "8px 12px",
+                              border: "1px solid #E9DDD3",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              fontFamily: "inherit",
+                              background: "white",
+                              outline: "none",
+                              marginTop: "8px",
+                              boxSizing: "border-box"
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.border = "2px solid #003250";
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.border = "1px solid #E9DDD3";
+                            }}
+                          />
+                        </div>
+                      )}
                     </>
                   );
                 }
@@ -4502,6 +4827,9 @@ export default function FlowCanvas() {
                           text: textAddOn ? {
                             text: (component.content as any).text?.text || "",
                             type: "default"
+                          } : undefined,
+                          moveOnButton: moveOnButtonAddOn ? {
+                            text: (component.content as any).moveOnButton?.text || ""
                           } : undefined
                         },
                         aiGenerated: aiGenerated,
