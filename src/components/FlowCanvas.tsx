@@ -2316,7 +2316,44 @@ export default function FlowCanvas() {
                   <input
                     type="checkbox"
                     checked={celebrationModalAddOn}
-                    onChange={(e) => setCelebrationModalAddOn(e.target.checked)}
+                    onChange={(e) => {
+                      const newValue = e.target.checked;
+                      setCelebrationModalAddOn(newValue);
+                      
+                      // Update component data immediately for real-time preview
+                      if (editingMessageId) {
+                        const node = nodes.find(n => n.data.messageId === editingMessageId);
+                        if (node) {
+                          const component = components.get(node.data.componentId);
+                          if (component) {
+                            const updatedComponent = {
+                              ...component,
+                              content: {
+                                ...component.content,
+                                celebrationModal: newValue ? {
+                                  title: (component.content as any).celebrationModal?.title || "",
+                                  content: (component.content as any).celebrationModal?.content || "",
+                                  description: (component.content as any).celebrationModal?.description || "",
+                                  media: (component.content as any).celebrationModal?.media || "",
+                                  callToActionText: (component.content as any).celebrationModal?.callToActionText || "",
+                                  timeToLoad: (component.content as any).celebrationModal?.timeToLoad || 0
+                                } : undefined
+                              },
+                              updatedAt: new Date()
+                            };
+                            
+                            // Dispatch event to update preview immediately
+                            const event = new CustomEvent("updateComponentData", {
+                              detail: { 
+                                messageId: editingMessageId, 
+                                componentData: updatedComponent 
+                              },
+                            });
+                            window.dispatchEvent(event);
+                          }
+                        }
+                      }
+                    }}
                     style={{
                       accentColor: "#003250",
                       transform: "scale(1.1)"

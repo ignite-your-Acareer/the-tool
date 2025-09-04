@@ -39,6 +39,14 @@ type Message = {
   formTitle?: string; // Form title
   formSendButtonText?: string; // Form send button text
   moveOnButtonText?: string; // Move on button text
+  celebrationModal?: {
+    title: string;
+    content: string;
+    description: string;
+    media: string;
+    callToActionText: string;
+    timeToLoad: number;
+  };
   cardData?: {
     title: string;
     description: string;
@@ -392,7 +400,15 @@ export default function ConversationPreview() {
                 formSendButtonText: componentData.uiToolType === "form"
                   ? componentData.content.form?.sendButtonText || "Continue"
                   : undefined,
-                moveOnButtonText: (componentData.content as any).moveOnButton ? (componentData.content as any).moveOnButton.text : undefined
+                moveOnButtonText: (componentData.content as any).moveOnButton ? (componentData.content as any).moveOnButton.text : undefined,
+                celebrationModal: (componentData.content as any).celebrationModal ? {
+                  title: (componentData.content as any).celebrationModal.title || "",
+                  content: (componentData.content as any).celebrationModal.content || "",
+                  description: (componentData.content as any).celebrationModal.description || "",
+                  media: (componentData.content as any).celebrationModal.media || "",
+                  callToActionText: (componentData.content as any).celebrationModal.callToActionText || "",
+                  timeToLoad: (componentData.content as any).celebrationModal.timeToLoad || 0
+                } : undefined
               }
             : msg
         )
@@ -881,8 +897,184 @@ export default function ConversationPreview() {
               </div>
             </div>
             
-            {/* Add user placeholder after AI messages (but not for Multi Select) */}
-            {message.sender === "ai" && message.uiToolType !== "multiSelect" && (
+            {/* Celebration Modal Card - Show when celebration modal add-on is checked */}
+            {message.celebrationModal && (
+              <div 
+                className={`message ai ${
+                  message.messageId && highlightedMessageId === message.messageId ? "message-node-highlighted" : ""
+                } ${message.messageId && orphanMessageIds.has(message.messageId) ? "message-orphan" : ""} ${
+                  message.messageId && selectedMessageIds.has(message.messageId) ? "message-selected" : ""
+                }`}
+                onMouseEnter={() => {
+                  if (!isTestMode && message.messageId) {
+                    const event = new CustomEvent("highlightNode", {
+                      detail: { messageId: message.messageId },
+                    });
+                    window.dispatchEvent(event);
+                  }
+                }}
+                onMouseLeave={() => {
+                  if (!isTestMode && message.messageId) {
+                    const event = new CustomEvent("unhighlightNode", {
+                      detail: { messageId: message.messageId },
+                    });
+                    window.dispatchEvent(event);
+                  }
+                }}
+              >
+                <div className="message-content">
+                  <div style={{
+                    background: "#F2E8E0",
+                    borderRadius: "12px",
+                    padding: "20px",
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                    maxWidth: "400px",
+                    margin: "0 auto",
+                    position: "relative"
+                  }}>
+                    {/* Close button */}
+                    <button
+                      style={{
+                        position: "absolute",
+                        top: "12px",
+                        right: "12px",
+                        background: "#003250",
+                        color: "white",
+                        border: "none",
+                        borderRadius: "50%",
+                        width: "24px",
+                        height: "24px",
+                        fontSize: "14px",
+                        cursor: "pointer",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        zIndex: 10
+                      }}
+                      onClick={() => {
+                        console.log("Close celebration modal");
+                      }}
+                    >
+                      ×
+                    </button>
+                    
+                    {/* Description at top */}
+                    {message.celebrationModal.description && (
+                      <div style={{
+                        color: "#003250",
+                        fontSize: "14px",
+                        marginBottom: "16px",
+                        textAlign: "center"
+                      }}>
+                        {message.celebrationModal.description}
+                      </div>
+                    )}
+                    
+                    {/* Media/Image */}
+                    {message.celebrationModal.media && (
+                      <div style={{
+                        marginBottom: "16px",
+                        textAlign: "center"
+                      }}>
+                        <img 
+                          src={message.celebrationModal.media} 
+                          alt="Celebration" 
+                          style={{
+                            maxWidth: "100%",
+                            height: "auto",
+                            borderRadius: "8px"
+                          }}
+                        />
+                      </div>
+                    )}
+                    
+                    {/* Title */}
+                    {message.celebrationModal.title && (
+                      <div style={{
+                        color: "#003250",
+                        fontSize: "24px",
+                        fontWeight: "bold",
+                        marginBottom: "12px",
+                        textAlign: "center"
+                      }}>
+                        {message.celebrationModal.title}
+                      </div>
+                    )}
+                    
+                    {/* Content */}
+                    {message.celebrationModal.content && (
+                      <div style={{
+                        color: "#003250",
+                        fontSize: "16px",
+                        marginBottom: "20px",
+                        textAlign: "center",
+                        lineHeight: "1.4"
+                      }}>
+                        {message.celebrationModal.content}
+                      </div>
+                    )}
+                    
+                    {/* Call to Action Buttons */}
+                    <div style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: "12px"
+                    }}>
+                      {/* View My Profile Button */}
+                      <button
+                        style={{
+                          background: "white",
+                          color: "#F16B68",
+                          border: "2px solid #F16B68",
+                          borderRadius: "25px",
+                          padding: "12px 24px",
+                          fontSize: "16px",
+                          fontWeight: "600",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "8px"
+                        }}
+                        onClick={() => {
+                          console.log("View My Profile clicked");
+                        }}
+                      >
+                        View My Profile
+                        <span style={{ fontSize: "18px" }}>🔍</span>
+                      </button>
+                      
+                      {/* Call to Action Button */}
+                      <button
+                        style={{
+                          background: "#F16B68",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "25px",
+                          padding: "12px 24px",
+                          fontSize: "16px",
+                          fontWeight: "600",
+                          cursor: "pointer",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "8px"
+                        }}
+                        onClick={() => {
+                          console.log("Call to action clicked:", message.celebrationModal?.callToActionText);
+                        }}
+                      >
+                        {message.celebrationModal.callToActionText || "Continue"}
+                        <span style={{ fontSize: "18px" }}>→</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
+            {/* Add user placeholder after AI messages (but not for Multi Select or when celebration modal is present) */}
+            {message.sender === "ai" && message.uiToolType !== "multiSelect" && !message.celebrationModal && (
               // Show placeholder in normal mode, or in test mode for messages before the selected one
               (!isTestMode || (isTestMode && message.messageId !== testStartMessageId)) && (
                 <div className="message user placeholder">
