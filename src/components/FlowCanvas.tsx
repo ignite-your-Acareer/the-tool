@@ -1,5 +1,8 @@
  
  
+ 
+ 
+ 
  import { useCallback, useEffect, useState } from "react";
 import {
   ReactFlow,
@@ -97,6 +100,7 @@ export default function FlowCanvas() {
   const [textAddOn, setTextAddOn] = useState(false);
   const [branchRoutingAddOn, setBranchRoutingAddOn] = useState(false);
   const [moveOnButtonAddOn, setMoveOnButtonAddOn] = useState(false);
+  const [celebrationModalAddOn, setCelebrationModalAddOn] = useState(false);
   const [aiGenerated, setAiGenerated] = useState(false);
 
   // Navigation bar state
@@ -1684,6 +1688,7 @@ export default function FlowCanvas() {
                       setTextAddOn(!!(component.content as any).text?.text);
                       setBranchRoutingAddOn(!!(component.content as any).branchRouting && Object.keys((component.content as any).branchRouting).length > 0);
                       setMoveOnButtonAddOn(!!(component.content as any).moveOnButton?.text);
+                      setCelebrationModalAddOn(!!(component.content as any).celebrationModal?.title);
                       setAiGenerated(!!component.aiGenerated);
                     }
                   }
@@ -2278,14 +2283,15 @@ export default function FlowCanvas() {
                   alignItems: "center",
                   gap: "6px",
                   fontSize: "14px",
-                  color: "#999999",
-                  cursor: "not-allowed"
+                  color: "#003250",
+                  cursor: "pointer"
                 }}>
                   <input
                     type="checkbox"
-                    disabled
+                    checked={celebrationModalAddOn}
+                    onChange={(e) => setCelebrationModalAddOn(e.target.checked)}
                     style={{
-                      accentColor: "#999999",
+                      accentColor: "#003250",
                       transform: "scale(1.1)"
                     }}
                   />
@@ -2597,6 +2603,374 @@ export default function FlowCanvas() {
                               }
                             }}
                             placeholder="Enter button text (e.g., 'Continue', 'Next', 'Submit')..."
+                            style={{
+                              width: "100%",
+                              padding: "8px 12px",
+                              border: "1px solid #E9DDD3",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              fontFamily: "inherit",
+                              background: "white",
+                              outline: "none",
+                              marginTop: "8px",
+                              boxSizing: "border-box"
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.border = "2px solid #003250";
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.border = "1px solid #E9DDD3";
+                            }}
+                          />
+                        </div>
+                      )}
+                      
+                      {/* Celebration Modal Section - only show when checked */}
+                      {celebrationModalAddOn && (
+                        <div style={{
+                          backgroundColor: "#F2E8E0",
+                          border: "1px solid #E9DDD3",
+                          padding: "16px",
+                          marginTop: "16px",
+                          marginLeft: "-20px",
+                          marginRight: "-20px"
+                        }}>
+                          <label style={{ fontWeight: "700" }}>Title:</label>
+                          <input
+                            type="text"
+                            value={(component?.content as any)?.celebrationModal?.title || ""}
+                            onChange={(e) => {
+                              if (node) {
+                                const component = components.get(node.data.componentId);
+                                if (component) {
+                                  const updatedComponent = {
+                                    ...component,
+                                    content: {
+                                      ...component.content,
+                                      celebrationModal: {
+                                        ...(component.content as any).celebrationModal,
+                                        title: e.target.value
+                                      }
+                                    },
+                                    updatedAt: new Date()
+                                  };
+                                  setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                  
+                                  // Dispatch event to update component data
+                                  const event = new CustomEvent("updateComponentData", {
+                                    detail: { 
+                                      messageId: editingMessageId, 
+                                      componentData: updatedComponent 
+                                    },
+                                  });
+                                  window.dispatchEvent(event);
+                                }
+                              }
+                            }}
+                            placeholder="Enter celebration modal title..."
+                            style={{
+                              width: "100%",
+                              padding: "8px 12px",
+                              border: "1px solid #E9DDD3",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              fontFamily: "inherit",
+                              background: "white",
+                              outline: "none",
+                              marginTop: "8px",
+                              marginBottom: "16px",
+                              boxSizing: "border-box"
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.border = "2px solid #003250";
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.border = "1px solid #E9DDD3";
+                            }}
+                          />
+                          
+                          <label style={{ fontWeight: "700" }}>Content:</label>
+                          <textarea
+                            value={(component?.content as any)?.celebrationModal?.content || ""}
+                            onChange={(e) => {
+                              if (node) {
+                                const component = components.get(node.data.componentId);
+                                if (component) {
+                                  const updatedComponent = {
+                                    ...component,
+                                    content: {
+                                      ...component.content,
+                                      celebrationModal: {
+                                        ...(component.content as any).celebrationModal,
+                                        content: e.target.value
+                                      }
+                                    },
+                                    updatedAt: new Date()
+                                  };
+                                  setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                  
+                                  // Dispatch event to update component data
+                                  const event = new CustomEvent("updateComponentData", {
+                                    detail: { 
+                                      messageId: editingMessageId, 
+                                      componentData: updatedComponent 
+                                    },
+                                  });
+                                  window.dispatchEvent(event);
+                                }
+                              }
+                            }}
+                            placeholder="Enter celebration modal content..."
+                            style={{
+                              width: "100%",
+                              minHeight: "80px",
+                              padding: "12px",
+                              border: "1px solid #E9DDD3",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              fontFamily: "inherit",
+                              marginTop: "8px",
+                              marginBottom: "16px",
+                              resize: "vertical",
+                              boxSizing: "border-box",
+                              background: "white",
+                              outline: "none"
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.border = "2px solid #003250";
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.border = "1px solid #E9DDD3";
+                            }}
+                          />
+                          
+                          <label style={{ fontWeight: "700" }}>Description:</label>
+                          <input
+                            type="text"
+                            value={(component?.content as any)?.celebrationModal?.description || ""}
+                            onChange={(e) => {
+                              if (node) {
+                                const component = components.get(node.data.componentId);
+                                if (component) {
+                                  const updatedComponent = {
+                                    ...component,
+                                    content: {
+                                      ...component.content,
+                                      celebrationModal: {
+                                        ...(component.content as any).celebrationModal,
+                                        description: e.target.value
+                                      }
+                                    },
+                                    updatedAt: new Date()
+                                  };
+                                  setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                  
+                                  // Dispatch event to update component data
+                                  const event = new CustomEvent("updateComponentData", {
+                                    detail: { 
+                                      messageId: editingMessageId, 
+                                      componentData: updatedComponent 
+                                    },
+                                  });
+                                  window.dispatchEvent(event);
+                                }
+                              }
+                            }}
+                            placeholder="Enter celebration modal description..."
+                            style={{
+                              width: "100%",
+                              padding: "8px 12px",
+                              border: "1px solid #E9DDD3",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              fontFamily: "inherit",
+                              background: "white",
+                              outline: "none",
+                              marginTop: "8px",
+                              marginBottom: "16px",
+                              boxSizing: "border-box"
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.border = "2px solid #003250";
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.border = "1px solid #E9DDD3";
+                            }}
+                          />
+                          
+                          <label style={{ fontWeight: "700" }}>Media:</label>
+                          <div style={{ position: "relative", marginTop: "8px", marginBottom: "16px" }}>
+                            <select
+                              value={(component?.content as any)?.celebrationModal?.media || ""}
+                              onChange={(e) => {
+                                if (node) {
+                                  const component = components.get(node.data.componentId);
+                                  if (component) {
+                                    const updatedComponent = {
+                                      ...component,
+                                      content: {
+                                        ...component.content,
+                                        celebrationModal: {
+                                          ...(component.content as any).celebrationModal,
+                                          media: e.target.value
+                                        }
+                                      },
+                                      updatedAt: new Date()
+                                    };
+                                    setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                    
+                                    // Dispatch event to update component data
+                                    const event = new CustomEvent("updateComponentData", {
+                                      detail: { 
+                                        messageId: editingMessageId, 
+                                        componentData: updatedComponent 
+                                      },
+                                    });
+                                    window.dispatchEvent(event);
+                                  }
+                                }
+                              }}
+                              style={{
+                                width: "100%",
+                                padding: "8px 12px",
+                                border: "1px solid #E9DDD3",
+                                borderRadius: "8px",
+                                fontSize: "14px",
+                                fontFamily: "inherit",
+                                background: "white",
+                                outline: "none",
+                                cursor: "pointer"
+                              }}
+                              onFocus={(e) => {
+                                e.target.style.border = "2px solid #003250";
+                              }}
+                              onBlur={(e) => {
+                                e.target.style.border = "1px solid #E9DDD3";
+                              }}
+                            >
+                              <option value="">Select an image...</option>
+                              {availableImages.map((image, index) => (
+                                <option key={index} value={image.value}>
+                                  {image.label}
+                                </option>
+                              ))}
+                            </select>
+                            {(component?.content as any)?.celebrationModal?.media && (
+                              <div style={{
+                                position: "absolute",
+                                top: "100%",
+                                left: "0",
+                                right: "0",
+                                backgroundColor: "white",
+                                border: "1px solid #E9DDD3",
+                                borderRadius: "8px",
+                                padding: "8px",
+                                marginTop: "4px",
+                                zIndex: 10,
+                                boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+                              }}>
+                                <img
+                                  src={(component?.content as any)?.celebrationModal?.media}
+                                  alt="Selected"
+                                  style={{
+                                    width: "100%",
+                                    height: "auto",
+                                    maxHeight: "100px",
+                                    objectFit: "contain"
+                                  }}
+                                />
+                              </div>
+                            )}
+                          </div>
+                          
+                          <label style={{ fontWeight: "700" }}>Call to Action Button Text:</label>
+                          <input
+                            type="text"
+                            value={(component?.content as any)?.celebrationModal?.callToActionText || ""}
+                            onChange={(e) => {
+                              if (node) {
+                                const component = components.get(node.data.componentId);
+                                if (component) {
+                                  const updatedComponent = {
+                                    ...component,
+                                    content: {
+                                      ...component.content,
+                                      celebrationModal: {
+                                        ...(component.content as any).celebrationModal,
+                                        callToActionText: e.target.value
+                                      }
+                                    },
+                                    updatedAt: new Date()
+                                  };
+                                  setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                  
+                                  // Dispatch event to update component data
+                                  const event = new CustomEvent("updateComponentData", {
+                                    detail: { 
+                                      messageId: editingMessageId, 
+                                      componentData: updatedComponent 
+                                    },
+                                  });
+                                  window.dispatchEvent(event);
+                                }
+                              }
+                            }}
+                            placeholder="Enter call to action button text..."
+                            style={{
+                              width: "100%",
+                              padding: "8px 12px",
+                              border: "1px solid #E9DDD3",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              fontFamily: "inherit",
+                              background: "white",
+                              outline: "none",
+                              marginTop: "8px",
+                              marginBottom: "16px",
+                              boxSizing: "border-box"
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.border = "2px solid #003250";
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.border = "1px solid #E9DDD3";
+                            }}
+                          />
+                          
+                          <label style={{ fontWeight: "700" }}>Time to Load (milliseconds):</label>
+                          <input
+                            type="number"
+                            min="0"
+                            value={(component?.content as any)?.celebrationModal?.timeToLoad || ""}
+                            onChange={(e) => {
+                              if (node) {
+                                const component = components.get(node.data.componentId);
+                                if (component) {
+                                  const updatedComponent = {
+                                    ...component,
+                                    content: {
+                                      ...component.content,
+                                      celebrationModal: {
+                                        ...(component.content as any).celebrationModal,
+                                        timeToLoad: parseInt(e.target.value) || 0
+                                      }
+                                    },
+                                    updatedAt: new Date()
+                                  };
+                                  setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                  
+                                  // Dispatch event to update component data
+                                  const event = new CustomEvent("updateComponentData", {
+                                    detail: { 
+                                      messageId: editingMessageId, 
+                                      componentData: updatedComponent 
+                                    },
+                                  });
+                                  window.dispatchEvent(event);
+                                }
+                              }
+                            }}
+                            placeholder="Enter time to load in milliseconds..."
                             style={{
                               width: "100%",
                               padding: "8px 12px",
@@ -3253,6 +3627,374 @@ export default function FlowCanvas() {
                               }
                             }}
                             placeholder="Enter button text (e.g., 'Continue', 'Next', 'Submit')..."
+                            style={{
+                              width: "100%",
+                              padding: "8px 12px",
+                              border: "1px solid #E9DDD3",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              fontFamily: "inherit",
+                              background: "white",
+                              outline: "none",
+                              marginTop: "8px",
+                              boxSizing: "border-box"
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.border = "2px solid #003250";
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.border = "1px solid #E9DDD3";
+                            }}
+                          />
+                        </div>
+                      )}
+                      
+                      {/* Celebration Modal Section - only show when checked */}
+                      {celebrationModalAddOn && (
+                        <div style={{
+                          backgroundColor: "#F2E8E0",
+                          border: "1px solid #E9DDD3",
+                          padding: "16px",
+                          marginTop: "16px",
+                          marginLeft: "-20px",
+                          marginRight: "-20px"
+                        }}>
+                          <label style={{ fontWeight: "700" }}>Title:</label>
+                          <input
+                            type="text"
+                            value={(component?.content as any)?.celebrationModal?.title || ""}
+                            onChange={(e) => {
+                              if (node) {
+                                const component = components.get(node.data.componentId);
+                                if (component) {
+                                  const updatedComponent = {
+                                    ...component,
+                                    content: {
+                                      ...component.content,
+                                      celebrationModal: {
+                                        ...(component.content as any).celebrationModal,
+                                        title: e.target.value
+                                      }
+                                    },
+                                    updatedAt: new Date()
+                                  };
+                                  setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                  
+                                  // Dispatch event to update component data
+                                  const event = new CustomEvent("updateComponentData", {
+                                    detail: { 
+                                      messageId: editingMessageId, 
+                                      componentData: updatedComponent 
+                                    },
+                                  });
+                                  window.dispatchEvent(event);
+                                }
+                              }
+                            }}
+                            placeholder="Enter celebration modal title..."
+                            style={{
+                              width: "100%",
+                              padding: "8px 12px",
+                              border: "1px solid #E9DDD3",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              fontFamily: "inherit",
+                              background: "white",
+                              outline: "none",
+                              marginTop: "8px",
+                              marginBottom: "16px",
+                              boxSizing: "border-box"
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.border = "2px solid #003250";
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.border = "1px solid #E9DDD3";
+                            }}
+                          />
+                          
+                          <label style={{ fontWeight: "700" }}>Content:</label>
+                          <textarea
+                            value={(component?.content as any)?.celebrationModal?.content || ""}
+                            onChange={(e) => {
+                              if (node) {
+                                const component = components.get(node.data.componentId);
+                                if (component) {
+                                  const updatedComponent = {
+                                    ...component,
+                                    content: {
+                                      ...component.content,
+                                      celebrationModal: {
+                                        ...(component.content as any).celebrationModal,
+                                        content: e.target.value
+                                      }
+                                    },
+                                    updatedAt: new Date()
+                                  };
+                                  setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                  
+                                  // Dispatch event to update component data
+                                  const event = new CustomEvent("updateComponentData", {
+                                    detail: { 
+                                      messageId: editingMessageId, 
+                                      componentData: updatedComponent 
+                                    },
+                                  });
+                                  window.dispatchEvent(event);
+                                }
+                              }
+                            }}
+                            placeholder="Enter celebration modal content..."
+                            style={{
+                              width: "100%",
+                              minHeight: "80px",
+                              padding: "12px",
+                              border: "1px solid #E9DDD3",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              fontFamily: "inherit",
+                              marginTop: "8px",
+                              marginBottom: "16px",
+                              resize: "vertical",
+                              boxSizing: "border-box",
+                              background: "white",
+                              outline: "none"
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.border = "2px solid #003250";
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.border = "1px solid #E9DDD3";
+                            }}
+                          />
+                          
+                          <label style={{ fontWeight: "700" }}>Description:</label>
+                          <input
+                            type="text"
+                            value={(component?.content as any)?.celebrationModal?.description || ""}
+                            onChange={(e) => {
+                              if (node) {
+                                const component = components.get(node.data.componentId);
+                                if (component) {
+                                  const updatedComponent = {
+                                    ...component,
+                                    content: {
+                                      ...component.content,
+                                      celebrationModal: {
+                                        ...(component.content as any).celebrationModal,
+                                        description: e.target.value
+                                      }
+                                    },
+                                    updatedAt: new Date()
+                                  };
+                                  setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                  
+                                  // Dispatch event to update component data
+                                  const event = new CustomEvent("updateComponentData", {
+                                    detail: { 
+                                      messageId: editingMessageId, 
+                                      componentData: updatedComponent 
+                                    },
+                                  });
+                                  window.dispatchEvent(event);
+                                }
+                              }
+                            }}
+                            placeholder="Enter celebration modal description..."
+                            style={{
+                              width: "100%",
+                              padding: "8px 12px",
+                              border: "1px solid #E9DDD3",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              fontFamily: "inherit",
+                              background: "white",
+                              outline: "none",
+                              marginTop: "8px",
+                              marginBottom: "16px",
+                              boxSizing: "border-box"
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.border = "2px solid #003250";
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.border = "1px solid #E9DDD3";
+                            }}
+                          />
+                          
+                          <label style={{ fontWeight: "700" }}>Media:</label>
+                          <div style={{ position: "relative", marginTop: "8px", marginBottom: "16px" }}>
+                            <select
+                              value={(component?.content as any)?.celebrationModal?.media || ""}
+                              onChange={(e) => {
+                                if (node) {
+                                  const component = components.get(node.data.componentId);
+                                  if (component) {
+                                    const updatedComponent = {
+                                      ...component,
+                                      content: {
+                                        ...component.content,
+                                        celebrationModal: {
+                                          ...(component.content as any).celebrationModal,
+                                          media: e.target.value
+                                        }
+                                      },
+                                      updatedAt: new Date()
+                                    };
+                                    setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                    
+                                    // Dispatch event to update component data
+                                    const event = new CustomEvent("updateComponentData", {
+                                      detail: { 
+                                        messageId: editingMessageId, 
+                                        componentData: updatedComponent 
+                                      },
+                                    });
+                                    window.dispatchEvent(event);
+                                  }
+                                }
+                              }}
+                              style={{
+                                width: "100%",
+                                padding: "8px 12px",
+                                border: "1px solid #E9DDD3",
+                                borderRadius: "8px",
+                                fontSize: "14px",
+                                fontFamily: "inherit",
+                                background: "white",
+                                outline: "none",
+                                cursor: "pointer"
+                              }}
+                              onFocus={(e) => {
+                                e.target.style.border = "2px solid #003250";
+                              }}
+                              onBlur={(e) => {
+                                e.target.style.border = "1px solid #E9DDD3";
+                              }}
+                            >
+                              <option value="">Select an image...</option>
+                              {availableImages.map((image, index) => (
+                                <option key={index} value={image.value}>
+                                  {image.label}
+                                </option>
+                              ))}
+                            </select>
+                            {(component?.content as any)?.celebrationModal?.media && (
+                              <div style={{
+                                position: "absolute",
+                                top: "100%",
+                                left: "0",
+                                right: "0",
+                                backgroundColor: "white",
+                                border: "1px solid #E9DDD3",
+                                borderRadius: "8px",
+                                padding: "8px",
+                                marginTop: "4px",
+                                zIndex: 10,
+                                boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+                              }}>
+                                <img
+                                  src={(component?.content as any)?.celebrationModal?.media}
+                                  alt="Selected"
+                                  style={{
+                                    width: "100%",
+                                    height: "auto",
+                                    maxHeight: "100px",
+                                    objectFit: "contain"
+                                  }}
+                                />
+                              </div>
+                            )}
+                          </div>
+                          
+                          <label style={{ fontWeight: "700" }}>Call to Action Button Text:</label>
+                          <input
+                            type="text"
+                            value={(component?.content as any)?.celebrationModal?.callToActionText || ""}
+                            onChange={(e) => {
+                              if (node) {
+                                const component = components.get(node.data.componentId);
+                                if (component) {
+                                  const updatedComponent = {
+                                    ...component,
+                                    content: {
+                                      ...component.content,
+                                      celebrationModal: {
+                                        ...(component.content as any).celebrationModal,
+                                        callToActionText: e.target.value
+                                      }
+                                    },
+                                    updatedAt: new Date()
+                                  };
+                                  setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                  
+                                  // Dispatch event to update component data
+                                  const event = new CustomEvent("updateComponentData", {
+                                    detail: { 
+                                      messageId: editingMessageId, 
+                                      componentData: updatedComponent 
+                                    },
+                                  });
+                                  window.dispatchEvent(event);
+                                }
+                              }
+                            }}
+                            placeholder="Enter call to action button text..."
+                            style={{
+                              width: "100%",
+                              padding: "8px 12px",
+                              border: "1px solid #E9DDD3",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              fontFamily: "inherit",
+                              background: "white",
+                              outline: "none",
+                              marginTop: "8px",
+                              marginBottom: "16px",
+                              boxSizing: "border-box"
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.border = "2px solid #003250";
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.border = "1px solid #E9DDD3";
+                            }}
+                          />
+                          
+                          <label style={{ fontWeight: "700" }}>Time to Load (milliseconds):</label>
+                          <input
+                            type="number"
+                            min="0"
+                            value={(component?.content as any)?.celebrationModal?.timeToLoad || ""}
+                            onChange={(e) => {
+                              if (node) {
+                                const component = components.get(node.data.componentId);
+                                if (component) {
+                                  const updatedComponent = {
+                                    ...component,
+                                    content: {
+                                      ...component.content,
+                                      celebrationModal: {
+                                        ...(component.content as any).celebrationModal,
+                                        timeToLoad: parseInt(e.target.value) || 0
+                                      }
+                                    },
+                                    updatedAt: new Date()
+                                  };
+                                  setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                  
+                                  // Dispatch event to update component data
+                                  const event = new CustomEvent("updateComponentData", {
+                                    detail: { 
+                                      messageId: editingMessageId, 
+                                      componentData: updatedComponent 
+                                    },
+                                  });
+                                  window.dispatchEvent(event);
+                                }
+                              }
+                            }}
+                            placeholder="Enter time to load in milliseconds..."
                             style={{
                               width: "100%",
                               padding: "8px 12px",
@@ -4028,6 +4770,374 @@ export default function FlowCanvas() {
                           />
                         </div>
                       )}
+                      
+                      {/* Celebration Modal Section - only show when checked */}
+                      {celebrationModalAddOn && (
+                        <div style={{
+                          backgroundColor: "#F2E8E0",
+                          border: "1px solid #E9DDD3",
+                          padding: "16px",
+                          marginTop: "16px",
+                          marginLeft: "-20px",
+                          marginRight: "-20px"
+                        }}>
+                          <label style={{ fontWeight: "700" }}>Title:</label>
+                          <input
+                            type="text"
+                            value={(component?.content as any)?.celebrationModal?.title || ""}
+                            onChange={(e) => {
+                              if (node) {
+                                const component = components.get(node.data.componentId);
+                                if (component) {
+                                  const updatedComponent = {
+                                    ...component,
+                                    content: {
+                                      ...component.content,
+                                      celebrationModal: {
+                                        ...(component.content as any).celebrationModal,
+                                        title: e.target.value
+                                      }
+                                    },
+                                    updatedAt: new Date()
+                                  };
+                                  setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                  
+                                  // Dispatch event to update component data
+                                  const event = new CustomEvent("updateComponentData", {
+                                    detail: { 
+                                      messageId: editingMessageId, 
+                                      componentData: updatedComponent 
+                                    },
+                                  });
+                                  window.dispatchEvent(event);
+                                }
+                              }
+                            }}
+                            placeholder="Enter celebration modal title..."
+                            style={{
+                              width: "100%",
+                              padding: "8px 12px",
+                              border: "1px solid #E9DDD3",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              fontFamily: "inherit",
+                              background: "white",
+                              outline: "none",
+                              marginTop: "8px",
+                              marginBottom: "16px",
+                              boxSizing: "border-box"
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.border = "2px solid #003250";
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.border = "1px solid #E9DDD3";
+                            }}
+                          />
+                          
+                          <label style={{ fontWeight: "700" }}>Content:</label>
+                          <textarea
+                            value={(component?.content as any)?.celebrationModal?.content || ""}
+                            onChange={(e) => {
+                              if (node) {
+                                const component = components.get(node.data.componentId);
+                                if (component) {
+                                  const updatedComponent = {
+                                    ...component,
+                                    content: {
+                                      ...component.content,
+                                      celebrationModal: {
+                                        ...(component.content as any).celebrationModal,
+                                        content: e.target.value
+                                      }
+                                    },
+                                    updatedAt: new Date()
+                                  };
+                                  setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                  
+                                  // Dispatch event to update component data
+                                  const event = new CustomEvent("updateComponentData", {
+                                    detail: { 
+                                      messageId: editingMessageId, 
+                                      componentData: updatedComponent 
+                                    },
+                                  });
+                                  window.dispatchEvent(event);
+                                }
+                              }
+                            }}
+                            placeholder="Enter celebration modal content..."
+                            style={{
+                              width: "100%",
+                              minHeight: "80px",
+                              padding: "12px",
+                              border: "1px solid #E9DDD3",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              fontFamily: "inherit",
+                              marginTop: "8px",
+                              marginBottom: "16px",
+                              resize: "vertical",
+                              boxSizing: "border-box",
+                              background: "white",
+                              outline: "none"
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.border = "2px solid #003250";
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.border = "1px solid #E9DDD3";
+                            }}
+                          />
+                          
+                          <label style={{ fontWeight: "700" }}>Description:</label>
+                          <input
+                            type="text"
+                            value={(component?.content as any)?.celebrationModal?.description || ""}
+                            onChange={(e) => {
+                              if (node) {
+                                const component = components.get(node.data.componentId);
+                                if (component) {
+                                  const updatedComponent = {
+                                    ...component,
+                                    content: {
+                                      ...component.content,
+                                      celebrationModal: {
+                                        ...(component.content as any).celebrationModal,
+                                        description: e.target.value
+                                      }
+                                    },
+                                    updatedAt: new Date()
+                                  };
+                                  setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                  
+                                  // Dispatch event to update component data
+                                  const event = new CustomEvent("updateComponentData", {
+                                    detail: { 
+                                      messageId: editingMessageId, 
+                                      componentData: updatedComponent 
+                                    },
+                                  });
+                                  window.dispatchEvent(event);
+                                }
+                              }
+                            }}
+                            placeholder="Enter celebration modal description..."
+                            style={{
+                              width: "100%",
+                              padding: "8px 12px",
+                              border: "1px solid #E9DDD3",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              fontFamily: "inherit",
+                              background: "white",
+                              outline: "none",
+                              marginTop: "8px",
+                              marginBottom: "16px",
+                              boxSizing: "border-box"
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.border = "2px solid #003250";
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.border = "1px solid #E9DDD3";
+                            }}
+                          />
+                          
+                          <label style={{ fontWeight: "700" }}>Media:</label>
+                          <div style={{ position: "relative", marginTop: "8px", marginBottom: "16px" }}>
+                            <select
+                              value={(component?.content as any)?.celebrationModal?.media || ""}
+                              onChange={(e) => {
+                                if (node) {
+                                  const component = components.get(node.data.componentId);
+                                  if (component) {
+                                    const updatedComponent = {
+                                      ...component,
+                                      content: {
+                                        ...component.content,
+                                        celebrationModal: {
+                                          ...(component.content as any).celebrationModal,
+                                          media: e.target.value
+                                        }
+                                      },
+                                      updatedAt: new Date()
+                                    };
+                                    setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                    
+                                    // Dispatch event to update component data
+                                    const event = new CustomEvent("updateComponentData", {
+                                      detail: { 
+                                        messageId: editingMessageId, 
+                                        componentData: updatedComponent 
+                                      },
+                                    });
+                                    window.dispatchEvent(event);
+                                  }
+                                }
+                              }}
+                              style={{
+                                width: "100%",
+                                padding: "8px 12px",
+                                border: "1px solid #E9DDD3",
+                                borderRadius: "8px",
+                                fontSize: "14px",
+                                fontFamily: "inherit",
+                                background: "white",
+                                outline: "none",
+                                cursor: "pointer"
+                              }}
+                              onFocus={(e) => {
+                                e.target.style.border = "2px solid #003250";
+                              }}
+                              onBlur={(e) => {
+                                e.target.style.border = "1px solid #E9DDD3";
+                              }}
+                            >
+                              <option value="">Select an image...</option>
+                              {availableImages.map((image, index) => (
+                                <option key={index} value={image.value}>
+                                  {image.label}
+                                </option>
+                              ))}
+                            </select>
+                            {(component?.content as any)?.celebrationModal?.media && (
+                              <div style={{
+                                position: "absolute",
+                                top: "100%",
+                                left: "0",
+                                right: "0",
+                                backgroundColor: "white",
+                                border: "1px solid #E9DDD3",
+                                borderRadius: "8px",
+                                padding: "8px",
+                                marginTop: "4px",
+                                zIndex: 10,
+                                boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+                              }}>
+                                <img
+                                  src={(component?.content as any)?.celebrationModal?.media}
+                                  alt="Selected"
+                                  style={{
+                                    width: "100%",
+                                    height: "auto",
+                                    maxHeight: "100px",
+                                    objectFit: "contain"
+                                  }}
+                                />
+                              </div>
+                            )}
+                          </div>
+                          
+                          <label style={{ fontWeight: "700" }}>Call to Action Button Text:</label>
+                          <input
+                            type="text"
+                            value={(component?.content as any)?.celebrationModal?.callToActionText || ""}
+                            onChange={(e) => {
+                              if (node) {
+                                const component = components.get(node.data.componentId);
+                                if (component) {
+                                  const updatedComponent = {
+                                    ...component,
+                                    content: {
+                                      ...component.content,
+                                      celebrationModal: {
+                                        ...(component.content as any).celebrationModal,
+                                        callToActionText: e.target.value
+                                      }
+                                    },
+                                    updatedAt: new Date()
+                                  };
+                                  setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                  
+                                  // Dispatch event to update component data
+                                  const event = new CustomEvent("updateComponentData", {
+                                    detail: { 
+                                      messageId: editingMessageId, 
+                                      componentData: updatedComponent 
+                                    },
+                                  });
+                                  window.dispatchEvent(event);
+                                }
+                              }
+                            }}
+                            placeholder="Enter call to action button text..."
+                            style={{
+                              width: "100%",
+                              padding: "8px 12px",
+                              border: "1px solid #E9DDD3",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              fontFamily: "inherit",
+                              background: "white",
+                              outline: "none",
+                              marginTop: "8px",
+                              marginBottom: "16px",
+                              boxSizing: "border-box"
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.border = "2px solid #003250";
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.border = "1px solid #E9DDD3";
+                            }}
+                          />
+                          
+                          <label style={{ fontWeight: "700" }}>Time to Load (milliseconds):</label>
+                          <input
+                            type="number"
+                            min="0"
+                            value={(component?.content as any)?.celebrationModal?.timeToLoad || ""}
+                            onChange={(e) => {
+                              if (node) {
+                                const component = components.get(node.data.componentId);
+                                if (component) {
+                                  const updatedComponent = {
+                                    ...component,
+                                    content: {
+                                      ...component.content,
+                                      celebrationModal: {
+                                        ...(component.content as any).celebrationModal,
+                                        timeToLoad: parseInt(e.target.value) || 0
+                                      }
+                                    },
+                                    updatedAt: new Date()
+                                  };
+                                  setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                  
+                                  // Dispatch event to update component data
+                                  const event = new CustomEvent("updateComponentData", {
+                                    detail: { 
+                                      messageId: editingMessageId, 
+                                      componentData: updatedComponent 
+                                    },
+                                  });
+                                  window.dispatchEvent(event);
+                                }
+                              }
+                            }}
+                            placeholder="Enter time to load in milliseconds..."
+                            style={{
+                              width: "100%",
+                              padding: "8px 12px",
+                              border: "1px solid #E9DDD3",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              fontFamily: "inherit",
+                              background: "white",
+                              outline: "none",
+                              marginTop: "8px",
+                              boxSizing: "border-box"
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.border = "2px solid #003250";
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.border = "1px solid #E9DDD3";
+                            }}
+                          />
+                        </div>
+                      )}
                     </>
                   );
                 } else if (uiToolType === "multiSelect") {
@@ -4667,6 +5777,374 @@ export default function FlowCanvas() {
                           />
                         </div>
                       )}
+                      
+                      {/* Celebration Modal Section - only show when checked */}
+                      {celebrationModalAddOn && (
+                        <div style={{
+                          backgroundColor: "#F2E8E0",
+                          border: "1px solid #E9DDD3",
+                          padding: "16px",
+                          marginTop: "16px",
+                          marginLeft: "-20px",
+                          marginRight: "-20px"
+                        }}>
+                          <label style={{ fontWeight: "700" }}>Title:</label>
+                          <input
+                            type="text"
+                            value={(component?.content as any)?.celebrationModal?.title || ""}
+                            onChange={(e) => {
+                              if (node) {
+                                const component = components.get(node.data.componentId);
+                                if (component) {
+                                  const updatedComponent = {
+                                    ...component,
+                                    content: {
+                                      ...component.content,
+                                      celebrationModal: {
+                                        ...(component.content as any).celebrationModal,
+                                        title: e.target.value
+                                      }
+                                    },
+                                    updatedAt: new Date()
+                                  };
+                                  setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                  
+                                  // Dispatch event to update component data
+                                  const event = new CustomEvent("updateComponentData", {
+                                    detail: { 
+                                      messageId: editingMessageId, 
+                                      componentData: updatedComponent 
+                                    },
+                                  });
+                                  window.dispatchEvent(event);
+                                }
+                              }
+                            }}
+                            placeholder="Enter celebration modal title..."
+                            style={{
+                              width: "100%",
+                              padding: "8px 12px",
+                              border: "1px solid #E9DDD3",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              fontFamily: "inherit",
+                              background: "white",
+                              outline: "none",
+                              marginTop: "8px",
+                              marginBottom: "16px",
+                              boxSizing: "border-box"
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.border = "2px solid #003250";
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.border = "1px solid #E9DDD3";
+                            }}
+                          />
+                          
+                          <label style={{ fontWeight: "700" }}>Content:</label>
+                          <textarea
+                            value={(component?.content as any)?.celebrationModal?.content || ""}
+                            onChange={(e) => {
+                              if (node) {
+                                const component = components.get(node.data.componentId);
+                                if (component) {
+                                  const updatedComponent = {
+                                    ...component,
+                                    content: {
+                                      ...component.content,
+                                      celebrationModal: {
+                                        ...(component.content as any).celebrationModal,
+                                        content: e.target.value
+                                      }
+                                    },
+                                    updatedAt: new Date()
+                                  };
+                                  setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                  
+                                  // Dispatch event to update component data
+                                  const event = new CustomEvent("updateComponentData", {
+                                    detail: { 
+                                      messageId: editingMessageId, 
+                                      componentData: updatedComponent 
+                                    },
+                                  });
+                                  window.dispatchEvent(event);
+                                }
+                              }
+                            }}
+                            placeholder="Enter celebration modal content..."
+                            style={{
+                              width: "100%",
+                              minHeight: "80px",
+                              padding: "12px",
+                              border: "1px solid #E9DDD3",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              fontFamily: "inherit",
+                              marginTop: "8px",
+                              marginBottom: "16px",
+                              resize: "vertical",
+                              boxSizing: "border-box",
+                              background: "white",
+                              outline: "none"
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.border = "2px solid #003250";
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.border = "1px solid #E9DDD3";
+                            }}
+                          />
+                          
+                          <label style={{ fontWeight: "700" }}>Description:</label>
+                          <input
+                            type="text"
+                            value={(component?.content as any)?.celebrationModal?.description || ""}
+                            onChange={(e) => {
+                              if (node) {
+                                const component = components.get(node.data.componentId);
+                                if (component) {
+                                  const updatedComponent = {
+                                    ...component,
+                                    content: {
+                                      ...component.content,
+                                      celebrationModal: {
+                                        ...(component.content as any).celebrationModal,
+                                        description: e.target.value
+                                      }
+                                    },
+                                    updatedAt: new Date()
+                                  };
+                                  setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                  
+                                  // Dispatch event to update component data
+                                  const event = new CustomEvent("updateComponentData", {
+                                    detail: { 
+                                      messageId: editingMessageId, 
+                                      componentData: updatedComponent 
+                                    },
+                                  });
+                                  window.dispatchEvent(event);
+                                }
+                              }
+                            }}
+                            placeholder="Enter celebration modal description..."
+                            style={{
+                              width: "100%",
+                              padding: "8px 12px",
+                              border: "1px solid #E9DDD3",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              fontFamily: "inherit",
+                              background: "white",
+                              outline: "none",
+                              marginTop: "8px",
+                              marginBottom: "16px",
+                              boxSizing: "border-box"
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.border = "2px solid #003250";
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.border = "1px solid #E9DDD3";
+                            }}
+                          />
+                          
+                          <label style={{ fontWeight: "700" }}>Media:</label>
+                          <div style={{ position: "relative", marginTop: "8px", marginBottom: "16px" }}>
+                            <select
+                              value={(component?.content as any)?.celebrationModal?.media || ""}
+                              onChange={(e) => {
+                                if (node) {
+                                  const component = components.get(node.data.componentId);
+                                  if (component) {
+                                    const updatedComponent = {
+                                      ...component,
+                                      content: {
+                                        ...component.content,
+                                        celebrationModal: {
+                                          ...(component.content as any).celebrationModal,
+                                          media: e.target.value
+                                        }
+                                      },
+                                      updatedAt: new Date()
+                                    };
+                                    setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                    
+                                    // Dispatch event to update component data
+                                    const event = new CustomEvent("updateComponentData", {
+                                      detail: { 
+                                        messageId: editingMessageId, 
+                                        componentData: updatedComponent 
+                                      },
+                                    });
+                                    window.dispatchEvent(event);
+                                  }
+                                }
+                              }}
+                              style={{
+                                width: "100%",
+                                padding: "8px 12px",
+                                border: "1px solid #E9DDD3",
+                                borderRadius: "8px",
+                                fontSize: "14px",
+                                fontFamily: "inherit",
+                                background: "white",
+                                outline: "none",
+                                cursor: "pointer"
+                              }}
+                              onFocus={(e) => {
+                                e.target.style.border = "2px solid #003250";
+                              }}
+                              onBlur={(e) => {
+                                e.target.style.border = "1px solid #E9DDD3";
+                              }}
+                            >
+                              <option value="">Select an image...</option>
+                              {availableImages.map((image, index) => (
+                                <option key={index} value={image.value}>
+                                  {image.label}
+                                </option>
+                              ))}
+                            </select>
+                            {(component?.content as any)?.celebrationModal?.media && (
+                              <div style={{
+                                position: "absolute",
+                                top: "100%",
+                                left: "0",
+                                right: "0",
+                                backgroundColor: "white",
+                                border: "1px solid #E9DDD3",
+                                borderRadius: "8px",
+                                padding: "8px",
+                                marginTop: "4px",
+                                zIndex: 10,
+                                boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+                              }}>
+                                <img
+                                  src={(component?.content as any)?.celebrationModal?.media}
+                                  alt="Selected"
+                                  style={{
+                                    width: "100%",
+                                    height: "auto",
+                                    maxHeight: "100px",
+                                    objectFit: "contain"
+                                  }}
+                                />
+                              </div>
+                            )}
+                          </div>
+                          
+                          <label style={{ fontWeight: "700" }}>Call to Action Button Text:</label>
+                          <input
+                            type="text"
+                            value={(component?.content as any)?.celebrationModal?.callToActionText || ""}
+                            onChange={(e) => {
+                              if (node) {
+                                const component = components.get(node.data.componentId);
+                                if (component) {
+                                  const updatedComponent = {
+                                    ...component,
+                                    content: {
+                                      ...component.content,
+                                      celebrationModal: {
+                                        ...(component.content as any).celebrationModal,
+                                        callToActionText: e.target.value
+                                      }
+                                    },
+                                    updatedAt: new Date()
+                                  };
+                                  setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                  
+                                  // Dispatch event to update component data
+                                  const event = new CustomEvent("updateComponentData", {
+                                    detail: { 
+                                      messageId: editingMessageId, 
+                                      componentData: updatedComponent 
+                                    },
+                                  });
+                                  window.dispatchEvent(event);
+                                }
+                              }
+                            }}
+                            placeholder="Enter call to action button text..."
+                            style={{
+                              width: "100%",
+                              padding: "8px 12px",
+                              border: "1px solid #E9DDD3",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              fontFamily: "inherit",
+                              background: "white",
+                              outline: "none",
+                              marginTop: "8px",
+                              marginBottom: "16px",
+                              boxSizing: "border-box"
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.border = "2px solid #003250";
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.border = "1px solid #E9DDD3";
+                            }}
+                          />
+                          
+                          <label style={{ fontWeight: "700" }}>Time to Load (milliseconds):</label>
+                          <input
+                            type="number"
+                            min="0"
+                            value={(component?.content as any)?.celebrationModal?.timeToLoad || ""}
+                            onChange={(e) => {
+                              if (node) {
+                                const component = components.get(node.data.componentId);
+                                if (component) {
+                                  const updatedComponent = {
+                                    ...component,
+                                    content: {
+                                      ...component.content,
+                                      celebrationModal: {
+                                        ...(component.content as any).celebrationModal,
+                                        timeToLoad: parseInt(e.target.value) || 0
+                                      }
+                                    },
+                                    updatedAt: new Date()
+                                  };
+                                  setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                  
+                                  // Dispatch event to update component data
+                                  const event = new CustomEvent("updateComponentData", {
+                                    detail: { 
+                                      messageId: editingMessageId, 
+                                      componentData: updatedComponent 
+                                    },
+                                  });
+                                  window.dispatchEvent(event);
+                                }
+                              }
+                            }}
+                            placeholder="Enter time to load in milliseconds..."
+                            style={{
+                              width: "100%",
+                              padding: "8px 12px",
+                              border: "1px solid #E9DDD3",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              fontFamily: "inherit",
+                              background: "white",
+                              outline: "none",
+                              marginTop: "8px",
+                              boxSizing: "border-box"
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.border = "2px solid #003250";
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.border = "1px solid #E9DDD3";
+                            }}
+                          />
+                        </div>
+                      )}
                     </>
                   );
                 } else {
@@ -4798,6 +6276,374 @@ export default function FlowCanvas() {
                           />
                         </div>
                       )}
+                      
+                      {/* Celebration Modal Section - only show when checked */}
+                      {celebrationModalAddOn && (
+                        <div style={{
+                          backgroundColor: "#F2E8E0",
+                          border: "1px solid #E9DDD3",
+                          padding: "16px",
+                          marginTop: "16px",
+                          marginLeft: "-20px",
+                          marginRight: "-20px"
+                        }}>
+                          <label style={{ fontWeight: "700" }}>Title:</label>
+                          <input
+                            type="text"
+                            value={(component?.content as any)?.celebrationModal?.title || ""}
+                            onChange={(e) => {
+                              if (node) {
+                                const component = components.get(node.data.componentId);
+                                if (component) {
+                                  const updatedComponent = {
+                                    ...component,
+                                    content: {
+                                      ...component.content,
+                                      celebrationModal: {
+                                        ...(component.content as any).celebrationModal,
+                                        title: e.target.value
+                                      }
+                                    },
+                                    updatedAt: new Date()
+                                  };
+                                  setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                  
+                                  // Dispatch event to update component data
+                                  const event = new CustomEvent("updateComponentData", {
+                                    detail: { 
+                                      messageId: editingMessageId, 
+                                      componentData: updatedComponent 
+                                    },
+                                  });
+                                  window.dispatchEvent(event);
+                                }
+                              }
+                            }}
+                            placeholder="Enter celebration modal title..."
+                            style={{
+                              width: "100%",
+                              padding: "8px 12px",
+                              border: "1px solid #E9DDD3",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              fontFamily: "inherit",
+                              background: "white",
+                              outline: "none",
+                              marginTop: "8px",
+                              marginBottom: "16px",
+                              boxSizing: "border-box"
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.border = "2px solid #003250";
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.border = "1px solid #E9DDD3";
+                            }}
+                          />
+                          
+                          <label style={{ fontWeight: "700" }}>Content:</label>
+                          <textarea
+                            value={(component?.content as any)?.celebrationModal?.content || ""}
+                            onChange={(e) => {
+                              if (node) {
+                                const component = components.get(node.data.componentId);
+                                if (component) {
+                                  const updatedComponent = {
+                                    ...component,
+                                    content: {
+                                      ...component.content,
+                                      celebrationModal: {
+                                        ...(component.content as any).celebrationModal,
+                                        content: e.target.value
+                                      }
+                                    },
+                                    updatedAt: new Date()
+                                  };
+                                  setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                  
+                                  // Dispatch event to update component data
+                                  const event = new CustomEvent("updateComponentData", {
+                                    detail: { 
+                                      messageId: editingMessageId, 
+                                      componentData: updatedComponent 
+                                    },
+                                  });
+                                  window.dispatchEvent(event);
+                                }
+                              }
+                            }}
+                            placeholder="Enter celebration modal content..."
+                            style={{
+                              width: "100%",
+                              minHeight: "80px",
+                              padding: "12px",
+                              border: "1px solid #E9DDD3",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              fontFamily: "inherit",
+                              marginTop: "8px",
+                              marginBottom: "16px",
+                              resize: "vertical",
+                              boxSizing: "border-box",
+                              background: "white",
+                              outline: "none"
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.border = "2px solid #003250";
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.border = "1px solid #E9DDD3";
+                            }}
+                          />
+                          
+                          <label style={{ fontWeight: "700" }}>Description:</label>
+                          <input
+                            type="text"
+                            value={(component?.content as any)?.celebrationModal?.description || ""}
+                            onChange={(e) => {
+                              if (node) {
+                                const component = components.get(node.data.componentId);
+                                if (component) {
+                                  const updatedComponent = {
+                                    ...component,
+                                    content: {
+                                      ...component.content,
+                                      celebrationModal: {
+                                        ...(component.content as any).celebrationModal,
+                                        description: e.target.value
+                                      }
+                                    },
+                                    updatedAt: new Date()
+                                  };
+                                  setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                  
+                                  // Dispatch event to update component data
+                                  const event = new CustomEvent("updateComponentData", {
+                                    detail: { 
+                                      messageId: editingMessageId, 
+                                      componentData: updatedComponent 
+                                    },
+                                  });
+                                  window.dispatchEvent(event);
+                                }
+                              }
+                            }}
+                            placeholder="Enter celebration modal description..."
+                            style={{
+                              width: "100%",
+                              padding: "8px 12px",
+                              border: "1px solid #E9DDD3",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              fontFamily: "inherit",
+                              background: "white",
+                              outline: "none",
+                              marginTop: "8px",
+                              marginBottom: "16px",
+                              boxSizing: "border-box"
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.border = "2px solid #003250";
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.border = "1px solid #E9DDD3";
+                            }}
+                          />
+                          
+                          <label style={{ fontWeight: "700" }}>Media:</label>
+                          <div style={{ position: "relative", marginTop: "8px", marginBottom: "16px" }}>
+                            <select
+                              value={(component?.content as any)?.celebrationModal?.media || ""}
+                              onChange={(e) => {
+                                if (node) {
+                                  const component = components.get(node.data.componentId);
+                                  if (component) {
+                                    const updatedComponent = {
+                                      ...component,
+                                      content: {
+                                        ...component.content,
+                                        celebrationModal: {
+                                          ...(component.content as any).celebrationModal,
+                                          media: e.target.value
+                                        }
+                                      },
+                                      updatedAt: new Date()
+                                    };
+                                    setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                    
+                                    // Dispatch event to update component data
+                                    const event = new CustomEvent("updateComponentData", {
+                                      detail: { 
+                                        messageId: editingMessageId, 
+                                        componentData: updatedComponent 
+                                      },
+                                    });
+                                    window.dispatchEvent(event);
+                                  }
+                                }
+                              }}
+                              style={{
+                                width: "100%",
+                                padding: "8px 12px",
+                                border: "1px solid #E9DDD3",
+                                borderRadius: "8px",
+                                fontSize: "14px",
+                                fontFamily: "inherit",
+                                background: "white",
+                                outline: "none",
+                                cursor: "pointer"
+                              }}
+                              onFocus={(e) => {
+                                e.target.style.border = "2px solid #003250";
+                              }}
+                              onBlur={(e) => {
+                                e.target.style.border = "1px solid #E9DDD3";
+                              }}
+                            >
+                              <option value="">Select an image...</option>
+                              {availableImages.map((image, index) => (
+                                <option key={index} value={image.value}>
+                                  {image.label}
+                                </option>
+                              ))}
+                            </select>
+                            {(component?.content as any)?.celebrationModal?.media && (
+                              <div style={{
+                                position: "absolute",
+                                top: "100%",
+                                left: "0",
+                                right: "0",
+                                backgroundColor: "white",
+                                border: "1px solid #E9DDD3",
+                                borderRadius: "8px",
+                                padding: "8px",
+                                marginTop: "4px",
+                                zIndex: 10,
+                                boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+                              }}>
+                                <img
+                                  src={(component?.content as any)?.celebrationModal?.media}
+                                  alt="Selected"
+                                  style={{
+                                    width: "100%",
+                                    height: "auto",
+                                    maxHeight: "100px",
+                                    objectFit: "contain"
+                                  }}
+                                />
+                              </div>
+                            )}
+                          </div>
+                          
+                          <label style={{ fontWeight: "700" }}>Call to Action Button Text:</label>
+                          <input
+                            type="text"
+                            value={(component?.content as any)?.celebrationModal?.callToActionText || ""}
+                            onChange={(e) => {
+                              if (node) {
+                                const component = components.get(node.data.componentId);
+                                if (component) {
+                                  const updatedComponent = {
+                                    ...component,
+                                    content: {
+                                      ...component.content,
+                                      celebrationModal: {
+                                        ...(component.content as any).celebrationModal,
+                                        callToActionText: e.target.value
+                                      }
+                                    },
+                                    updatedAt: new Date()
+                                  };
+                                  setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                  
+                                  // Dispatch event to update component data
+                                  const event = new CustomEvent("updateComponentData", {
+                                    detail: { 
+                                      messageId: editingMessageId, 
+                                      componentData: updatedComponent 
+                                    },
+                                  });
+                                  window.dispatchEvent(event);
+                                }
+                              }
+                            }}
+                            placeholder="Enter call to action button text..."
+                            style={{
+                              width: "100%",
+                              padding: "8px 12px",
+                              border: "1px solid #E9DDD3",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              fontFamily: "inherit",
+                              background: "white",
+                              outline: "none",
+                              marginTop: "8px",
+                              marginBottom: "16px",
+                              boxSizing: "border-box"
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.border = "2px solid #003250";
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.border = "1px solid #E9DDD3";
+                            }}
+                          />
+                          
+                          <label style={{ fontWeight: "700" }}>Time to Load (milliseconds):</label>
+                          <input
+                            type="number"
+                            min="0"
+                            value={(component?.content as any)?.celebrationModal?.timeToLoad || ""}
+                            onChange={(e) => {
+                              if (node) {
+                                const component = components.get(node.data.componentId);
+                                if (component) {
+                                  const updatedComponent = {
+                                    ...component,
+                                    content: {
+                                      ...component.content,
+                                      celebrationModal: {
+                                        ...(component.content as any).celebrationModal,
+                                        timeToLoad: parseInt(e.target.value) || 0
+                                      }
+                                    },
+                                    updatedAt: new Date()
+                                  };
+                                  setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                  
+                                  // Dispatch event to update component data
+                                  const event = new CustomEvent("updateComponentData", {
+                                    detail: { 
+                                      messageId: editingMessageId, 
+                                      componentData: updatedComponent 
+                                    },
+                                  });
+                                  window.dispatchEvent(event);
+                                }
+                              }
+                            }}
+                            placeholder="Enter time to load in milliseconds..."
+                            style={{
+                              width: "100%",
+                              padding: "8px 12px",
+                              border: "1px solid #E9DDD3",
+                              borderRadius: "8px",
+                              fontSize: "14px",
+                              fontFamily: "inherit",
+                              background: "white",
+                              outline: "none",
+                              marginTop: "8px",
+                              boxSizing: "border-box"
+                            }}
+                            onFocus={(e) => {
+                              e.target.style.border = "2px solid #003250";
+                            }}
+                            onBlur={(e) => {
+                              e.target.style.border = "1px solid #E9DDD3";
+                            }}
+                          />
+                        </div>
+                      )}
                     </>
                   );
                 }
@@ -4830,6 +6676,14 @@ export default function FlowCanvas() {
                           } : undefined,
                           moveOnButton: moveOnButtonAddOn ? {
                             text: (component.content as any).moveOnButton?.text || ""
+                          } : undefined,
+                          celebrationModal: celebrationModalAddOn ? {
+                            title: (component.content as any).celebrationModal?.title || "",
+                            content: (component.content as any).celebrationModal?.content || "",
+                            description: (component.content as any).celebrationModal?.description || "",
+                            media: (component.content as any).celebrationModal?.media || "",
+                            callToActionText: (component.content as any).celebrationModal?.callToActionText || "",
+                            timeToLoad: (component.content as any).celebrationModal?.timeToLoad || 0
                           } : undefined
                         },
                         aiGenerated: aiGenerated,
