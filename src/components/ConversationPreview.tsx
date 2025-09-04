@@ -38,6 +38,7 @@ type Message = {
   formFields?: FormField[]; // Form fields
   formTitle?: string; // Form title
   formSendButtonText?: string; // Form send button text
+  moveOnButtonText?: string; // Move on button text
   cardData?: {
     title: string;
     description: string;
@@ -344,6 +345,9 @@ export default function ConversationPreview() {
 
     const handleUpdateComponentData = (event: CustomEvent) => {
       const { messageId, componentData } = event.detail;
+      
+
+      
       setMessages(prev => 
         prev.map(msg => 
           msg.messageId === messageId 
@@ -387,7 +391,8 @@ export default function ConversationPreview() {
                   : undefined,
                 formSendButtonText: componentData.uiToolType === "form"
                   ? componentData.content.form?.sendButtonText || "Continue"
-                  : undefined
+                  : undefined,
+                moveOnButtonText: (componentData.content as any).moveOnButton ? (componentData.content as any).moveOnButton.text : undefined
               }
             : msg
         )
@@ -714,6 +719,59 @@ export default function ConversationPreview() {
           <div className="profile-circle">R</div>
         </div>
       </div>
+
+      {/* Move On Button - Show when exactly one component is selected and it has move on button text */}
+      {selectedMessageIds.size === 1 && !isTestMode && (() => {
+        const selectedMessageId = Array.from(selectedMessageIds)[0];
+        const selectedMessage = messages.find(msg => msg.messageId === selectedMessageId);
+        const moveOnButtonText = selectedMessage?.moveOnButtonText;
+        
+
+        
+        if (moveOnButtonText !== undefined) {
+          return (
+            <div style={{
+              display: "flex",
+              justifyContent: "center",
+              padding: "16px 20px 0px 20px",
+              marginBottom: "8px"
+            }}>
+              <button
+                style={{
+                  background: "#8EAF86",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "25px",
+                  padding: "12px 24px",
+                  fontSize: "16px",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  boxShadow: "0 2px 8px rgba(142, 175, 134, 0.3)",
+                  transition: "all 0.2s ease",
+                  outline: "none",
+                  minWidth: "200px",
+                  textAlign: "center"
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "#7A9A72";
+                  e.currentTarget.style.boxShadow = "0 4px 12px rgba(122, 154, 114, 0.4)";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "#8EAF86";
+                  e.currentTarget.style.boxShadow = "0 2px 8px rgba(142, 175, 134, 0.3)";
+                }}
+                onClick={() => {
+                  // Handle move on button click - could trigger next step in flow
+                  console.log("Move on button clicked:", moveOnButtonText);
+                }}
+              >
+                {moveOnButtonText && moveOnButtonText.trim() !== "" ? moveOnButtonText : "Enter button text..."}
+              </button>
+            </div>
+          );
+        }
+        return null;
+      })()}
 
       <div className="conversation-messages" ref={messagesRef}>
                 {(isTestMode ? testMessages : messages).map((message) => (

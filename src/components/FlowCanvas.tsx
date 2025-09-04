@@ -1,9 +1,4 @@
- 
- 
- 
- 
- 
- import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ReactFlow,
   Background,
@@ -2270,7 +2265,39 @@ export default function FlowCanvas() {
                   <input
                     type="checkbox"
                     checked={moveOnButtonAddOn}
-                    onChange={(e) => setMoveOnButtonAddOn(e.target.checked)}
+                    onChange={(e) => {
+                      const newValue = e.target.checked;
+                      setMoveOnButtonAddOn(newValue);
+                      
+                      // Update component data immediately for real-time preview
+                      if (editingMessageId) {
+                        const node = nodes.find(n => n.data.messageId === editingMessageId);
+                        if (node) {
+                          const component = components.get(node.data.componentId);
+                          if (component) {
+                            const updatedComponent = {
+                              ...component,
+                              content: {
+                                ...component.content,
+                                moveOnButton: newValue ? {
+                                  text: (component.content as any).moveOnButton?.text || ""
+                                } : undefined
+                              },
+                              updatedAt: new Date()
+                            };
+                            
+                            // Dispatch event to update preview immediately
+                            const event = new CustomEvent("updateComponentData", {
+                              detail: { 
+                                messageId: editingMessageId, 
+                                componentData: updatedComponent 
+                              },
+                            });
+                            window.dispatchEvent(event);
+                          }
+                        }
+                      }
+                    }}
                     style={{
                       accentColor: "#003250",
                       transform: "scale(1.1)"
