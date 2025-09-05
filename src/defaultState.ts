@@ -1008,7 +1008,7 @@ const defaultState = {
       "uiToolType": "message",
       "content": {
         "message": {
-          "text": "[Free Chat placeholder]",
+          "text": "That's a great set of strengths! If you could design a role that uses all of your strengths daily, what would that look like? Or is there something else you'd like to talk about?",
           "richText": true
         }
       },
@@ -1789,7 +1789,7 @@ const defaultState = {
     {
       "id": "16",
       "sender": "ai",
-      "content": "[Free Chat placeholder]",
+      "content": "That's a great set of strengths! If you could design a role that uses all of your strengths daily, what would that look like? Or is there something else you'd like to talk about?",
       "messageId": "msg-16",
       "componentId": "comp-1755475332549",
       "uiToolType": "message"
