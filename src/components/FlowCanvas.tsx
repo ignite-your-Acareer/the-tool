@@ -2216,7 +2216,8 @@ export default function FlowCanvas() {
                               ...component.content,
                               text: e.target.checked ? {
                                 text: (component.content as any).text?.text || "",
-                                type: "default"
+                                type: "default",
+                                millisecondsToLoad: (component.content as any).text?.millisecondsToLoad || 0
                               } : undefined
                             }
                           };
@@ -2442,7 +2443,54 @@ export default function FlowCanvas() {
                       
                       {textAddOn && (
                         <>
-                          <label style={{ fontWeight: "700" }}>Text Content:</label>
+                          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                            <label style={{ fontWeight: "700" }}>Text Content:</label>
+                            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                              <label style={{ fontWeight: "700", fontSize: "14px" }}>Milliseconds to Load:</label>
+                              <input
+                                type="number"
+                                value={(component?.content as any)?.text?.millisecondsToLoad || 0}
+                                onChange={(e) => {
+                                  if (node) {
+                                    const component = components.get(node.data.componentId);
+                                    if (component) {
+                                      const updatedComponent = {
+                                        ...component,
+                                        content: {
+                                          ...component.content,
+                                          text: {
+                                            ...(component.content as any).text,
+                                            millisecondsToLoad: parseInt(e.target.value) || 0
+                                          }
+                                        },
+                                        updatedAt: new Date()
+                                      };
+                                      setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                      
+                                      // Dispatch event to update preview
+                                      const event = new CustomEvent("updateComponentData", {
+                                        detail: { 
+                                          messageId: editingMessageId, 
+                                          componentData: updatedComponent 
+                                        },
+                                      });
+                                      window.dispatchEvent(event);
+                                    }
+                                  }
+                                }}
+                                style={{
+                                  width: "80px",
+                                  padding: "4px 8px",
+                                  border: "1px solid #ccc",
+                                  borderRadius: "4px",
+                                  fontSize: "14px",
+                                  textAlign: "right"
+                                }}
+                                min="0"
+                                step="100"
+                              />
+                            </div>
+                          </div>
                           <textarea
                             value={(component?.content as any)?.text?.text || ""}
                             onChange={(e) => {
@@ -3143,7 +3191,54 @@ export default function FlowCanvas() {
                     paddingLeft: "20px",
                     paddingRight: "20px"
                   }}>
-                    <label style={{ fontWeight: "700" }}>Text Content:</label>
+                    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "8px" }}>
+                      <label style={{ fontWeight: "700" }}>Text Content:</label>
+                      <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                        <label style={{ fontWeight: "700", fontSize: "14px" }}>Milliseconds to Load:</label>
+                        <input
+                          type="number"
+                          value={(component?.content as any)?.text?.millisecondsToLoad || 0}
+                          onChange={(e) => {
+                            if (node) {
+                              const component = components.get(node.data.componentId);
+                              if (component) {
+                                const updatedComponent = {
+                                  ...component,
+                                  content: {
+                                    ...component.content,
+                                    text: {
+                                      ...(component.content as any).text,
+                                      millisecondsToLoad: parseInt(e.target.value) || 0
+                                    }
+                                  },
+                                  updatedAt: new Date()
+                                };
+                                setComponents(prev => new Map(prev).set(component.id, updatedComponent));
+                                
+                                // Dispatch event to update preview
+                                const event = new CustomEvent("updateComponentData", {
+                                  detail: { 
+                                    messageId: editingMessageId, 
+                                    componentData: updatedComponent 
+                                  },
+                                });
+                                window.dispatchEvent(event);
+                              }
+                            }
+                          }}
+                          style={{
+                            width: "80px",
+                            padding: "4px 8px",
+                            border: "1px solid #ccc",
+                            borderRadius: "4px",
+                            fontSize: "14px",
+                            textAlign: "right"
+                          }}
+                          min="0"
+                          step="100"
+                        />
+                      </div>
+                    </div>
                     <textarea
                       value={(component?.content as any)?.text?.text || ""}
                       onChange={(e) => {
@@ -6740,7 +6835,8 @@ export default function FlowCanvas() {
                           } : undefined,
                           text: textAddOn ? {
                             text: (component.content as any).text?.text || "",
-                            type: "default"
+                            type: "default",
+                            millisecondsToLoad: (component.content as any).text?.millisecondsToLoad || 0
                           } : undefined,
                           moveOnButton: moveOnButtonAddOn ? {
                             text: (component.content as any).moveOnButton?.text || ""
