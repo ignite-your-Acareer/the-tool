@@ -973,7 +973,7 @@ export default function ConversationPreview() {
                     {/* Media/Image */}
                     {message.celebrationModal.media && (
                       <div style={{
-                        marginBottom: "16px",
+                        marginBottom: "0px",
                         textAlign: "center"
                       }}>
                         <img 
@@ -982,35 +982,45 @@ export default function ConversationPreview() {
                           style={{
                             maxWidth: "100%",
                             height: "auto",
-                            borderRadius: "8px"
+                            borderRadius: "8px 8px 0 0"
                           }}
                         />
                       </div>
                     )}
                     
-                    {/* Title */}
-                    {message.celebrationModal.title && (
+                    {/* Title and Content on lighter background */}
+                    {(message.celebrationModal.title || message.celebrationModal.content) && (
                       <div style={{
-                        color: "#003250",
-                        fontSize: "24px",
-                        fontWeight: "bold",
-                        marginBottom: "12px",
-                        textAlign: "center"
+                        background: "#F8F4F0",
+                        borderRadius: "0 0 8px 8px",
+                        padding: "16px 20px",
+                        marginTop: "0px"
                       }}>
-                        {message.celebrationModal.title}
-                      </div>
-                    )}
-                    
-                    {/* Content */}
-                    {message.celebrationModal.content && (
-                      <div style={{
-                        color: "#003250",
-                        fontSize: "16px",
-                        marginBottom: "20px",
-                        textAlign: "center",
-                        lineHeight: "1.4"
-                      }}>
-                        {message.celebrationModal.content}
+                        {/* Title */}
+                        {message.celebrationModal.title && (
+                          <div style={{
+                            color: "#003250",
+                            fontSize: "24px",
+                            fontWeight: "bold",
+                            marginBottom: "12px",
+                            textAlign: "center"
+                          }}>
+                            {message.celebrationModal.title}
+                          </div>
+                        )}
+                        
+                        {/* Content */}
+                        {message.celebrationModal.content && (
+                          <div style={{
+                            color: "#003250",
+                            fontSize: "16px",
+                            marginBottom: "0px",
+                            textAlign: "center",
+                            lineHeight: "1.4"
+                          }}>
+                            {message.celebrationModal.content}
+                          </div>
+                        )}
                       </div>
                     )}
                     
@@ -1018,7 +1028,8 @@ export default function ConversationPreview() {
                     <div style={{
                       display: "flex",
                       flexDirection: "column",
-                      gap: "12px"
+                      gap: "12px",
+                      marginTop: "20px"
                     }}>
                       {/* View My Profile Button */}
                       <button
@@ -1041,7 +1052,6 @@ export default function ConversationPreview() {
                         }}
                       >
                         View My Profile
-                        <span style={{ fontSize: "18px" }}>🔍</span>
                       </button>
                       
                       {/* Call to Action Button */}
